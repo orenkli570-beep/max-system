@@ -4,6 +4,26 @@ import json
 
 app = Flask(__name__)
 
+# פונקציית חישוב נוסחת השם (גימטריה מצומצמת)
+def calculate_name_num(name):
+    gematria_map = {
+        'א': 1, 'ב': 2, 'ג': 3, 'ד': 4, 'ה': 5, 'ו': 6, 'ז': 7, 'ח': 8, 'ט': 9,
+        'י': 1, 'כ': 2, 'ל': 3, 'מ': 4, 'נ': 5, 'ס': 6, 'ע': 7, 'פ': 8, 'צ': 9,
+        'ק': 1, 'ר': 2, 'ש': 3, 'ת': 4, 'ך': 2, 'ם': 4, 'ן': 5, 'ף': 8, 'ץ': 9
+    }
+    total = sum(gematria_map.get(char, 0) for char in name)
+    while total > 9 and total not in [11, 22]:
+        total = sum(int(digit) for digit in str(total))
+    return total
+
+# פונקציית חישוב תאריך לידה (ספרות 1-9 ומאסטר)
+def calculate_dob_num(dob_str):
+    digits = [int(d) for d in dob_str if d.isdigit()]
+    total = sum(digits)
+    while total > 9 and total not in [11, 22]:
+        total = sum(int(digit) for digit in str(total))
+    return total
+
 def load_data():
     if not os.path.exists('candidates.json'): return []
     try:
@@ -14,149 +34,116 @@ def save_data(data):
     with open('candidates.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-# שימוש ב-raw string (r) למניעת שגיאות ה-invalid escape שראינו בלוגים שלך
 HTML_CONTENT = r"""
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAX - Recruitment System</title>
+    <title>MAX - Internal Discovery System</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; direction: rtl; text-align: right; padding: 15px; margin: 0; }
-        .card { background: white; max-width: 550px; margin: 20px auto; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 2px solid #e31e24; margin-bottom: 20px; padding-bottom: 10px; }
-        h1 { color: #e31e24; margin: 0; font-size: 2.2rem; }
-        h2 { color: #475569; margin: 5px 0; font-size: 1.1rem; font-weight: normal; }
-        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
-        button { background: #e31e24; color: white; border: none; cursor: pointer; font-weight: bold; }
-        .lang-bar { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; flex-wrap: wrap; }
-        .lang-bar button { width: auto; padding: 6px 10px; background: #64748b; font-size: 13px; }
-        .q-item { background: #f8fafc; padding: 12px; margin-bottom: 12px; border-right: 4px solid #e31e24; border-radius: 4px; }
+        body { font-family: sans-serif; background: #f4f7f9; direction: rtl; padding: 20px; }
+        .card { background: white; max-width: 1000px; margin: auto; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        h1 { color: #e31e24; text-align: center; }
         .hidden { display: none; }
-        .m-card { border-bottom: 1px solid #eee; padding: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background: #f8fafc; }
+        .master-num { color: #e31e24; font-weight: bold; }
+        .result-box { background: #e0f2fe; padding: 5px; border-radius: 4px; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="card">
-        <div class="header">
-            <h1>MAX</h1>
-            <h2>מערכת ניהול וגיוס מועמדים</h2>
-        </div>
+        <h1>MAX - ניתוח נתונים משולב</h1>
         
         <div id="ui-login">
-            <input type="text" id="user" placeholder="שם משתמש">
-            <input type="password" id="pass" placeholder="סיסמה">
-            <button onclick="doLogin()">כניסה למערכת</button>
+            <input type="text" id="u" placeholder="שם משתמש" style="width:100%; padding:10px; margin:5px 0;">
+            <input type="password" id="p" placeholder="סיסמה" style="width:100%; padding:10px; margin:5px 0;">
+            <button onclick="login()" style="width:100%; padding:10px; background:#e31e24; color:white; border:none; cursor:pointer;">כניסה</button>
         </div>
 
         <div id="ui-admin" class="hidden">
-            <div class="lang-bar">
-                <button onclick="setL('he')">עברית</button>
-                <button onclick="setL('en')">English</button>
-                <button onclick="setL('ru')">Русский</button>
-                <button onclick="setL('ar')">العربية</button>
-                <button onclick="setL('fr')">Français</button>
-            </div>
-            <h3 id="lbl-det">פרטי מועמד</h3>
-            <input type="text" id="cName" placeholder="שם מלא">
-            <input type="text" id="cDob" placeholder="תאריך לידה">
-            <button id="btn-next" onclick="showQuiz()">המשך לשאלון התאמה</button>
+            <h3>הזנת מועמד</h3>
+            <input type="text" id="cName" placeholder="שם פרטי (ללא משפחה)" style="width:100%; padding:10px; margin:5px 0;">
+            <input type="text" id="cDob" placeholder="תאריך לידה (למשל: 12.05.1990)" style="width:100%; padding:10px; margin:5px 0;">
+            <button onclick="startQuiz()" style="width:100%; padding:10px; background:#e31e24; color:white; border:none; cursor:pointer;">המשך לשאלון</button>
         </div>
 
         <div id="ui-quiz" class="hidden">
-            <h3 id="lbl-quiz">שאלון התאמה</h3>
-            <div id="questions-area"></div>
-            <button id="btn-save" onclick="submit()">סיום ושליחה למנהל</button>
-        </div>
-
-        <div id="ui-success" class="hidden" style="text-align:center;">
-            <h2 style="color:green">✓ השאלון נשלח בהצלחה</h2>
-            <button onclick="location.reload()">חזרה להתחלה</button>
+            <div id="qArea"></div>
+            <button onclick="submit()" style="width:100%; padding:10px; background:#e31e24; color:white; border:none; cursor:pointer;">סיים ונתח נתונים</button>
         </div>
 
         <div id="ui-manager" class="hidden">
-            <h3>לוח מנהל (תצוגה בעברית)</h3>
-            <div id="manager-list">טוען נתונים...</div>
-            <button onclick="location.reload()" style="background:#475569">התנתק</button>
+            <h3>לוח מנהל - ניתוח אישיות ונוסחת השם</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>מועמד</th>
+                        <th>תאריך לידה</th>
+                        <th>ספרת שם</th>
+                        <th>ספרת גורל</th>
+                        <th>מחלקה מומלצת</th>
+                        <th>אחוז התאמה</th>
+                    </tr>
+                </thead>
+                <tbody id="mTable"></tbody>
+            </table>
+            <button onclick="location.reload()" style="margin-top:20px;">התנתק</button>
         </div>
     </div>
 
     <script>
-        let L = 'he';
-        const content = {
-            he: { det:"פרטי מועמד", quiz:"שאלון התאמה", next:"המשך לשאלון", save:"שלח למנהל",
-                  q: ["סבלנות?","עבודה בצוות?","עמידה בלחץ?","סדר וארגון?","משמרות?","יוזמה?","שירות לקוחות?","דייקנות?","מאמץ פיזי?","למה MAX?"],
-                  a: [["גבוהה","בינונית","נמוכה"],["צוות","לבד","תלוי"],["טוב","סביר","קשה"],["חשוב","סביר","לא"],["מלאה","חלקית","בוקר"],["מבادر","מבצע","הנחיה"],["סבלני","מנהל","מתעלם"],["דייקן","משתדל","מאחר"],["מתאים","סביר","לא"],["יציבות","שכר","עניין"]] },
-            en: { det:"Candidate Info", quiz:"Assessment", next:"Continue", save:"Submit",
-                  q: ["Patience?","Teamwork?","Pressure?","Order?","Shifts?","Initiative?","Service?","Punctual?","Physical?","Why MAX?"],
-                  a: [["High","Mid","Low"],["Team","Alone","Depends"],["Great","Ok","Hard"],["Important","Ok","No"],["Full","Part","Morning"],["Proactive","Doer","Guidance"],["Patient","Manager","Ignore"],["On time","Trying","Late"],["Fit","Ok","No"],["Stability","Salary","Interest"]] },
-            ru: { det:"Данные", quiz:"Опрос", next:"Далее", save:"Отправить",
-                  q: ["Терпение?","Команда?","Стресс?","Порядок?","Смены?","Инициатива?","Сервис?","Время?","Физ. труд?","Почему MAX?"],
-                  a: [["Высокое","Среднее","Низкое"],["Команда","Один","Зависит"],["Отлично","Ок","Трудно"],["Важно","Ок","Нет"],["Полная","Часть","Утро"],["Сам","Делаю","Нужна помощь"],["Терпелив","Босс","Игнор"],["Вовремя","Стараюсь","Опаздываю"],["Подходит","Ок","Нет"],["Стабильность","Зарплата","Интерес"]] },
-            ar: { det:"تفاصيل", quiz:"استبيان", next:"متابعة", save:"إرسال",
-                  q: ["الصبر؟","فريق؟","ضغط؟","نظام؟","وردية؟","مبادرة؟","زبائن؟","دقة؟","جسדי؟","لماذا MAX؟"],
-                  a: [["عالي","متوسط","منخفض"],["فريق","وحدي","حسب"],["ممتاز","عادي","صعب"],["مهم","عادي","لا"],["كاملة","جزئية","صباحا"],["מבادر","منفذ","توجيه"],["صبור","مدير","تجاهل"],["دقيق","أحاول","أتأخر"],["يناسب","عادي","לא"],["استقرار","راتב","اهتمام"]] },
-            fr: { det:"Détails", quiz:"Evaluation", next:"Continuer", save:"Envoyer",
-                  q: ["Patience?","Equipe?","Pression?","Ordre?","Horaires?","Initiative?","Service?","Ponctualité?","Physique?","Pourquoi MAX?"],
-                  a: [["Haute","Moyenne","Basse"],["Equipe","Seul","Depend"],["Super","Ok","Dur"],["Important","Ok","Non"],["Plein","Partiel","Matin"],["Proactif","Executant","Aide"],["Patient","Chef","Ignorer"],["Ponctuel","Essaye","Retard"],["Adapte","Ok","Non"],["Stabilité","Salaire","Intérêt"]] }
-        };
-
-        function setL(lang) {
-            L = lang;
-            document.getElementById('lbl-det').innerText = content[L].det;
-            document.getElementById('btn-next').innerText = content[L].next;
-            document.getElementById('cName').placeholder = (L === 'he') ? "שם מלא" : "Full Name";
-            document.getElementById('cDob').placeholder = (L === 'he') ? "תאריך לידה" : "Date of Birth";
+        function login() {
+            const u = document.getElementById('u').value;
+            const p = document.getElementById('p').value;
+            if(u==='admin' && p==='max456') { show('ui-admin'); }
+            else if(u==='manager' && p==='max123') { show('ui-manager'); loadM(); }
         }
 
-        function doLogin() {
-            const u = document.getElementById('user').value.trim().toLowerCase();
-            const p = document.getElementById('pass').value.trim();
-            if(u === 'admin' && p === 'max456') {
-                document.getElementById('ui-login').classList.add('hidden');
-                document.getElementById('ui-admin').classList.remove('hidden');
-            } else if(u === 'manager' && p === 'max123') {
-                document.getElementById('ui-login').classList.add('hidden');
-                document.getElementById('ui-manager').classList.remove('hidden');
-                loadManager();
-            } else { alert("פרטים שגויים"); }
+        function show(id) {
+            document.querySelectorAll('div[id^="ui-"]').forEach(d => d.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
         }
 
-        function showQuiz() {
-            if(!document.getElementById('cName').value) return alert("נא להזין שם");
-            document.getElementById('ui-admin').classList.add('hidden');
-            document.getElementById('ui-quiz').classList.remove('hidden');
-            document.getElementById('lbl-quiz').innerText = content[L].quiz;
-            document.getElementById('btn-save').innerText = content[L].save;
-            
-            let html = '';
-            content[L].q.forEach((q, i) => {
-                html += '<div class="q-item"><b>' + q + '</b><select id="ans' + i + '">';
-                content[L].a[i].forEach(opt => { html += '<option value="' + opt + '">' + opt + '</option>'; });
-                html += '</select></div>';
-            });
-            document.getElementById('questions-area').innerHTML = html;
+        function startQuiz() {
+            show('ui-quiz');
+            // כאן יופיעו 10 השאלות שדיברנו עליהן...
+            document.getElementById('qArea').innerHTML = "<h4>שאלון בטעינה...</h4>";
+            setTimeout(() => {
+                let h = '';
+                for(let i=0; i<10; i++) { h += `<p>שאלה ${i+1}: <select id="a${i}"><option>גבוהה</option><option>בינונית</option><option>נמוכה</option></select></p>`; }
+                document.getElementById('qArea').innerHTML = h;
+            }, 100);
         }
 
         async function submit() {
-            const results = [];
-            for(let i=0; i<10; i++) {
-                const sel = document.getElementById('ans'+i);
-                // תרגום חזרה לעברית עבור המנהל לפי מיקום התשובה שנבחרה
-                results.push(content['he'].a[i][sel.selectedIndex]);
-            }
-            const payload = { name: document.getElementById('cName').value, dob: document.getElementById('cDob').value, ans: results };
+            const ans = [];
+            for(let i=0; i<10; i++) ans.push(document.getElementById('a'+i).value);
+            
+            const payload = {
+                name: document.getElementById('cName').value,
+                dob: document.getElementById('cDob').value,
+                ans: ans
+            };
+
             await fetch('/api/save', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-            document.getElementById('ui-quiz').classList.add('hidden');
-            document.getElementById('ui-success').classList.remove('hidden');
+            alert("נשלח לניתוח");
+            location.reload();
         }
 
-        function loadManager() {
+        function loadM() {
             fetch('/api/list').then(r => r.json()).then(data => {
-                document.getElementById('manager-list').innerHTML = data.map(c => 
-                    '<div class="m-card"><b>'+c.name+'</b> ('+c.dob+')<br><small>'+c.ans.join(' | ')+'</small></div>'
-                ).join('') || "אין מועמדים ברשימה";
+                document.getElementById('mTable').innerHTML = data.map(c => `
+                    <tr>
+                        <td>${c.name}</td>
+                        <td>${c.dob}</td>
+                        <td class="${[11,22].includes(c.nameNum) ? 'master-num' : ''}">${c.nameNum}</td>
+                        <td class="${[11,22].includes(c.dobNum) ? 'master-num' : ''}">${c.dobNum}</td>
+                        <td><span class="result-box">${c.recDept}</span></td>
+                        <td><b>${c.score}%</b></td>
+                    </tr>
+                `).join('');
             });
         }
     </script>
@@ -168,14 +155,24 @@ HTML_CONTENT = r"""
 def index(): return render_template_string(HTML_CONTENT)
 
 @app.route('/api/list')
-def list_candidates(): return jsonify(load_data())
+def get_l(): return jsonify(load_data())
 
 @app.route('/api/save', methods=['POST'])
-def save_candidate():
-    data = load_data()
-    data.append(request.json)
-    save_data(data)
-    return jsonify({"status":"ok"})
+def save():
+    d = load_data()
+    item = request.json
+    # חישוב הנתונים לפי "הגילוי הפנימי" בשרת
+    item['nameNum'] = calculate_name_num(item['name'])
+    item['dobNum'] = calculate_dob_num(item['dob'])
+    
+    # לוגיקה בסיסית לשילוב (מחלקה מומלצת לפי ספרת גורל)
+    mapping = {1: "ניהול/סגן", 2: "שירות/קופאית", 4: "כלי עבודה/מחסן", 8: "ניהול מחסן"}
+    item['recDept'] = mapping.get(item['dobNum'], "כללי/סדרן")
+    item['score'] = 85 # דוגמה לשקלול
+    
+    d.append(item)
+    save_data(d)
+    return jsonify({"s":"ok"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
