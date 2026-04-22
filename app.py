@@ -4,7 +4,7 @@ import json
 
 app = Flask(__name__)
 
-# --- לוגיקה של הגילוי הפנימי ---
+# --- מנוע הגילוי הפנימי (צמצום והצלבה) ---
 def get_num(val):
     if not val: return 0
     num = sum([int(d) for d in str(val) if d.isdigit()])
@@ -12,191 +12,177 @@ def get_num(val):
         num = sum(int(digit) for digit in str(num))
     return num
 
-def get_name_num(name):
-    g_map = {'א':1,'ב':2,'ג':3,'ד':4,'ה':5,'ו':6,'ז':7,'ח':8,'ט':9,'י':1,'כ':2,'ל':3,'מ':4,'נ':5,'ס':6,'ע':7,'פ':8,'צ':9,'ק':1,'ר':2,'ש':3,'ת':4,'ך':2,'ם':4,'ן':5,'ף':8,'ץ':9}
-    total = sum(g_map.get(c, 0) for c in name)
-    return get_num(total)
-
-def analyze_rel(c_dob):
-    m_num = 5 # 14.9 = 1+4+9=14 -> 1+4=5
-    c_num = get_num(c_dob)
-    rel_score = get_num(m_num + c_num)
-    map_rel = {
-        1: "יחסים של סמכות וביצוע מהיר. המועמד יכבד דרישות חדות.",
-        2: "שיתוף פעולה רגיש. דורש הסברים רכים ונעימים.",
-        3: "דינמיקה יצירתית. המועמד יפרח תחת דרישות שמאפשרות ביטוי עצמי.",
-        4: "יחסי עבודה פרקטיים מאוד. המועמד מצפה לדרישות ברורות ומסודרות.",
-        5: "תקשורת מהירה ודינמית. שניכם צריכים מרחב פעולה.",
-        6: "הרמוניה ואחריות. המועמד יבצע דרישות מתוך תחושת מחויבות גבוהה.",
-        7: "צורך בשקט והסברים מעמיקים. לא אוהב דרישות בלחץ.",
-        8: "הישגיות גבוהה וכוח. המועמד יבצע דרישות כדי להתקדם.",
-        9: "שירותיות רחבה. המועמד יבצע דרישות למען המטרה הכללית.",
-        11: "אינטואיציה גבוהה. המועמד יבין את הדרישות שלך לפני שתגיד אותן.",
-        22: "ביצועיסט על. מסוגל להוציא לפועל פרויקטים מורכבים עבורך."
+def check_synergy(p1_dob, p2_dob):
+    # חישוב התאמה בין שני אנשים
+    n1 = get_num(p1_dob)
+    n2 = get_num(p2_dob)
+    res = get_num(n1 + n2)
+    
+    synergy_map = {
+        1: "שילוב של כוח וביצוע. מעולה למשימות מהירות.",
+        2: "שילוב רגיש. מצוין לשירות לקוחות משותף.",
+        4: "שילוב יציב מאוד. מעולה לספירות מלאי וסדר.",
+        5: "שילוב תוסס. עלול להיות חוסר שקט אם אין עניין.",
+        8: "שילוב הישגי. יעמדו בכל יעד מכירות שתציב.",
+        11: "הבנה אינטואיטיבית. עובדים כגוף אחד.",
+        22: "צוות עוצמתי. יכולים להרים מחלקה שלמה לבד."
     }
-    return map_rel.get(rel_score, "יחסי עבודה סטנדרטיים")
+    return synergy_map.get(res, "עבודה זורמת וסטנדרטית.")
 
-def save_db(data):
-    db = []
-    if os.path.exists('candidates.json'):
-        with open('candidates.json', 'r', encoding='utf-8') as f: db = json.load(f)
+# --- ניהול קבצים ---
+def get_db(filename):
+    if os.path.exists(filename):
+        with open(filename, 'r', encoding='utf-8') as f: return json.load(f)
+    return []
+
+def save_db(filename, data):
+    db = get_db(filename)
     db.append(data)
-    with open('candidates.json', 'w', encoding='utf-8') as f: json.dump(db, f, ensure_ascii=False, indent=4)
+    with open(filename, 'w', encoding='utf-8') as f: json.dump(db, f, ensure_ascii=False, indent=4)
 
-# --- ממשק משתמש ---
+# --- ממשק HTML ---
 HTML = r"""
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>MAX System</title>
+    <title>MAX - Smart HR & Synergy</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; direction: rtl; padding: 20px; }
-        .card { background: white; max-width: 800px; margin: auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { color: #e31e24; margin:0; } h2 { color: #475569; border-bottom: 2px solid #e31e24; padding-bottom: 10px; }
-        .lang-bar { display: flex; gap: 5px; margin-bottom: 20px; }
-        .lang-bar button { flex: 1; padding: 5px; background: #64748b; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; }
-        .btn-main { background: #e31e24; color: white; font-weight: bold; font-size: 1.1rem; border: none; cursor: pointer; }
+        body { font-family: sans-serif; background: #f4f7f6; direction: rtl; margin: 0; padding: 20px; }
+        .container { background: white; max-width: 1000px; margin: auto; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        h1 { color: #e31e24; text-align: center; }
+        .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; cursor: pointer; border: 1px solid transparent; }
+        .tab.active { border-bottom: 3px solid #e31e24; font-weight: bold; color: #e31e24; }
         .hidden { display: none; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background: #f8fafc; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #eee; padding: 12px; text-align: center; }
+        .synergy-box { background: #fff3f3; padding: 15px; border-radius: 8px; border: 1px solid #e31e24; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <div class="card">
+    <div class="container">
         <h1>MAX כאן קונים בכיף</h1>
-        <h2>מערכת גיוס והתאמת עובדים</h2>
+        <h2 style="text-align:center; font-weight:normal;">ניהול הון אנושי וסינרגיית צוות</h2>
 
         <div id="ui-login">
-            <input type="text" id="u" placeholder="שם משתמש">
-            <input type="password" id="p" placeholder="סיסמה">
-            <button class="btn-main" onclick="login()">כניסה</button>
+            <input type="password" id="pass" placeholder="קוד כניסה מנהל/מזכירה" style="width:100%; padding:10px;">
+            <button onclick="login()" style="width:100%; padding:10px; margin-top:10px; background:#e31e24; color:white; border:none;">כניסה</button>
         </div>
 
-        <div id="ui-sec" class="hidden">
-            <div class="lang-bar">
-                <button onclick="setL('he')">עברית</button><button onclick="setL('en')">EN</button>
-                <button onclick="setL('ru')">RU</button><button onclick="setL('ar')">AR</button><button onclick="setL('fr')">FR</button>
+        <div id="main-ui" class="hidden">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('candidates')">מועמדים חדשים</div>
+                <div class="tab" onclick="switchTab('staff')">צוות ותיק</div>
+                <div class="tab" onclick="switchTab('synergy')">הצלבת עובדים (סינרגיה)</div>
             </div>
-            <div id="sec-form">
-                <input type="text" id="cName" placeholder="שם המועמד">
-                <input type="text" id="cDob" placeholder="תאריך לידה">
-                <button class="btn-main" onclick="goQuiz()">המשך לשאלון</button>
-            </div>
-            <div id="quiz-area" class="hidden"></div>
-        </div>
 
-        <div id="ui-man" class="hidden">
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>מועמד</th>
-                            <th>התאמה</th>
-                            <th>מחלקה ומשרה</th>
-                            <th>יחסים עם המנהל (דרישות)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="mTable"></tbody>
-                </table>
+            <div id="tab-candidates">
+                <div id="cand-list">טוען נתונים...</div>
             </div>
-            <button onclick="location.reload()">התנתק</button>
+
+            <div id="tab-staff" class="hidden">
+                <h3>הוספת עובד ותיק למערכת</h3>
+                <input type="text" id="sName" placeholder="שם העובד">
+                <input type="text" id="sDob" placeholder="תאריך לידה">
+                <button onclick="addStaff()">הוסף לצוות</button>
+                <hr>
+                <div id="staff-list"></div>
+            </div>
+
+            <div id="tab-synergy" class="hidden">
+                <h3>בדיקת התאמה בין עובדים / מועמדים</h3>
+                <p>בחר שני אנשים כדי לבדוק איך הם יעבדו יחד במשמרת:</p>
+                <select id="person1"></select>
+                <select id="person2"></select>
+                <button onclick="checkSynergy()" style="background:black;">בדוק הצלבה</button>
+                <div id="synergy-result" class="synergy-box hidden"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        let curL = 'he';
-        const dict = {
-            he: { q: ["סבלנות?","צוות?","לחץ?","סדר?","משמרות?","יוזמה?","שירות?","דייקנות?","פיזי?","למה MAX?"], a: ["גבוהה","בינונית","נמוכה"], msg: "התשובות ממתינות לאישור המנהל" },
-            en: { q: ["Patience?","Team?","Pressure?","Order?","Shifts?","Initiative?","Service?","Punctual?","Physical?","Why MAX?"], a: ["High","Mid","Low"], msg: "Answers pending manager approval" },
-            ru: { q: ["Терпение?","Команда?","Давление?","Порядок?","Смены?","Инициатива?","Сервис?","Точность?","Физика?","Почему MAX?"], a: ["Высокая","Средняя","Низкая"], msg: "Ответы ожидают одобрения" },
-            ar: { q: ["الصبر؟","فريق؟","ضغط؟","نظام؟","وردية؟","مبادرة؟","خدمة؟","دقة؟","جسدي؟","لماذا MAX؟"], a: ["عالي","متوسط","منخفض"], msg: "الإجابات بانتظار موافقة المدير" },
-            fr: { q: ["Patience?","Équipe?","Pression?","Ordre?","Shifts?","Initiative?","Service?","Ponctualité?","Physique?","Pourquoi MAX?"], a: ["Haute","Moyenne","Basse"], msg: "Réponses en attente du responsable" }
-        };
-
-        function setL(l) { curL = l; if(!document.getElementById('quiz-area').classList.contains('hidden')) goQuiz(); }
+        let allPeople = [];
 
         function login() {
-            const u = document.getElementById('u').value;
-            if(u === 'admin') show('ui-sec');
-            else if(u === 'manager') { show('ui-man'); loadM(); }
+            if(document.getElementById('pass').value) {
+                document.getElementById('ui-login').classList.add('hidden');
+                document.getElementById('main-ui').classList.remove('hidden');
+                loadAll();
+            }
         }
 
-        function show(id) {
-            document.querySelectorAll('div[id^="ui-"]').forEach(d => d.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
+        function switchTab(t) {
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('tab-candidates').classList.add('hidden');
+            document.getElementById('tab-staff').classList.add('hidden');
+            document.getElementById('tab-synergy').classList.add('hidden');
+            document.getElementById('tab-' + t).classList.remove('hidden');
         }
 
-        function goQuiz() {
-            document.getElementById('sec-form').classList.add('hidden');
-            const area = document.getElementById('quiz-area');
-            area.classList.remove('hidden');
-            let h = '';
-            dict[curL].q.forEach((q, i) => {
-                h += `<div style="text-align:right;"><label>${q}</label><select id="a${i}">`;
-                dict[curL].a.forEach(opt => h += `<option>${opt}</option>`);
-                h += `</select></div>`;
+        async function addStaff() {
+            const name = document.getElementById('sName').value;
+            const dob = document.getElementById('sDob').value;
+            await fetch('/api/add_staff', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, dob}) });
+            loadAll();
+        }
+
+        async function loadAll() {
+            const res = await fetch('/api/all_data');
+            const data = await res.json();
+            allPeople = data.combined;
+            
+            // עדכון רשימות
+            let cHtml = '<table><tr><th>שם</th><th>התאמה</th><th>מחלקה</th></tr>';
+            data.candidates.forEach(c => {
+                cHtml += `<tr><td>${c.name}</td><td>${c.score}%</td><td>${c.dept}</td></tr>`;
             });
-            h += `<button class="btn-main" onclick="send()">${dict[curL].msg.split(' ')[0]}...</button>`;
-            area.innerHTML = h;
+            document.getElementById('cand-list').innerHTML = cHtml + '</table>';
+
+            let sHtml = '<ul>';
+            data.staff.forEach(s => { sHtml += `<li>${s.name} (${s.dob})</li>`; });
+            document.getElementById('staff-list').innerHTML = sHtml + '</ul>';
+
+            // עדכון סלקטים לסינרגיה
+            let opts = allPeople.map(p => `<option value="${p.dob}">${p.name}</option>`).join('');
+            document.getElementById('person1').innerHTML = opts;
+            document.getElementById('person2').innerHTML = opts;
         }
 
-        async function send() {
-            const payload = {
-                name: document.getElementById('cName').value,
-                dob: document.getElementById('cDob').value,
-                ans: Array.from({length:10}, (_, i) => document.getElementById('a'+i).value)
-            };
-            await fetch('/api/save', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
-            alert(dict[curL].msg);
-            location.reload();
-        }
-
-        function loadM() {
-            fetch('/api/list').then(r => r.json()).then(data => {
-                document.getElementById('mTable').innerHTML = data.reverse().map(c => `
-                    <tr>
-                        <td><b>${c.name}</b><br>${c.dob}</td>
-                        <td style="color:red; font-weight:bold;">${c.score}%</td>
-                        <td>${c.dept}<br><small>${c.job}</small></td>
-                        <td style="text-align:right; font-size:11px;">${c.rel}</td>
-                    </tr>
-                `).join('');
-            });
+        async function checkSynergy() {
+            const dob1 = document.getElementById('person1').value;
+            const dob2 = document.getElementById('person2').value;
+            const res = await fetch('/api/check_synergy', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({dob1, dob2}) });
+            const data = await res.json();
+            const box = document.getElementById('synergy-result');
+            box.classList.remove('hidden');
+            box.innerHTML = `<strong>תוצאת הצלבה:</strong><br>${data.result}`;
         }
     </script>
 </body>
 </html>
 """
 
-@app.route('/')
-def index(): return render_template_string(HTML)
+@app.route('/api/add_staff', methods=['POST'])
+def add_staff():
+    save_db('staff.json', request.json)
+    return jsonify({"ok": True})
 
-@app.route('/api/list')
-def get_l():
-    if os.path.exists('candidates.json'):
-        with open('candidates.json', 'r', encoding='utf-8') as f: return jsonify(json.load(f))
-    return jsonify([])
+@app.route('/api/all_data')
+def all_data():
+    cands = get_db('candidates.json')
+    staff = get_db('staff.json')
+    return jsonify({
+        "candidates": cands,
+        "staff": staff,
+        "combined": cands + staff
+    })
 
-@app.route('/api/save', methods=['POST'])
-def save():
+@app.route('/api/check_synergy', methods=['POST'])
+def check_syn():
     d = request.json
-    # חישוב התאמה ומחלקות
-    depts = ["טקסטיל", "כלי בית", "חשמל", "צעצועים", "ניקיון", "פארם", "כלי כתיבה", "ימי הולדת", "יצירה", "כלי עבודה", "ספורט", "רכב", "חיות מחמד"]
-    jobs = ["סדרן", "אחראי משמרת", "אחראי מחלקה", "אדמיניסטרציה", "מחסנאי", "מנהל מחסן", "בודק סחורה", "עובד כללי", "קופאית ראשית", "קופאית רגילה", "סגן מנהל", "מנהל"]
-    
-    n_num = get_name_num(d['name'])
-    d_num = get_num(d['dob'])
-    
-    d['dept'] = depts[d_num % len(depts)]
-    d['job'] = jobs[n_num % len(jobs)]
-    d['score'] = 75 + (n_num + d_num) % 25
-    d['rel'] = analyze_rel(d['dob'])
-    
-    save_db(d)
-    return jsonify({"ok":True})
+    result = check_synergy(d['dob1'], d['dob2'])
+    return jsonify({"result": result})
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+# ... (שאר הפונקציות מהקוד הקודם)
