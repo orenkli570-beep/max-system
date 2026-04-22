@@ -14,159 +14,154 @@ def save_data(data):
     with open('candidates.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-HTML_TEMPLATE = """
+HTML_CONTENT = """
 <!doctype html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAX Recruitment System</title>
+    <title>MAX - מערכת גיוס</title>
     <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; direction: rtl; text-align: right; padding: 10px; margin: 0; }
-        .card { background: white; max-width: 600px; margin: 20px auto; padding: 25px; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
-        h1 { color: #e31e24; text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
-        button { background: #e31e24; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        button:hover { background: #c1181d; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; direction: rtl; text-align: right; padding: 20px; margin: 0; }
+        .card { background: white; max-width: 600px; margin: 20px auto; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h1 { color: #e31e24; text-align: center; margin-bottom: 5px; font-size: 2.2rem; }
+        h2 { color: #475569; text-align: center; margin-top: 0; font-size: 1.1rem; font-weight: normal; margin-bottom: 25px; }
+        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; font-size: 16px; }
+        button { background: #e31e24; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #b91c1c; }
         .lang-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-        .lang-bar button { width: auto; padding: 8px 12px; background: #475569; font-size: 13px; }
+        .lang-bar button { width: auto; padding: 8px 15px; background: #64748b; font-size: 13px; }
         .lang-bar button.active { background: #e31e24; }
-        .q-item { background: #f8fafc; padding: 15px; margin-bottom: 15px; border-right: 5px solid #e31e24; border-radius: 6px; }
+        .q-box { background: #f8fafc; padding: 15px; border-right: 5px solid #e31e24; margin-bottom: 12px; border-radius: 6px; }
         #admin-ui, #manager-ui, #success-ui, #quiz-ui { display: none; }
-        .m-card { border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 10px; background: #fff; }
+        .m-item { border-bottom: 1px solid #eee; padding: 15px; }
+        .m-item b { color: #e31e24; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h1>MAX - Recruitment</h1>
+        <h1>MAX</h1>
+        <h2>מערכת ניהול וגיוס מועמדים</h2>
         
         <div id="login-ui">
-            <input type="text" id="user_in" placeholder="שם משתמש / Username">
-            <input type="password" id="pass_in" placeholder="סיסמה / Password">
-            <button onclick="doLogin()">כניסה / Login</button>
+            <input type="text" id="userInput" placeholder="שם משתמש">
+            <input type="password" id="passInput" placeholder="סיסמה">
+            <button onclick="login()">כניסה למערכת</button>
         </div>
 
         <div id="admin-ui">
             <div class="lang-bar">
-                <button onclick="changeL('he')" id="btn-he" class="active">עברית</button>
-                <button onclick="changeL('en')" id="btn-en">English</button>
-                <button onclick="changeL('ru')" id="btn-ru">Русский</button>
-                <button onclick="changeL('ar')" id="btn-ar">العربية</button>
-                <button onclick="changeL('fr')" id="btn-fr">Français</button>
+                <button onclick="setL('he')" id="btn-he" class="active">עברית</button>
+                <button onclick="setL('en')" id="btn-en">English</button>
+                <button onclick="setL('ru')" id="btn-ru">Русский</button>
+                <button onclick="setL('ar')" id="btn-ar">العربية</button>
+                <button onclick="setL('fr')" id="btn-fr">Français</button>
             </div>
-            <h3 id="txt-details">פרטי מועמד</h3>
-            <input type="text" id="cand_name" placeholder="שם מלא / Full Name">
-            <input type="text" id="cand_dob" placeholder="תאריך לידה / Date of Birth">
-            <button onclick="goQuiz()" id="btn-next">המשך לשאלון</button>
+            <h3 id="t-details">פרטי מועמד</h3>
+            <input type="text" id="c_name" placeholder="שם מלא / Full Name">
+            <input type="text" id="c_dob" placeholder="תאריך לידה / DOB">
+            <button onclick="openQuiz()" id="btn-next">המשך לשאלון התאמה</button>
         </div>
 
         <div id="quiz-ui">
-            <h3 id="txt-quiz">שאלון התאמה</h3>
-            <div id="questions-area"></div>
-            <button onclick="finishAndSend()" id="btn-send">שלח למנהל</button>
+            <h3 id="t-quiz">שאלון התאמה</h3>
+            <div id="questions-list"></div>
+            <button onclick="submitData()" id="btn-send">שלח נתונים למנהל</button>
         </div>
 
         <div id="success-ui" style="text-align:center;">
-            <div style="font-size: 50px; color: #22c55e;">✓</div>
-            <h2 id="txt-success">נשלח בהצלחה!</h2>
-            <p id="txt-msg">הנתונים הועברו למנהל לצורך ניתוח ברוח "הגילוי הפנימי".</p>
-            <button onclick="location.reload()" style="background:#475569">הזן מועמד חדש</button>
+            <h2 style="color:green; font-weight:bold;">✓ השאלון נשלח בהצלחה!</h2>
+            <p>הנתונים נשמרו במערכת עבור המנהל.</p>
+            <button onclick="location.reload()">חזרה לתפריט כניסה</button>
         </div>
 
         <div id="manager-ui">
-            <h3>לוח בקרה מנהל (תצוגה בעברית)</h3>
-            <div id="manager-list"></div>
-            <button onclick="location.reload()" style="background:#475569; margin-top:20px;">התנתק</button>
+            <h3>לוח בקרה - מועמדים שנקלטו</h3>
+            <div id="manager-results">טוען נתונים...</div>
+            <button onclick="location.reload()" style="background:#475569; margin-top:20px;">התנתק מהמערכת</button>
         </div>
     </div>
 
     <script>
-        let L = 'he';
-        const dict = {
-            he: { details: "פרטי מועמד", next: "המשך לשאלון", quiz: "שאלון התאמה", send: "שלח למנהל", success: "נשלח בהצלחה!", msg: "הנתונים הועברו למנהל לצורך ניתוח.",
-                q: ["סבלנות בעבודה?", "עבודה בצוות?", "עמידה בלחץ?", "סדר וארגון?", "זמינות למשמרות?", "יוזמה אישית?", "התמודדות עם לקוח?", "דיוק בזמנים?", "עבודה פיזית?", "למה דווקא MAX?"],
-                a: [["גבוהה", "בינונית", "נמוכה"], ["מעדיף צוות", "מעדיף לבד", "תלוי במשימה"], ["מצוין", "סביר", "קשה לי"], ["חשוב מאוד", "חשוב במידה", "לא חשוב"], ["מלאה", "חלקי", "רק בוקר"], ["תמיד מחפש", "עושה מה שצריך", "מעדיף הנחיות"], ["בסבלנות", "קורא למנהל", "מתעלם"], ["דייקן מאוד", "משתדל", "מאחר לפעמים"], ["מתאים לי", "סביר", "לא מתאים"], ["יציבות", "שכר", "עניין"]] },
-            en: { details: "Candidate Info", next: "Continue to Quiz", quiz: "Assessment Quiz", send: "Submit to Manager", success: "Sent!", msg: "Data sent to manager for analysis.",
-                q: ["Patience?", "Teamwork?", "Pressure?", "Order?", "Shifts?", "Initiative?", "Customer service?", "Punctuality?", "Physical work?", "Why MAX?"],
-                a: [["High", "Medium", "Low"], ["Team", "Alone", "Depends"], ["Excellent", "Average", "Hard"], ["Very important", "Fair", "Not important"], ["Full", "Partial", "Morning only"], ["Always", "As required", "Need guidance"], ["Patiently", "Call manager", "Ignore"], ["Very punctual", "Trying", "Sometimes late"], ["Fit", "Okay", "Not fit"], ["Stability", "Salary", "Interest"]] },
-            ru: { details: "Данные кандидата", next: "К тесту", quiz: "Опросник", send: "Отправить менеджеру", success: "Успешно!", msg: "Данные отправлены менеджеру.",
-                q: ["Терпение?", "Команда?", "Стресс?", "Порядок?", "Смены?", "Инициатива?", "Клиенты?", "Пунктуальность?", "Физ. работа?", "Почему MAX?"],
-                a: [["Высокое", "Среднее", "Низкое"], ["Команда", "Один", "Зависит"], ["Отлично", "Ок", "Трудно"], ["Очень важно", "Средне", "Не важно"], ["Полная", "Частично", "Только утро"], ["Всегда", "По заданию", "Нужны указания"], ["Терпеливо", "Звать шефа", "Игнор"], ["Пунктуален", "Стараюсь", "Опаздываю"], ["Подходит", "Ок", "Нет"], ["Стабильность", "Зарплата", "Интерес"]] },
-            ar: { details: "تفاصيل المرشح", next: "متابعة للاختبار", quiz: "استبيان التقييم", send: "إرسال للمدير", success: "تم الإرسال!", msg: "تم إرسال البيانات للمدير للتحليل.",
-                q: ["مستوى الصبر؟", "العمل الجماعي؟", "ضغط العمل؟", "النظام؟", "الورديات؟", "المبادرة؟", "تعامل مع زبون؟", "الدقة؟", "عمل جسدي؟", "لماذا MAX؟"],
-                a: [["عالي", "متوسط", "منخفض"], ["فريق", "وحدي", "حسب"], ["ممتاز", "عادي", "صعب"], ["مهم جداً", "متوسط", "غير مهم"], ["كاملة", "جزئياً", "صباحاً فقط"], ["دائماً", "حسب الطلب", "أحتاج توجيه"], ["بصبر", "أنادي المدير", "تجاهل"], ["دقيق جداً", "أحاول", "أتأخر أحياناً"], ["يناسبني", "عادي", "لا يناسبني"], ["استقرار", "راتب", "اهتمام"]] },
-            fr: { details: "Infos Candidat", next: "Continuer", quiz: "Évaluation", send: "Envoyer", success: "Envoyé!", msg: "Données envoyées au manager.",
-                q: ["Patience?", "Équipe?", "Pression?", "Ordre?", "Horaires?", "Initiative?", "Clientèle?", "Ponctualité?", "Travail physique?", "Pourquoi MAX?"],
-                a: [["Élevée", "Moyenne", "Basse"], ["Équipe", "Seul", "Dépend"], ["Excellent", "Moyen", "Difficile"], ["Très important", "Moyen", "Pas important"], ["Temps plein", "Partiel", "Matin seulement"], ["Toujours", "Selon besoin", "Besoin d'aide"], ["Patiemment", "Appeler chef", "Ignorer"], ["Ponctuel", "Essaye", "En retard"], ["Adapté", "Ok", "Pas adapté"], ["Stabilité", "Salaire", "Intérêt"]] }
+        let currentLang = 'he';
+        const dictionary = {
+            he: { details: "פרטי מועמד", next: "המשך לשאלון התאמה", quiz: "שאלון התאמה", send: "שלח נתונים למנהל",
+                q: ["סבלנות?", "צוות?", "לחץ?", "סדר?", "משמרות?", "יוזמה?", "שירות?", "זמנים?", "פיזי?", "למה MAX?"],
+                a: [["גבוהה","בינונית","נמוכה"],["צוות","לבד","תלוי"],["טוב מאוד","סביר","קשה"],["חשוב","סביר","לא"],["מלאה","חלקית","בוקר"],["יוזם","מבצע","צריך הנחיה"],["סבלני","מנהל","מתעלם"],["דייקן","משתדל","מאחר"],["מתאים","סביר","לא"],["יציבות","שכר","עניין"]] },
+            en: { details: "Candidate Info", next: "Continue to Quiz", quiz: "Assessment", send: "Submit to Manager",
+                q: ["Patience?", "Teamwork?", "Pressure?", "Order?", "Shifts?", "Initiative?", "Service?", "Punctuality?", "Physical?", "Why MAX?"],
+                a: [["High","Mid","Low"],["Team","Alone","Depends"],["Great","Ok","Hard"],["Important","Ok","No"],["Full","Part","Morning"],["Proactive","Doer","Guidance"],["Patient","Manager","Ignore"],["Punctual","Trying","Late"],["Fit","Ok","No"],["Stability","Salary","Interest"]] },
+            ru: { details: "Данные", next: "Далее", quiz: "Опрос", send: "Отправить",
+                q: ["Терпение?", "Команда?", "Стресс?", "Порядок?", "Смены?", "Инициатива?", "Сервис?", "Время?", "Физ. труд?", "Почему MAX?"],
+                a: [["Высокое","Среднее","Низкое"],["Команда","Один","Зависит"],["Отлично","Ок","Трудно"],["Важно","Ок","Нет"],["Полная","Часть","Утро"],["Сам","Делаю","Нужна помощь"],["Терпелив","Босс","Игнор"],["Вовремя","Стараюсь","Опаздываю"],["Подходит","Ок","Нет"],["Стабильность","Зарплата","Интерес"]] },
+            ar: { details: "تفاصيل", next: "متابعة", quiz: "استبيان", send: "إرسال",
+                q: ["الصبر؟", "فريق؟", "ضغط؟", "نظام؟", "وردية؟", "مبادرة؟", "زبائن؟", "دقة؟", "عمل جسدي؟", "لماذا MAX؟"],
+                a: [["عالي","متوسط","منخفض"],["فريق","وحدي","حسب"],["ممتاز","عادي","صعب"],["مهم","عادي","لا"],["كاملة","جزئية","صباحا"],["מבادر","منفذ","توجيه"],["صبور","مدير","تجاهל"],["دقيق","أחاول","أتأخر"],["يناسب","عادي","לא"],["استقرار","راتب","اهتمام"]] },
+            fr: { details: "Détails", next: "Suivant", quiz: "Quiz", send: "Envoyer",
+                q: ["Patience?", "Equipe?", "Pression?", "Ordre?", "Horaires?", "Initiative?", "Service?", "Ponctualité?", "Physique?", "Pourquoi MAX?"],
+                a: [["Haute","Moyenne","Basse"],["Equipe","Seul","Depend"],["Super","Ok","Dur"],["Important","Ok","Non"],["Plein","Partiel","Matin"],["Proactif","Executant","Besoin d'aide"],["Patient","Chef","Ignorer"],["Ponctuel","Essaye","Retard"],["Adapte","Ok","Non"],["Stabilite","Salaire","Interet"]] }
         };
 
-        function changeL(lang) {
-            L = lang;
+        function setL(l) {
+            currentLang = l;
             document.querySelectorAll('.lang-bar button').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-' + lang).classList.add('active');
-            document.getElementById('txt-details').innerText = dict[L].details;
-            document.getElementById('btn-next').innerText = dict[L].next;
-            document.getElementById('txt-quiz').innerText = dict[L].quiz;
-            document.getElementById('btn-send').innerText = dict[L].send;
-            document.getElementById('txt-success').innerText = dict[L].success;
-            document.getElementById('txt-msg').innerText = dict[L].msg;
+            document.getElementById('btn-' + l).classList.add('active');
+            document.getElementById('t-details').innerText = dictionary[l].details;
+            document.getElementById('btn-next').innerText = dictionary[l].next;
+            document.getElementById('t-quiz').innerText = dictionary[l].quiz;
+            document.getElementById('btn-send').innerText = dictionary[l].send;
         }
 
-        function doLogin() {
-            const u = document.getElementById('user_in').value.trim().toLowerCase();
-            const p = document.getElementById('pass_in').value.trim();
+        function login() {
+            const u = document.getElementById('userInput').value.trim().toLowerCase();
+            const p = document.getElementById('passInput').value.trim();
             if(u === 'admin' && p === 'max456') {
-                document.getElementById('login-ui').style.display='none';
-                document.getElementById('admin-ui').style.display='block';
+                document.getElementById('login-ui').style.display = 'none';
+                document.getElementById('admin-ui').style.display = 'block';
             } else if(u === 'manager' && p === 'max123') {
-                document.getElementById('login-ui').style.display='none';
-                document.getElementById('manager-ui').style.display='block';
-                fetchList();
-            } else { alert("Error: Wrong details"); }
+                document.getElementById('login-ui').style.display = 'none';
+                document.getElementById('manager-ui').style.display = 'block';
+                fetchManagerData();
+            } else {
+                alert("שם משתמש או סיסמה שגויים!");
+            }
         }
 
-        function goQuiz() {
-            if(!document.getElementById('cand_name').value) return alert("Please enter name");
-            document.getElementById('admin-ui').style.display='none';
-            document.getElementById('quiz-ui').style.display='block';
-            const area = document.getElementById('questions-area');
-            area.innerHTML = dict[L].q.map((q, i) => `
-                <div class="q-item">
+        function openQuiz() {
+            if(!document.getElementById('c_name').value) return alert("נא להזין שם מועמד");
+            document.getElementById('admin-ui').style.display = 'none';
+            document.getElementById('quiz-ui').style.display = 'block';
+            const list = document.getElementById('questions-list');
+            list.innerHTML = dictionary[currentLang].q.map((q, i) => `
+                <div class="q-box">
                     <label><b>\${q}</b></label>
-                    <select id="ans\${i}">\${dict[L].a[i].map(opt => `<option value="\${opt}">\${opt}</option>`).join('')}</select>
+                    <select id="qsel\${i}">\${dictionary[currentLang].a[i].map(opt => `<option value="\${opt}">\${opt}</option>`).join('')}</select>
                 </div>
             `).join('');
         }
 
-        async function finishAndSend() {
+        async function submitData() {
             const payload = {
-                name: document.getElementById('cand_name').value,
-                dob: document.getElementById('cand_dob').value,
-                // תרגום התשובות לעברית עבור המנהל
-                answers: dict[L].q.map((_, i) => {
-                    const idx = document.getElementById('ans'+i).selectedIndex;
-                    return dict['he'].a[i][idx];
-                })
+                name: document.getElementById('c_name').value,
+                dob: document.getElementById('c_dob').value,
+                answers: dictionary[currentLang].q.map((_, i) => document.getElementById('qsel'+i).value)
             };
             await fetch('/api/save', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-            document.getElementById('quiz-ui').style.display='none';
-            document.getElementById('success-ui').style.display='block';
+            document.getElementById('quiz-ui').style.display = 'none';
+            document.getElementById('success-ui').style.display = 'block';
         }
 
-        async function fetchList() {
+        async function fetchManagerData() {
             const res = await fetch('/api/list');
             const data = await res.json();
-            const div = document.getElementById('manager-list');
+            const div = document.getElementById('manager-results');
+            if(data.length === 0) { div.innerHTML = "<p>אין מועמדים רשומים במערכת.</p>"; return; }
             div.innerHTML = data.map(c => `
-                <div class="m-card">
-                    <div style="color:#e31e24; font-weight:bold; font-size:1.1rem;">\${c.name}</div>
-                    <div style="color:#64748b; margin-bottom:10px;">תאריך לידה: \${c.dob}</div>
-                    <div style="font-size:0.9rem; border-top:1px solid #eee; padding-top:5px;">
-                        \${c.answers.map((a, i) => `<div><b>\${dict['he'].q[i]}:</b> \${a}</div>`).join('')}
-                    </div>
+                <div class="m-item">
+                    <b>\${c.name}</b> (\${c.dob})<br>
+                    <small>תשובות: \${c.answers.join(' | ')}</small>
                 </div>
             `).join('');
-            if(data.length === 0) div.innerHTML = "<p>אין מועמדים חדשים.</p>";
         }
     </script>
 </body>
@@ -174,18 +169,17 @@ HTML_TEMPLATE = """
 """
 
 @app.route('/')
-def home(): return render_template_string(HTML_TEMPLATE)
+def home(): return render_template_string(HTML_CONTENT)
 
 @app.route('/api/list')
 def get_list(): return jsonify(load_data())
 
 @app.route('/api/save', methods=['POST'])
 def save():
-    data = load_data()
-    data.append(request.json)
-    save_data(data)
-    return jsonify({"status": "ok"})
+    d = load_data()
+    d.append(request.json)
+    save_data(d)
+    return jsonify({"status":"ok"})
 
 if __name__ == '__main__':
-    p = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=p)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
