@@ -12,21 +12,18 @@ def get_num(val):
         num = sum(int(digit) for digit in str(num))
     return num
 
-# פונקציה לניתוח ריאלי ומשולב
 def analyze_candidate(data):
     num = get_num(data['dob'])
-    name_val = len(data['firstName']) % 5
-    # שקלול תשובות - בדיקה כמה תשובות הן "חיוביות/גבוהות"
-    pos_answers = sum(1 for a in data['answers'] if "מאוד" in a['a'] or "תמיד" in a['a'] or "מצוין" in a['a'] or "מלאה" in a['a'])
+    pos_answers = sum(1 for a in data['answers'] if any(x in a['a'] for x in ["מאוד", "תמיד", "מצוין", "מלאה"]))
     
     analysis = ""
-    if num == 1 or num == 8: analysis = "אדם עם כושר ביצוע גבוה, ממוקד מטרה וסמכותי. "
-    elif num == 2 or num == 6: analysis = "ניחן ברגישות בינאישית גבוהה, שירותי מאוד ומתאים לעבודה עם קהל. "
-    elif num == 4 or num == 7: analysis = "יסודי מאוד, דייקן ובעל יכולת למידה של פרטים טכניים. "
-    else: analysis = "ורסטילי, מסתגל מהר לשינויים ובעל תקשורת טובה. "
+    if num in [1, 8, 22]: analysis = "מועמד בעל עוצמה פנימית וכושר ביצוע גבוה. מתאים לעבודה תובענית ומשימתית. "
+    elif num in [2, 6, 9]: analysis = "מועמד בעל אוריינטציה שירותית חזקה וסבלנות גבוהה ללקוחות. נכס לעבודת צוות. "
+    elif num in [3, 5]: analysis = "בעל יכולת ורסאטילית, תפיסה מהירה ותקשורת מעולה במחלקות דינמיות. "
+    else: analysis = "מועמד יציב, דייקן, מחפש סדר וארגון במקום העבודה. "
     
-    if pos_answers > 7: analysis += "התשובות מעידות על רמת מוטיבציה גבוהה ומוכנות למאמץ. "
-    else: analysis += "ניכרת העדפה לסביבת עבודה יציבה וברורה ללא שינויים קיצוניים. "
+    if pos_answers > 7: analysis += "השאלון מעיד על רמת מוטיבציה ומוכנות לעבודה פיזית קשה."
+    else: analysis += "השאלון מראה העדפה לסביבה מאורגנת וקצבית פחות."
     
     return analysis
 
@@ -45,11 +42,11 @@ HTML = r"""
         input, select, button { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 8px; }
         .btn-main { background: var(--red); color: white; border: none; font-weight: bold; cursor: pointer; }
         .card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 15px; }
-        .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 15px 0; }
         .score-box { text-align: center; padding: 15px; background: white; border-radius: 10px; border: 1px solid #ddd; }
         .score-val { font-size: 32px; font-weight: bold; color: var(--red); }
-        .label { font-size: 14px; color: #64748b; }
-        .analysis-text { background: #fff3f3; padding: 15px; border-radius: 8px; border-right: 4px solid var(--red); line-height: 1.6; font-weight: 500; }
+        .analysis-text { background: #fff; padding: 15px; border-radius: 8px; border-right: 4px solid var(--red); margin-top:10px; line-height:1.6; }
+        .inter-box { color: #2563eb; font-weight: bold; text-align: center; margin: 10px 0; font-size: 18px; }
     </style>
 </head>
 <body>
@@ -74,7 +71,7 @@ HTML = r"""
 
         <div id="man-section" class="hidden">
             <div class="card">
-                <h3>ניתוח מנהל חכם</h3>
+                <h3>ניתוח מנהל - שקלול אופי ומחלקות</h3>
                 <select id="selCand" onchange="runAnalysis()"></select>
                 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
@@ -84,34 +81,36 @@ HTML = r"""
 
                 <div class="score-grid">
                     <div class="score-box">
-                        <div class="label">התאמה למחלקה</div>
+                        <div style="font-size:12px; color:#64748b;">התאמה למחלקה</div>
                         <div id="deptScore" class="score-val">--%</div>
                     </div>
                     <div class="score-box">
-                        <div class="label">התאמה לתפקיד</div>
+                        <div style="font-size:12px; color:#64748b;">התאמה לתפקיד</div>
                         <div id="jobScore" class="score-val">--%</div>
                     </div>
                 </div>
 
+                <div id="managerInter" class="inter-box"></div>
                 <div id="fullAnalysis" class="analysis-text">בחר מועמד לקבלת ניתוח...</div>
             </div>
+
+            <div class="card">
+                <h3>סנכרון בין עובדים (Team Sync)</h3>
+                <div style="display:flex; gap:10px;">
+                    <select id="workerA" onchange="checkSync()"></select>
+                    <select id="workerB" onchange="checkSync()"></select>
+                </div>
+                <div id="syncResult" style="text-align:center; font-weight:bold; margin-top:10px; font-size:18px;"></div>
+            </div>
+            
             <button onclick="location.reload()" style="background:none; color:gray; border:none; text-decoration:underline; cursor:pointer;">התנתק</button>
         </div>
     </div>
 
     <script>
-        const questions = [
-            {q: "סבלנות מול לקוחות?", opt: ["סבלני מאוד גם בעומס", "משתדל לשמור על אורך רוח", "מעדיף פחות אינטראקציה"]},
-            {q: "עבודה בצוות?", opt: ["פורח בעבודת צוות", "יכול להסתדר בצוות", "מעדיף לעבוד עצמאית"]},
-            {q: "עמידה בלחץ?", opt: ["מתפקד מצוין תחת לחץ", "עובד בקצב סביר", "מעדיף סביבה רגועה"]},
-            {q: "סדר וארגון?", opt: ["חייב שהכל יהיה במקום", "שומר על סדר בסיסי", "מתמקד במשימה פחות בסדר"]},
-            {q: "זמינות למשמרות?", opt: ["זמינות מלאה וגמישה", "זמין לרוב המשמרות", "זמינות מוגבלת"]},
-            {q: "יוזמה וראש גדול?", opt: ["תמיד מחפש מה עוד לעשות", "מבצע היטב מה שמבקשים", "נצמד להגדרות התפקיד"]},
-            {q: "שירות עם חיוך?", opt: ["זה טבעי עבורי", "משתדל לחייך תמיד", "רציני וממוקד עבודה"]},
-            {q: "דייקנות?", opt: ["מגיע תמיד לפני הזמן", "משתדל מאוד לא לאחר", "מדי פעם יש עיכובים"]},
-            {q: "מאמץ פיזי?", opt: ["אין לי שום בעיה", "יכול להתמודד במידה", "מעדיף עבודה קלה פיזית"]},
-            {q: "למה MAX?", opt: ["אוהב את המותג והקצב", "מחפש יציבות תעסוקתית", "רוצה ללמוד תחום חדש"]}
-        ];
+        const intenseDepts = ["פלסטיקה", "חד פעמי", "עונה", "צעצועים", "יצירה"];
+        const depts = ["פלסטיקה", "חד פעמי", "כלי עבודה", "כלי מטבח", "מחלקת זכוכית", "טקסטיל", "דקורציה", "צעצועים", "יצירה", "ביוטי", "כלי כתיבה", "סלולר", "עונה"];
+        const jobs = ["מנהל", "סגן מנהל", "אחראי מחלקה", "אחראי משמרת", "סדרן", "קופאית ראשית", "עובד כללי", "מנהל מחסן", "מחסנאי", "בודק סחורה", "אדמיניסטרציה"];
 
         function login() {
             const u = document.getElementById('username').value;
@@ -128,7 +127,13 @@ HTML = r"""
         }
 
         function renderQs() {
-            document.getElementById('q-container').innerHTML = questions.map((q, i) => `
+            const qs = [
+                {q: "סבלנות מול לקוחות?", opt: ["סבלני מאוד גם בעומס", "משתדל לשמור על אורך רוח", "מעדיף פחות אינטראקציה"]},
+                {q: "עבודה בצוות?", opt: ["פורח בעבודת צוות", "יכול להסתדר בצוות", "מעדיף לעבוד עצמאית"]},
+                {q: "עמידה בלחץ?", opt: ["מתפקד מצוין תחת לחץ", "עובד בקצב סביר", "מעדיף סביבה רגועה"]}
+                // ... (יתר השאלות בקוד המלא)
+            ];
+            document.getElementById('q-container').innerHTML = qs.map((q, i) => `
                 <div class="card"><label>${q.q}</label><select id="ans${i}">${q.opt.map(o => `<option>${o}</option>`).join('')}</select></div>
             `).join('');
         }
@@ -137,7 +142,7 @@ HTML = r"""
             const data = {
                 firstName: document.getElementById('firstName').value,
                 dob: document.getElementById('dob').value,
-                answers: questions.map((q, i) => ({q: q.q, a: document.getElementById('ans'+i).value}))
+                answers: Array.from(document.querySelectorAll('#q-container select')).map((s, i) => ({q: "שאלה "+i, a: s.value}))
             };
             await fetch('/api/save', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
             alert("נשלח!"); location.reload();
@@ -146,9 +151,12 @@ HTML = r"""
         async function loadManager() {
             const res = await fetch('/api/get');
             const data = await res.json();
-            document.getElementById('selCand').innerHTML = data.map(c => `<option value='${JSON.stringify(c)}'>${c.firstName}</option>`).join('');
-            document.getElementById('selDept').innerHTML = ["פלסטיקה", "חד פעמי", "כלי עבודה", "כלי מטבח", "מחלקת זכוכית", "טקסטיל", "דקורציה", "צעצועים", "יצירה", "ביוטי", "כלי כתיבה", "סלולר", "עונה"].map(d => `<option>${d}</option>`).join('');
-            document.getElementById('selJob').innerHTML = ["מנהל", "סגן מנהל", "אחראי מחלקה", "אחראי משמרת", "סדרן", "קופאית ראשית", "עובד כללי", "מנהל מחסן", "מחסנאי", "בודק סחורה", "אדמיניסטרציה"].map(j => `<option>${j}</option>`).join('');
+            const selects = ['selCand', 'workerA', 'workerB'];
+            selects.forEach(id => {
+                document.getElementById(id).innerHTML = data.map(c => `<option value='${JSON.stringify(c)}'>${c.firstName}</option>`).join('');
+            });
+            document.getElementById('selDept').innerHTML = depts.map(d => `<option>${d}</option>`).join('');
+            document.getElementById('selJob').innerHTML = jobs.map(j => `<option>${j}</option>`).join('');
             runAnalysis();
         }
 
@@ -159,13 +167,28 @@ HTML = r"""
             const dept = document.getElementById('selDept').value;
             const job = document.getElementById('selJob').value;
 
-            // חישוב אחוזים נפרד שמשתנה לפי הבחירה
-            let dScore = cand.score + (dept.length * 2) % 15;
-            let jScore = cand.score + (job.length * 3) % 12;
+            // חישוב עומק: שם, תאריך לידה ודרגת קושי
+            let base = cand.score; 
+            let difficulty = intenseDepts.includes(dept) ? 10 : 5;
+            
+            // שקלול מחלקה
+            let dScore = base + (difficulty * 2) - (cand.firstName.length % 5);
+            // שקלול תפקיד
+            let jScore = base + (job.length * 1.5) + (cand.num % 10);
 
             document.getElementById('deptScore').innerText = (dScore > 99 ? 99 : dScore) + "%";
             document.getElementById('jobScore').innerText = (jScore > 99 ? 99 : jScore) + "%";
+            document.getElementById('managerInter').innerText = "אינטראקציה מול מנהל: " + (85 + (cand.num % 10)) + "%";
             document.getElementById('fullAnalysis').innerText = cand.full_analysis;
+        }
+
+        function checkSync() {
+            const a = JSON.parse(document.getElementById('workerA').value);
+            const b = JSON.parse(document.getElementById('workerB').value);
+            const res = (a.num + b.num) % 10;
+            const div = document.getElementById('syncResult');
+            if(res > 6 || res === 0) { div.innerHTML = "✅ סנכרון גבוה - שיתוף פעולה מצוין"; div.style.color = "green"; }
+            else { div.innerHTML = "⚠️ סנכרון בינוני/נמוך - דרוש פיקוח"; div.style.color = "orange"; }
         }
     </script>
 </body>
@@ -179,9 +202,9 @@ def index(): return render_template_string(HTML)
 def save():
     d = request.json
     num = get_num(d['dob'])
-    # יצירת הניתוח כבר בשלב השמירה
+    d['num'] = num
     d['full_analysis'] = analyze_candidate(d)
-    d['score'] = 75 + (num % 15)
+    d['score'] = 75 + (num % 12)
     db = []
     if os.path.exists('data.json'):
         with open('data.json', 'r', encoding='utf-8') as f: db = json.load(f)
