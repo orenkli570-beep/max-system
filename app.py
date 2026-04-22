@@ -4,7 +4,7 @@ import json
 
 app = Flask(__name__)
 
-# פונקציית חישוב נוסחת השם (גימטריה מצומצמת)
+# --- לוגיקה של הגילוי הפנימי ---
 def calculate_name_num(name):
     gematria_map = {
         'א': 1, 'ב': 2, 'ג': 3, 'ד': 4, 'ה': 5, 'ו': 6, 'ז': 7, 'ח': 8, 'ט': 9,
@@ -16,135 +16,127 @@ def calculate_name_num(name):
         total = sum(int(digit) for digit in str(total))
     return total
 
-# פונקציית חישוב תאריך לידה (ספרות 1-9 ומאסטר)
 def calculate_dob_num(dob_str):
     digits = [int(d) for d in dob_str if d.isdigit()]
+    if not digits: return 0
     total = sum(digits)
     while total > 9 and total not in [11, 22]:
         total = sum(int(digit) for digit in str(total))
     return total
 
-def load_data():
-    if not os.path.exists('candidates.json'): return []
-    try:
-        with open('candidates.json', 'r', encoding='utf-8') as f: return json.load(f)
-    except: return []
+def save_candidate(data):
+    file_path = 'candidates.json'
+    existing = []
+    if os.path.exists(file_path):
+        with open(file_path, 'r', encoding='utf-8') as f:
+            existing = json.load(f)
+    existing.append(data)
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(existing, f, ensure_ascii=False, indent=4)
 
-def save_data(data):
-    with open('candidates.json', 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-
+# --- ממשק משתמש ---
 HTML_CONTENT = r"""
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>MAX - Internal Discovery System</title>
+    <title>MAX Recruitment</title>
     <style>
-        body { font-family: sans-serif; background: #f4f7f9; direction: rtl; padding: 20px; }
-        .card { background: white; max-width: 1000px; margin: auto; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
-        h1 { color: #e31e24; text-align: center; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; direction: rtl; text-align: center; padding: 20px; }
+        .box { background: white; max-width: 600px; margin: auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #e31e24; font-size: 2.2rem; margin-bottom: 5px; }
+        h2 { color: #475569; font-size: 1.2rem; border-bottom: 2px solid #e31e24; padding-bottom: 10px; margin-bottom: 25px; }
+        .field { text-align: right; margin-bottom: 15px; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { background: #e31e24; color: white; border: none; padding: 15px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1.1rem; margin-top: 20px; }
         .hidden { display: none; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
-        th { background: #f8fafc; }
-        .master-num { color: #e31e24; font-weight: bold; }
-        .result-box { background: #e0f2fe; padding: 5px; border-radius: 4px; font-weight: bold; }
+        .q-row { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-right: 4px solid #e31e24; text-align: right; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>MAX - ניתוח נתונים משולב</h1>
-        
-        <div id="ui-login">
-            <input type="text" id="u" placeholder="שם משתמש" style="width:100%; padding:10px; margin:5px 0;">
-            <input type="password" id="p" placeholder="סיסמה" style="width:100%; padding:10px; margin:5px 0;">
-            <button onclick="login()" style="width:100%; padding:10px; background:#e31e24; color:white; border:none; cursor:pointer;">כניסה</button>
+    <div class="box">
+        <h1>MAX כאן קונים בכיף</h1>
+        <h2>מערכת גיוס והתאמת עובדים</h2>
+
+        <div id="step1">
+            <div class="field">
+                <label>שם המועמד (פרטי בלבד):</label>
+                <input type="text" id="cName" placeholder="הכנס שם פרטי">
+            </div>
+            <div class="field">
+                <label>תאריך לידה:</label>
+                <input type="text" id="cDob" placeholder="למשל: 01.01.1990">
+            </div>
+            <button onclick="showStep2()">המשך לשאלון התאמה</button>
         </div>
 
-        <div id="ui-admin" class="hidden">
-            <h3>הזנת מועמד</h3>
-            <input type="text" id="cName" placeholder="שם פרטי (ללא משפחה)" style="width:100%; padding:10px; margin:5px 0;">
-            <input type="text" id="cDob" placeholder="תאריך לידה (למשל: 12.05.1990)" style="width:100%; padding:10px; margin:5px 0;">
-            <button onclick="startQuiz()" style="width:100%; padding:10px; background:#e31e24; color:white; border:none; cursor:pointer;">המשך לשאלון</button>
+        <div id="step2" class="hidden">
+            <div id="questions-container"></div>
+            <button onclick="finalize()">שלח נתונים לניתוח</button>
         </div>
 
-        <div id="ui-quiz" class="hidden">
-            <div id="qArea"></div>
-            <button onclick="submit()" style="width:100%; padding:10px; background:#e31e24; color:white; border:none; cursor:pointer;">סיים ונתח נתונים</button>
-        </div>
-
-        <div id="ui-manager" class="hidden">
-            <h3>לוח מנהל - ניתוח אישיות ונוסחת השם</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>מועמד</th>
-                        <th>תאריך לידה</th>
-                        <th>ספרת שם</th>
-                        <th>ספרת גורל</th>
-                        <th>מחלקה מומלצת</th>
-                        <th>אחוז התאמה</th>
-                    </tr>
-                </thead>
-                <tbody id="mTable"></tbody>
-            </table>
-            <button onclick="location.reload()" style="margin-top:20px;">התנתק</button>
+        <div id="success" class="hidden">
+            <h3 style="color: green;">✓ הנתונים נשלחו בהצלחה למנהל</h3>
+            <button onclick="location.reload()">מועמד חדש</button>
         </div>
     </div>
 
     <script>
-        function login() {
-            const u = document.getElementById('u').value;
-            const p = document.getElementById('p').value;
-            if(u==='admin' && p==='max456') { show('ui-admin'); }
-            else if(u==='manager' && p==='max123') { show('ui-manager'); loadM(); }
-        }
+        const questions = [
+            "מידת הסבלנות שלך בעבודה עם לקוחות?",
+            "איך היכולת שלך לעבוד בצוות?",
+            "מהי רמת העמידה שלך במצבי לחץ?",
+            "עד כמה חשוב לך סדר וארגון בסביבת העבודה?",
+            "מהי הזמינות שלך למשמרות (בוקר/ערב/לילה)?",
+            "מידת היוזמה האישית שלך להגדלת ראש?",
+            "איך היית מגדיר את תודעת השירות שלך?",
+            "מידת הדייקנות שלך בזמנים?",
+            "האם יש לך יכולת לעבודה פיזית מתונה?",
+            "מהי המוטיבציה שלך לעבוד דווקא ב-MAX?"
+        ];
 
-        function show(id) {
-            document.querySelectorAll('div[id^="ui-"]').forEach(d => d.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        function startQuiz() {
-            show('ui-quiz');
-            // כאן יופיעו 10 השאלות שדיברנו עליהן...
-            document.getElementById('qArea').innerHTML = "<h4>שאלון בטעינה...</h4>";
-            setTimeout(() => {
-                let h = '';
-                for(let i=0; i<10; i++) { h += `<p>שאלה ${i+1}: <select id="a${i}"><option>גבוהה</option><option>בינונית</option><option>נמוכה</option></select></p>`; }
-                document.getElementById('qArea').innerHTML = h;
-            }, 100);
-        }
-
-        async function submit() {
-            const ans = [];
-            for(let i=0; i<10; i++) ans.push(document.getElementById('a'+i).value);
+        function showStep2() {
+            if(!document.getElementById('cName').value || !document.getElementById('cDob').value) {
+                alert("אנא מלא שם ותאריך לידה");
+                return;
+            }
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
             
-            const payload = {
-                name: document.getElementById('cName').value,
-                dob: document.getElementById('cDob').value,
-                ans: ans
-            };
-
-            await fetch('/api/save', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-            alert("נשלח לניתוח");
-            location.reload();
+            let html = "";
+            questions.forEach((q, i) => {
+                html += `
+                <div class="q-row">
+                    <label>${i+1}. ${q}</label>
+                    <select id="q${i}">
+                        <option value="גבוהה">גבוהה</option>
+                        <option value="בינונית">בינונית</option>
+                        <option value="נמוכה">נמוכה</option>
+                    </select>
+                </div>`;
+            });
+            document.getElementById('questions-container').innerHTML = html;
         }
 
-        function loadM() {
-            fetch('/api/list').then(r => r.json()).then(data => {
-                document.getElementById('mTable').innerHTML = data.map(c => `
-                    <tr>
-                        <td>${c.name}</td>
-                        <td>${c.dob}</td>
-                        <td class="${[11,22].includes(c.nameNum) ? 'master-num' : ''}">${c.nameNum}</td>
-                        <td class="${[11,22].includes(c.dobNum) ? 'master-num' : ''}">${c.dobNum}</td>
-                        <td><span class="result-box">${c.recDept}</span></td>
-                        <td><b>${c.score}%</b></td>
-                    </tr>
-                `).join('');
+        async function finalize() {
+            const name = document.getElementById('cName').value;
+            const dob = document.getElementById('cDob').value;
+            const answers = [];
+            for(let i=0; i<10; i++) {
+                answers.push(document.getElementById('q'+i).value);
+            }
+
+            const res = await fetch('/api/submit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name, dob, answers })
             });
+
+            if(res.ok) {
+                document.getElementById('step2').classList.add('hidden');
+                document.getElementById('success').classList.remove('hidden');
+            }
         }
     </script>
 </body>
@@ -152,27 +144,29 @@ HTML_CONTENT = r"""
 """
 
 @app.route('/')
-def index(): return render_template_string(HTML_CONTENT)
+def index():
+    return render_template_string(HTML_CONTENT)
 
-@app.route('/api/list')
-def get_l(): return jsonify(load_data())
-
-@app.route('/api/save', methods=['POST'])
-def save():
-    d = load_data()
-    item = request.json
-    # חישוב הנתונים לפי "הגילוי הפנימי" בשרת
-    item['nameNum'] = calculate_name_num(item['name'])
-    item['dobNum'] = calculate_dob_num(item['dob'])
+@app.route('/api/submit', methods=['POST'])
+def submit():
+    data = request.json
+    name = data['name']
+    dob = data['dob']
     
-    # לוגיקה בסיסית לשילוב (מחלקה מומלצת לפי ספרת גורל)
-    mapping = {1: "ניהול/סגן", 2: "שירות/קופאית", 4: "כלי עבודה/מחסן", 8: "ניהול מחסן"}
-    item['recDept'] = mapping.get(item['dobNum'], "כללי/סדרן")
-    item['score'] = 85 # דוגמה לשקלול
+    # חישוב הנתונים של הגילוי הפנימי
+    name_num = calculate_name_num(name)
+    dob_num = calculate_dob_num(dob)
     
-    d.append(item)
-    save_data(d)
-    return jsonify({"s":"ok"})
+    record = {
+        "name": name,
+        "dob": dob,
+        "answers": data['answers'],
+        "name_num": name_num,
+        "dob_num": dob_num
+    }
+    
+    save_candidate(record)
+    return jsonify({"status": "ok"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
