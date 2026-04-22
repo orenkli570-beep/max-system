@@ -5,7 +5,6 @@ import json
 app = Flask(__name__)
 app.secret_key = 'max_secure_key_2026'
 
-# --- לוגיקת חישוב (פרוטוקול אורן) ---
 def get_num(val):
     if not val: return 0
     num = sum([int(d) for d in str(val) if d.isdigit()])
@@ -15,25 +14,17 @@ def get_num(val):
 
 def analyze_candidate_logic(data):
     num = get_num(data['dob'])
-    name_len = len(data['firstName'])
-    # בדיקה רוחבית של התשובות (מזהה מילות מפתח חיוביות בכל השפות)
-    positive_keywords = ["מאוד", "תמיד", "מצוין", "מלאה", "פורח", "Very", "Always", "Thrive", "Excellent", "มาก", "เสมอ", "ที่สุด", "Очень", "Всегда", "Отлично", "دائماً", "جداً", "ممتاز"]
-    high_quality_ans = sum(1 for a in data['answers'] if any(word in a['a'] for word in positive_keywords))
+    pos_keywords = ["מאוד", "תמיד", "מצוין", "מלאה", "פורח", "Very", "Always", "Excellent", "มาก", "เสมอ", "Очень", "Всегда", "دائماً", "جداً"]
+    high_quality_ans = sum(1 for a in data['answers'] if any(word in a['a'] for word in pos_keywords))
     
     analysis = ""
-    if num in [1, 8, 22]:
-        analysis = "מועמד בעל כושר ביצוע גבוה ודומיננטיות. מתאים למחלקות אינטנסיביות. "
-    elif num in [2, 6, 9]:
-        analysis = "מועמד בעל רגישות שירותית גבוהה ויכולת הכלה בעבודה מול קהל. "
-    elif num in [4, 7]:
-        analysis = "מועמד יסודי, דייקן ומתאים למשימות הדורשות ריכוז וסדר מופתי. "
-    else:
-        analysis = "מועמד ורסטילי, תקשורתי ובעל יכולת אלתור והסתגלות מהירה. "
+    if num in [1, 8, 22]: analysis = "מועמד בעל כושר ביצוע גבוה ודומיננטיות. מתאים למחלקות אינטנסיביות. "
+    elif num in [2, 6, 9]: analysis = "מועמד בעל רגישות שירותית גבוהה ויכולת הכלה בעבודה מול קהל. "
+    elif num in [4, 7]: analysis = "מועמד יסודי, דייקן ומתאים למשימות הדורשות ריכוז וסדר מופתי. "
+    else: analysis = "מועמד ורסטילי, תקשורתי ובעל יכולת אלתור והסתגלות מהירה. "
 
-    if high_quality_ans > 7:
-        analysis += "מפגין מוטיבציה גבוהה מאוד ונכונות למאמץ משמעותי במערכת."
-    else:
-        analysis += "ניכרת העדפה ליציבות וסביבת עבודה מוגדרת היטב."
+    if high_quality_ans >= 7: analysis += "מפגין מוטיבציה גבוהה מאוד ונכונות למאמץ משמעותי במערכת."
+    else: analysis += "ניכרת העדפה ליציבות וסביבת עבודה מוגדרת היטב."
     
     return {"analysis": analysis, "num": num, "quality": high_quality_ans}
 
@@ -59,7 +50,6 @@ HTML = r"""
         .inter-box { color: #2563eb; font-weight: bold; text-align: center; margin: 10px 0; font-size: 18px; }
         .lang-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
         .lang-btn { background: #eee; border: 1px solid #ccc; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; }
-        .lang-btn:hover { background: #ddd; }
     </style>
 </head>
 <body>
@@ -112,7 +102,6 @@ HTML = r"""
                 <div id="managerInter" class="inter-box"></div>
                 <div id="fullAnalysis" class="analysis-text"></div>
             </div>
-
             <div class="card">
                 <h3>Team Sync - סנכרון בין עובדים</h3>
                 <div style="display:flex; gap:10px;">
@@ -129,58 +118,78 @@ HTML = r"""
         let currentLang = 'he';
         const translations = {
             he: {
-                send: "שליחה למנהל",
-                success: "נשלח בהצלחה!",
+                send: "שליחה למנהל", success: "נשלח בהצלחה!",
                 questions: [
                     {q: "סבלנות מול לקוחות?", opt: ["סבלני מאוד גם בעומס", "משתדל לשמור על אורך רוח", "מעדיף פחות אינטראקציה"]},
                     {q: "עבודה בצוות?", opt: ["פורח בעבודת צוות", "יכול להסתדר בצוות", "מעדיף לעבוד עצמאית"]},
                     {q: "עמידה בלחץ?", opt: ["מתפקד מצוין תחת לחץ", "עובד בקצב סביר", "מעדיף סביבה רגועה"]},
                     {q: "סדר וארגון?", opt: ["חייב שהכל יהיה במקום", "שומר על סדר בסיסי", "מתמקד במשימה פחות בסדר"]},
-                    {q: "זמינות למשמרות?", opt: ["זמינות מלאה וגמישה", "זמין לרוב המשמרות", "זמינות מוגבלת"]}
+                    {q: "זמינות למשמרות?", opt: ["זמינות מלאה וגמישה", "זמין לרוב המשמרות", "זמינות מוגבלת"]},
+                    {q: "יוזמה וראש גדול?", opt: ["תמיד מחפש מה עוד לעשות", "מבצע היטב מה שמבקשים", "נצמד להגדרות התפקיד"]},
+                    {q: "שירות עם חיוך?", opt: ["זה טבעי עבורי", "משתדל לחייך תמיד", "רציני וממוקד עבודה"]},
+                    {q: "דייקנות?", opt: ["מגיע תמיד לפני הזמן", "משתדל מאוד לא לאחר", "מדי פעם יש עיכובים"]},
+                    {q: "מאמץ פיזי?", opt: ["אין לי שום בעיה", "יכול להתמודד במידה", "מעדיף עבודה קלה פיזית"]},
+                    {q: "למה MAX?", opt: ["אוהב את המותג והקצב", "מחפש יציבות תעסוקתית", "רוצה ללמוד תחום חדש"]}
                 ]
             },
             en: {
-                send: "Send to Manager",
-                success: "Sent Successfully!",
+                send: "Send to Manager", success: "Sent Successfully!",
                 questions: [
                     {q: "Patience with customers?", opt: ["Very patient even under pressure", "Try to stay calm", "Prefer less interaction"]},
                     {q: "Teamwork?", opt: ["Thrive in a team", "Can work in a team", "Prefer working alone"]},
                     {q: "Pressure handling?", opt: ["Excellent under pressure", "Reasonable pace", "Prefer quiet environment"]},
                     {q: "Organization?", opt: ["Everything must be in place", "Basic order", "Task focused"]},
-                    {q: "Availability?", opt: ["Full and flexible", "Most shifts", "Limited availability"]}
+                    {q: "Availability?", opt: ["Full and flexible", "Most shifts", "Limited availability"]},
+                    {q: "Initiative?", opt: ["Always looking for more to do", "Does what is asked", "Sticks to job description"]},
+                    {q: "Service with a smile?", opt: ["Natural for me", "Try to always smile", "Serious and focused"]},
+                    {q: "Punctuality?", opt: ["Always early", "Try not to be late", "Occasional delays"]},
+                    {q: "Physical effort?", opt: ["No problem at all", "Can handle some", "Prefer light work"]},
+                    {q: "Why MAX?", opt: ["Love the brand and pace", "Seeking stability", "Want to learn new field"]}
                 ]
             },
             th: {
-                send: "ส่งให้ผู้จัดการ",
-                success: "ส่งสำเร็จ!",
+                send: "ส่งให้ผู้จัดการ", success: "ส่งสำเร็จ!",
                 questions: [
                     {q: "ความอดทนต่อลูกค้า?", opt: ["อดทนมากแม้ในสภาวะกดดัน", "พยายามสงบสติอารมณ์", "ชอบปฏิสัมพันธ์น้อย"]},
                     {q: "การทำงานเป็นทีม?", opt: ["เติบโตได้ดีในทีม", "ทำงานเป็นทีมได้", "ชอบทำงานคนเดียว"]},
                     {q: "การจัดการแรงกดดัน?", opt: ["ยอดเยี่ยมภายใต้ความกดดัน", "ก้าวที่สมเหตุสมผล", "ชอบสภาพแวดล้อมที่เงียบสงบ"]},
                     {q: "การจัดการองค์กร?", opt: ["ทุกอย่างต้องเข้าที่", "ระเบียบพื้นฐาน", "เน้นงานมากกว่าระเบียบ"]},
-                    {q: "ความพร้อมในการทำงาน?", opt: ["เต็มเวลาและยืดหยุ่น", "กะส่วนใหญ่", "จำกัดเวลา"]}
+                    {q: "ความพร้อมในการทำงาน?", opt: ["เต็มเวลาและยืดหยุ่น", "กะส่วนใหญ่", "จำกัดเวลา"]},
+                    {q: "ความคิดริเริ่ม?", opt: ["มองหาสิ่งที่ต้องทำเสมอ", "ทำตามที่ขอ", "ยึดตามรายละเอียดงาน"]},
+                    {q: "บริการด้วยรอยยิ้ม?", opt: ["เป็นธรรมชาติสำหรับฉัน", "พยายามยิ้มเสมอ", "จริงจังและมุ่งเน้นงาน"]},
+                    {q: "ความตรงต่อเวลา?", opt: ["มาเช้าเสมอ", "พยายามไม่สาย", "ล่าช้าเป็นบางครั้ง"]},
+                    {q: "ความพยายามทางกาย?", opt: ["ไม่มีปัญหาเลย", "จัดการได้บ้าง", "ชอบงานเบา"]},
+                    {q: "ทำไมต้อง MAX?", opt: ["รักแบรนด์และจังหวะงาน", "มองหาความมั่นคง", "ต้องการเรียนรู้สิ่งใหม่"]}
                 ]
             },
             ru: {
-                send: "Отправить менеджеру",
-                success: "Успешно отправлено!",
+                send: "Отправить менеджеру", success: "Успешно отправлено!",
                 questions: [
                     {q: "Терпение к клиентам?", opt: ["Очень терпелив даже при нагрузке", "Стараюсь сохранять спокойствие", "Предпочитаю меньше общения"]},
                     {q: "Командная работа?", opt: ["Процветаю в команде", "Могу работать в команде", "Предпочитаю работать один"]},
                     {q: "Работа под давлением?", opt: ["Отлично работаю под давлением", "Разумный темп", "Предпочитаю спокойную обстановку"]},
                     {q: "Порядок и организация?", opt: ["Все должно быть на своих местах", "Базовый порядок", "Фокус на задаче"]},
-                    {q: "Доступность смен?", opt: ["Полная и гибкая", "Большинство смен", "Ограниченная доступность"]}
+                    {q: "Доступность смен?", opt: ["Полная и гибкая", "Большинство смен", "Ограниченная доступность"]},
+                    {q: "Инициатива?", opt: ["Всегда ищу, что еще сделать", "Делаю, что просят", "Придерживаюсь инструкций"]},
+                    {q: "Улыбка в сервисе?", opt: ["Для меня это естественно", "Стараюсь всегда улыбаться", "Серьезен и сфокусирован"]},
+                    {q: "Пунктуальность?", opt: ["Всегда прихожу заранее", "Стараюсь не опаздывать", "Иногда бывают задержки"]},
+                    {q: "Физическая нагрузка?", opt: ["Никаких проблем", "Могу справиться", "Предпочитаю легкий труд"]},
+                    {q: "Почему MAX?", opt: ["Люблю бренд и темп", "Ищу стабильность", "Хочу учиться новому"]}
                 ]
             },
             ar: {
-                send: "إرسال إلى المدير",
-                success: "تم الإرسال بنجاح!",
+                send: "إرسال إلى المدير", success: "تم الإرسال بنجاح!",
                 questions: [
                     {q: "الصبر مع الزبائن؟", opt: ["صبور جداً حتى تحت الضغط", "أحاول البقاء هادئاً", "أفضل تفاعل أقل"]},
                     {q: "العمل الجماعي؟", opt: ["أزدهر في العمل الجماعي", "يمكنني العمل في فريق", "أفضل العمل بمفردي"]},
                     {q: "العمل تحت الضغط؟", opt: ["ممتاز تحت الضغط", "سرعة معقولة", "أفضل بيئة هادئة"]},
                     {q: "النظام والتنظيم؟", opt: ["يجب أن يكون كل شيء في مكانه", "نظام أساسي", "التركيز على المهمة"]},
-                    {q: "التوفر للمناوبات؟", opt: ["توفر كامل ومرن", "معظم المناوبات", "توفر محدود"]}
+                    {q: "التوفر للمناوبات؟", opt: ["توفر كامل ومرن", "معظم المناوبات", "توفر محدود"]},
+                    {q: "المبادرة؟", opt: ["أبحث دائماً عن المزيد لأفعله", "أفعل ما يطلب مني", "ألتزم بالوصف الوظيفي"]},
+                    {q: "الخدمة بابتسامة؟", opt: ["هذا طبيعي بالنسبة لي", "أحاول الابتسام دائماً", "جدي ومركز في العمل"]},
+                    {q: "الدقة في المواعيد؟", opt: ["أصل دائماً قبل الوقت", "أحاول جاهداً عدم التأخير", "تأخيرات عرضية"]},
+                    {q: "المجهود البدني؟", opt: ["ليس لدي مشكلة على الإطلاق", "يمكنني التعامل مع بعضه", "أفضل العمل الخفيف"]},
+                    {q: "لماذا MAX؟", opt: ["أحب العلامة التجارية والإيقاع", "أبحث عن الاستقرار", "أريد تعلم مجال جديد"]}
                 ]
             }
         };
@@ -220,7 +229,7 @@ HTML = r"""
                 dob: document.getElementById('dob').value,
                 answers: t.questions.map((q, i) => ({q: q.q, a: document.getElementById('ans'+i).value}))
             };
-            if(!data.firstName || !data.dob) return alert("Please fill all details");
+            if(!data.firstName || !data.dob) return alert("Fill all fields");
             await fetch('/api/save', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
             alert(t.success); location.reload();
         }
@@ -245,7 +254,6 @@ HTML = r"""
 
             let difficulty = intenseDepts.includes(dept) ? 10 : 5;
             let base = 75 + (cand.num % 10) + (cand.quality * 1.2);
-            
             let dScore = base + (difficulty === 10 ? 4 : -4) - (cand.firstName.length % 3);
             let jScore = base + (job.length * 0.5) + (cand.num % 4);
 
@@ -260,7 +268,7 @@ HTML = r"""
             const b = JSON.parse(document.getElementById('workerB').value);
             const sync = (a.num + b.num) % 10;
             const div = document.getElementById('syncResult');
-            div.innerHTML = (sync > 6 || sync === 0) ? "✅ סנכרון גבוה - מומלץ לעבודה יחד" : "⚠️ סנכרון נמוך - מצריך השגחה";
+            div.innerHTML = (sync > 6 || sync === 0) ? "✅ סנכרון גבוה" : "⚠️ סנכרון נמוך";
             div.style.color = (sync > 6 || sync === 0) ? "green" : "orange";
         }
     </script>
