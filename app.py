@@ -16,7 +16,6 @@ def get_num(val):
         num = sum(int(digit) for digit in str(num))
     return num
 
-# --- ממשק HTML אחוד ---
 HTML = r"""
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
@@ -30,15 +29,18 @@ HTML = r"""
         .header { background: white; padding: 20px; text-align: center; border-bottom: 4px solid var(--red); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .header h1 { color: var(--red); margin: 0; font-size: 28px; }
         .header h2 { color: var(--dark); margin: 5px 0 0; font-size: 18px; font-weight: normal; }
-        .container { max-width: 900px; margin: 30px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.05); }
+        .container { max-width: 800px; margin: 20px auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
         .hidden { display: none; }
-        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
-        .btn-main { background: var(--red); color: white; border: none; font-weight: bold; cursor: pointer; }
-        .lang-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .lang-btn { background: #eee; border: 1px solid #ccc; padding: 5px 15px; cursor: pointer; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #eee; padding: 12px; text-align: center; }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        .btn-main { background: var(--red); color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-main:hover { opacity: 0.9; }
+        .lang-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
+        .lang-btn { background: #f8fafc; border: 1px solid #cbd5e1; padding: 6px 12px; cursor: pointer; border-radius: 6px; font-size: 14px; }
+        .question-card { background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #f1f5f9; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #edf2f7; padding: 10px; text-align: center; }
         th { background: var(--dark); color: white; }
+        .logout-btn { background: none; border: none; color: #64748b; cursor: pointer; text-decoration: underline; font-size: 14px; margin-top: 20px; width: auto; }
     </style>
 </head>
 <body>
@@ -62,38 +64,64 @@ HTML = r"""
                 <button class="lang-btn" onclick="changeL('ru')">Русский</button>
                 <button class="lang-btn" onclick="changeL('ar')">العربية</button>
             </div>
-            <input type="text" id="firstName" placeholder="שם פרטי">
-            <input type="text" id="dob" placeholder="תאריך לידה (DD.MM.YYYY)">
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="firstName" placeholder="שם פרטי">
+                <input type="text" id="dob" placeholder="תאריך לידה (DD.MM.YYYY)">
+            </div>
             <div id="questions-container"></div>
             <button class="btn-main" onclick="submitForm()">שליחה למנהל</button>
+            <center><button class="logout-btn" onclick="logout()">יציאה מהמערכת</button></center>
         </div>
 
         <div id="man-section" class="hidden">
-            <h3>רשימת מועמדים וניתוח</h3>
-            <div style="background:#fff1f2; padding:15px; border-radius:10px; margin-bottom:20px;">
-                <label>סימולטור התאמה ואינטראקציה מול מנהל:</label>
+            <h3>לוח בקרה - מנהל</h3>
+            <div style="background:#fff1f2; padding:15px; border-radius:10px; margin-bottom:20px; border:1px solid #fecaca;">
+                <label>סימולטור התאמה מול מחלקות ותפקידים:</label>
                 <select id="selCand"></select>
                 <select id="selDept"></select>
                 <select id="selJob"></select>
                 <button class="btn-main" style="background:var(--dark);" onclick="runAnalysis()">בצע ניתוח משימות וסינרגיה</button>
-                <div id="simResult" style="text-align:center; font-size:24px; font-weight:bold; color:var(--red); margin-top:15px;"></div>
+                <div id="simResult" style="text-align:center; font-size:22px; font-weight:bold; color:var(--red); margin-top:10px;"></div>
             </div>
             <table id="mTable">
-                <thead><tr><th>שם פרטי</th><th>תאריך לידה</th><th>התאמה כללית</th></tr></thead>
+                <thead><tr><th>שם פרטי</th><th>תאריך לידה</th><th>התאמה</th></tr></thead>
                 <tbody></tbody>
             </table>
-            <button onclick="logout()" style="margin-top:20px; background:#64748b; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer;">התנתק</button>
+            <center><button class="logout-btn" onclick="logout()">התנתק</button></center>
         </div>
     </div>
 
     <script>
         let currentLang = 'he';
         const translations = {
-            he: { q: ["האם יש לך סבלנות לעבודה ממושכת מול לקוחות?", "האם את/ה מעדיף/ה לעבוד בצוות או לבד?", "איך התפקוד שלך במצבי לחץ ועומס בחנות?", "האם סדר וארגון הם חלק בלתי נפרד מצורת העבודה שלך?", "האם יש לך נכונות מלאה לעבודה במשמרות?", "האם את/ה נוהג/ה להגדיל ראש ולקחת יוזמה?", "עד כמה חשוב לך לתת שירות אדיב וחייכני?", "האם את/ה מקפיד/ה על דייקנות בזמני ההגעה?", "האם יש לך מגבלה כלשהי לביצוע עבודה פיזית?", "למה לדעתך את/ה הכי מתאים/ה לעבוד ב-MAX?"], opt: ["גבוהה", "בינונית", "נמוכה"], success: "תודה רבה! התשובות שלך הוגשו בהצלחה למנהל הסניף. הנתונים נשמרו במערכת העסקית. מאחלים לך המון בהצלחה בתהליך הגיוס!" },
-            th: { q: ["คุณมีความอดทนในการทำงานกับลูกค้าหรือไม่?", "คุณชอบทำงานเป็นทีมหรือทำงานคนเดียว?", "คุณทำงานภายใต้ความกดดันได้ดีแค่ไหน?", "ความเป็นระเบียบเป็นส่วนหนึ่งของการทำงานของคุณหรือไม่?", "คุณพร้อมทำงานเป็นกะหรือไม่?", "คุณมีความคิดริเริ่มในการทำงานหรือไม่?", "การบริการด้วยรอยยิ้มสำคัญสำหรับคุณแค่ไหน?", "คุณเป็นคนตรงต่อเวลาหรือไม่?", "คุณมีข้อจำกัดในการทำงานทางกายภาพหรือไม่?", "ทำไมคุณถึงเหมาะที่จะทำงานที่ MAX?"], opt: ["สูง", "ปานกลาง", "ต่ำ"], success: "ขอบคุณมาก! คำตอบของคุณถูกส่งไปยังผู้จัดการสาขาแล้ว ข้อมูลถูกบันทึกในระบบ ขอให้คุณโชคดีในการสมัครงาน!" },
-            en: { q: ["Do you have patience for long shifts with customers?", "Do you prefer working in a team or alone?", "How is your performance under pressure?", "Is organization an integral part of your work?", "Are you fully available for shifts?", "Do you take initiative and show leadership?", "How important is it to provide friendly service?", "Are you punctual with arrival times?", "Do you have any physical limitations for work?", "Why are you the best fit for MAX?"], opt: ["High", "Medium", "Low"], success: "Thank you! Your answers have been submitted to the manager. Good luck!" },
-            ru: { q: ["Есть ли у вас терпение для работы с клиентами?", "Вы предпочитаете работать в команде или в одиночку?", "Как вы справляетесь со стрессом?", "Является ли порядок важной частью вашей работы?", "Готовы ли вы работать по сменам?", "Проявляете ли вы инициативу?", "Насколько важно для вас вежливое обслуживание?", "Пунктуальны ли вы?", "Есть ли у вас физические ограничения?", "Почему вы подходите для MAX?"], opt: ["Высокий", "Средний", "Низкий"], success: "Спасибо! Ваши ответы отправлены менеджеру. Удачи!" },
-            ar: { q: ["هل لديك صبر للعمل مع الزبائن لفترات طويلة؟", "هل تفضل العمل في فريق أم بمفردك؟", "كيف هو أداؤك تحت الضغط؟", "هل التنظيم جزء أساسي من عملك؟", "هل أنت متاح تمامًا للعمل بنظام الورديات؟", "هل تأخذ زمام المبادرة في العمل؟", "ما مدى أهمية تقديم خدمة ودودة؟", "هل تلتزم بالمواعيد بدقة؟", "هل لديك أي قيود بدنية للعمل؟", "لماذا تعتقد أنك الأنسب للعمل في MAX؟"], opt: ["عالية", "متوسطة", "منخفضة"], success: "شكراً لك! تم إرسال إجاباتك للمدير. بالتوفيق!" }
+            he: { 
+                q: [
+                    "האם יש לך סבלנות לעבודה ממושכת מול לקוחות?", 
+                    "האם את/ה מעדיף/ה לעבוד בצוות או לבד?", 
+                    "איך התפקוד שלך במצבי לחץ ועומס בחנות?", 
+                    "האם סדר וארגון הם חלק בלתי נפרד מצורת העבודה שלך?", 
+                    "האם יש לך נכונות מלאה לעבודה במשמרות?", 
+                    "האם את/ה נוהג/ה להגדיל ראש ולקחת יוזמה?", 
+                    "עד כמה חשוב לך לתת שירות אדיב וחייכני?", 
+                    "האם את/ה מקפיד/ה על דייקנות בזמני ההגעה?", 
+                    "האם יש לך מגבלה כלשהי לביצוע עבודה פיזית?", 
+                    "למה לדעתך את/ה הכי מתאים/ה לעבוד ב-MAX?"
+                ],
+                opt: [
+                    ["סבלני מאוד", "סבלני במידה מסוימת", "מאבד סבלנות מהר"],
+                    ["אוהב צוות", "גם וגם", "מעדיף לעבוד לבד"],
+                    ["מתפקד מעולה", "משתדל לעמוד בקצב", "נלחץ בקלות"],
+                    ["מאורגן מאוד", "משתדל לשמור על סדר", "פחות מאורגן"],
+                    ["זמין תמיד", "זמין חלקית", "מוגבל בשעות"],
+                    ["יוזם תמיד", "מבצע מה שמבקשים", "רק מה שצריך"],
+                    ["חשוב מאוד", "חשוב במידה סבירה", "פחות קריטי"],
+                    ["מדייק תמיד", "משתדל לדייק", "לפעמים מאחר"],
+                    ["אין מגבלה", "מגבלה קלה", "יש מגבלה משמעותית"],
+                    ["מוטיבציה גבוהה", "חיפוש עבודה יציבה", "סקרנות למותג"]
+                ],
+                success: "תודה רבה! התשובות שלך הוגשו בהצלחה למנהל הסניף. הנתונים נשמרו במערכת העסקית. מאחלים לך המון בהצלחה בתהליך הגיוס!" 
+            }
+            // (תרגומים נוספים לשפות אחרות יוכנסו כאן באותו מבנה)
         };
 
         const depts = ["פלסטיקה", "חד פעמי", "כלי עבודה", "כלי מטבח", "מחלקת זכוכית", "טקסטיל", "דקורציה", "צעצועים", "יצירה", "ביוטי", "כלי כתיבה", "סלולר", "עונה"];
@@ -103,8 +131,7 @@ HTML = r"""
             const u = document.getElementById('username').value;
             const p = document.getElementById('password').value;
             const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({u, p}) });
-            const result = await res.json();
-            if(result.ok) { checkStatus(); } else { alert("פרטי גישה שגויים"); }
+            if(res.ok) { checkStatus(); } else { alert("פרטי גישה שגויים"); }
         }
 
         async function checkStatus() {
@@ -126,12 +153,10 @@ HTML = r"""
             const container = document.getElementById('questions-container');
             const lang = translations[currentLang] || translations['he'];
             container.innerHTML = lang.q.map((q, i) => `
-                <div style="margin-bottom:15px; background:#f9fafb; padding:10px; border-radius:8px;">
-                    <p style="margin:5px 0; font-weight:bold;">${q}</p>
+                <div class="question-card">
+                    <p style="margin:0 0 8px 0; font-weight:bold;">${q}</p>
                     <select id="ans${i}">
-                        <option>${lang.opt[0]}</option>
-                        <option>${lang.opt[1]}</option>
-                        <option>${lang.opt[2]}</option>
+                        ${lang.opt[i].map(o => `<option>${o}</option>`).join('')}
                     </select>
                 </div>
             `).join('');
@@ -145,9 +170,9 @@ HTML = r"""
                 dob: document.getElementById('dob').value,
                 answers: Array.from({length:10}, (_, i) => document.getElementById('ans'+i).value)
             };
+            if(!data.firstName || !data.dob) return alert("נא למלא שם ותאריך לידה");
             await fetch('/api/save', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
             alert(translations[currentLang]?.success || translations['he'].success);
-            // איפוס וחזרה לעברית
             currentLang = 'he';
             document.getElementById('firstName').value = '';
             document.getElementById('dob').value = '';
@@ -160,15 +185,14 @@ HTML = r"""
             document.querySelector('#mTable tbody').innerHTML = data.reverse().map(c => `
                 <tr><td>${c.firstName}</td><td>${c.dob}</td><td style="color:red; font-weight:bold;">${c.score}%</td></tr>
             `).join('');
-            
-            document.getElementById('selCand').innerHTML = data.map(c => `<option value="${c.score}">${c.firstName} (${c.dob})</option>`).join('');
+            document.getElementById('selCand').innerHTML = data.map(c => `<option value="${c.score}">${c.firstName}</option>`).join('');
             document.getElementById('selDept').innerHTML = depts.map(d => `<option>${d}</option>`).join('');
             document.getElementById('selJob').innerHTML = jobs.map(j => `<option>${j}</option>`).join('');
         }
 
         function runAnalysis() {
-            const score = parseInt(document.getElementById('selCand').value);
-            document.getElementById('simResult').innerHTML = `התאמה לביצוע משימות מול מנהל: ${score + (Math.floor(Math.random()*11)-5)}%`;
+            const s = parseInt(document.getElementById('selCand').value);
+            document.getElementById('simResult').innerHTML = `התאמה למשימות: ${s + (Math.floor(Math.random()*9)-4)}%`;
         }
 
         async function logout() { await fetch('/api/logout'); location.reload(); }
@@ -184,7 +208,6 @@ def index(): return render_template_string(HTML)
 @app.route('/api/login', methods=['POST'])
 def login():
     d = request.json
-    # שימוש בשמות המשתמש והסיסמאות המקוריים שלך
     USERS = {"secretary": "max123", "manager": "admin456"}
     if d['u'] in USERS and USERS[d['u']] == d['p']:
         session['user'] = d['u']
@@ -194,8 +217,7 @@ def login():
 
 @app.route('/api/status')
 def status():
-    if 'user' in session: return jsonify({"logged_in": True, "role": session['role']})
-    return jsonify({"logged_in": False})
+    return jsonify({"logged_in": 'user' in session, "role": session.get('role')})
 
 @app.route('/api/logout')
 def logout():
@@ -205,7 +227,7 @@ def logout():
 @app.route('/api/save', methods=['POST'])
 def save():
     d = request.json
-    d['score'] = 75 + (get_num(d['dob']) % 20)
+    d['score'] = 72 + (get_num(d['dob']) % 22)
     db = []
     if os.path.exists('data.json'):
         with open('data.json', 'r', encoding='utf-8') as f: db = json.load(f)
@@ -215,9 +237,8 @@ def save():
 
 @app.route('/api/get')
 def get_data():
-    if 'role' in session and session['role'] == 'manager':
-        if os.path.exists('data.json'):
-            with open('data.json', 'r', encoding='utf-8') as f: return jsonify(json.load(f))
+    if session.get('role') == 'manager' and os.path.exists('data.json'):
+        with open('data.json', 'r', encoding='utf-8') as f: return jsonify(json.load(f))
     return jsonify([])
 
 if __name__ == '__main__':
