@@ -16,23 +16,24 @@ def get_num(val):
 def analyze_candidate_logic(data):
     num = get_num(data['dob'])
     name_len = len(data['firstName'])
-    # בדיקת איכות תשובות (כמה תשובות הן מהדרגה הגבוהה ביותר)
-    high_quality_ans = sum(1 for a in data['answers'] if any(word in a['a'] for word in ["מאוד", "תמיד", "מצוין", "מלאה", "פורח"]))
+    # בדיקה רוחבית של התשובות (מזהה מילות מפתח חיוביות בכל השפות)
+    positive_keywords = ["מאוד", "תמיד", "מצוין", "מלאה", "פורח", "Very", "Always", "Thrive", "Excellent", "มาก", "เสมอ", "ที่สุด", "Очень", "Всегда", "Отлично", "دائماً", "جداً", "ممتاز"]
+    high_quality_ans = sum(1 for a in data['answers'] if any(word in a['a'] for word in positive_keywords))
     
     analysis = ""
     if num in [1, 8, 22]:
-        analysis = "מועמד בעל כושר ביצוע גבוה ודומיננטיות. "
+        analysis = "מועמד בעל כושר ביצוע גבוה ודומיננטיות. מתאים למחלקות אינטנסיביות. "
     elif num in [2, 6, 9]:
-        analysis = "מועמד בעל רגישות שירותית גבוהה ויכולת הכלה. "
+        analysis = "מועמד בעל רגישות שירותית גבוהה ויכולת הכלה בעבודה מול קהל. "
     elif num in [4, 7]:
-        analysis = "מועמד יסודי, דייקן ומתאים למשימות הדורשות ריכוז. "
+        analysis = "מועמד יסודי, דייקן ומתאים למשימות הדורשות ריכוז וסדר מופתי. "
     else:
-        analysis = "מועמד ורסטילי, תקשורתי ובעל יכולת אלתור. "
+        analysis = "מועמד ורסטילי, תקשורתי ובעל יכולת אלתור והסתגלות מהירה. "
 
     if high_quality_ans > 7:
-        analysis += "מפגין מוטיבציה גבוהה מאוד ונכונות למאמץ משמעותי."
+        analysis += "מפגין מוטיבציה גבוהה מאוד ונכונות למאמץ משמעותי במערכת."
     else:
-        analysis += "מחפש יציבות וסביבת עבודה מוגדרת היטב."
+        analysis += "ניכרת העדפה ליציבות וסביבת עבודה מוגדרת היטב."
     
     return {"analysis": analysis, "num": num, "quality": high_quality_ans}
 
@@ -56,8 +57,9 @@ HTML = r"""
         .score-val { font-size: 38px; font-weight: bold; color: var(--red); }
         .analysis-text { background: #fff3f3; padding: 15px; border-radius: 8px; border-right: 4px solid var(--red); line-height: 1.6; font-weight: bold; }
         .inter-box { color: #2563eb; font-weight: bold; text-align: center; margin: 10px 0; font-size: 18px; }
-        .lang-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
-        .lang-btn { background: #eee; border: 1px solid #ccc; padding: 6px 12px; cursor: pointer; border-radius: 5px; }
+        .lang-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
+        .lang-btn { background: #eee; border: 1px solid #ccc; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .lang-btn:hover { background: #ddd; }
     </style>
 </head>
 <body>
@@ -76,8 +78,8 @@ HTML = r"""
         <div id="sec-section" class="hidden">
             <div class="lang-bar">
                 <button class="lang-btn" onclick="changeL('he')">עברית</button>
-                <button class="lang-btn" onclick="changeL('th')">ไทย</button>
                 <button class="lang-btn" onclick="changeL('en')">English</button>
+                <button class="lang-btn" onclick="changeL('th')">ไทย</button>
                 <button class="lang-btn" onclick="changeL('ru')">Русский</button>
                 <button class="lang-btn" onclick="changeL('ar')">العربية</button>
             </div>
@@ -86,7 +88,7 @@ HTML = r"""
                 <input type="text" id="firstName" placeholder="שם פרטי">
                 <input type="text" id="dob" placeholder="תאריך לידה (DD.MM.YYYY)">
             </div>
-            <button class="btn-main" onclick="submitForm()">שליחה למנהל</button>
+            <button class="btn-main" id="submitBtn" onclick="submitForm()">שליחה למנהל</button>
         </div>
 
         <div id="man-section" class="hidden">
@@ -127,20 +129,60 @@ HTML = r"""
         let currentLang = 'he';
         const translations = {
             he: {
+                send: "שליחה למנהל",
+                success: "נשלח בהצלחה!",
                 questions: [
                     {q: "סבלנות מול לקוחות?", opt: ["סבלני מאוד גם בעומס", "משתדל לשמור על אורך רוח", "מעדיף פחות אינטראקציה"]},
                     {q: "עבודה בצוות?", opt: ["פורח בעבודת צוות", "יכול להסתדר בצוות", "מעדיף לעבוד עצמאית"]},
                     {q: "עמידה בלחץ?", opt: ["מתפקד מצוין תחת לחץ", "עובד בקצב סביר", "מעדיף סביבה רגועה"]},
                     {q: "סדר וארגון?", opt: ["חייב שהכל יהיה במקום", "שומר על סדר בסיסי", "מתמקד במשימה פחות בסדר"]},
-                    {q: "זמינות למשמרות?", opt: ["זמינות מלאה וגמישה", "זמין לרוב המשמרות", "זמינות מוגבלת"]},
-                    {q: "יוזמה וראש גדול?", opt: ["תמיד מחפש מה עוד לעשות", "מבצע היטב מה שמבקשים", "נצמד להגדרות התפקיד"]},
-                    {q: "שירות עם חיוך?", opt: ["זה טבעי עבורי", "משתדל לחייך תמיד", "רציני וממוקד עבודה"]},
-                    {q: "דייקנות?", opt: ["מגיע תמיד לפני הזמן", "משתדל מאוד לא לאחר", "מדי פעם יש עיכובים"]},
-                    {q: "מאמץ פיזי?", opt: ["אין לי שום בעיה", "יכול להתמודד במידה", "מעדיף עבודה קלה פיזית"]},
-                    {q: "למה MAX?", opt: ["אוהב את המותג והקצב", "מחפש יציבות תעסוקתית", "רוצה ללמוד תחום חדש"]}
+                    {q: "זמינות למשמרות?", opt: ["זמינות מלאה וגמישה", "זמין לרוב המשמרות", "זמינות מוגבלת"]}
+                ]
+            },
+            en: {
+                send: "Send to Manager",
+                success: "Sent Successfully!",
+                questions: [
+                    {q: "Patience with customers?", opt: ["Very patient even under pressure", "Try to stay calm", "Prefer less interaction"]},
+                    {q: "Teamwork?", opt: ["Thrive in a team", "Can work in a team", "Prefer working alone"]},
+                    {q: "Pressure handling?", opt: ["Excellent under pressure", "Reasonable pace", "Prefer quiet environment"]},
+                    {q: "Organization?", opt: ["Everything must be in place", "Basic order", "Task focused"]},
+                    {q: "Availability?", opt: ["Full and flexible", "Most shifts", "Limited availability"]}
+                ]
+            },
+            th: {
+                send: "ส่งให้ผู้จัดการ",
+                success: "ส่งสำเร็จ!",
+                questions: [
+                    {q: "ความอดทนต่อลูกค้า?", opt: ["อดทนมากแม้ในสภาวะกดดัน", "พยายามสงบสติอารมณ์", "ชอบปฏิสัมพันธ์น้อย"]},
+                    {q: "การทำงานเป็นทีม?", opt: ["เติบโตได้ดีในทีม", "ทำงานเป็นทีมได้", "ชอบทำงานคนเดียว"]},
+                    {q: "การจัดการแรงกดดัน?", opt: ["ยอดเยี่ยมภายใต้ความกดดัน", "ก้าวที่สมเหตุสมผล", "ชอบสภาพแวดล้อมที่เงียบสงบ"]},
+                    {q: "การจัดการองค์กร?", opt: ["ทุกอย่างต้องเข้าที่", "ระเบียบพื้นฐาน", "เน้นงานมากกว่าระเบียบ"]},
+                    {q: "ความพร้อมในการทำงาน?", opt: ["เต็มเวลาและยืดหยุ่น", "กะส่วนใหญ่", "จำกัดเวลา"]}
+                ]
+            },
+            ru: {
+                send: "Отправить менеджеру",
+                success: "Успешно отправлено!",
+                questions: [
+                    {q: "Терпение к клиентам?", opt: ["Очень терпелив даже при нагрузке", "Стараюсь сохранять спокойствие", "Предпочитаю меньше общения"]},
+                    {q: "Командная работа?", opt: ["Процветаю в команде", "Могу работать в команде", "Предпочитаю работать один"]},
+                    {q: "Работа под давлением?", opt: ["Отлично работаю под давлением", "Разумный темп", "Предпочитаю спокойную обстановку"]},
+                    {q: "Порядок и организация?", opt: ["Все должно быть на своих местах", "Базовый порядок", "Фокус на задаче"]},
+                    {q: "Доступность смен?", opt: ["Полная и гибкая", "Большинство смен", "Ограниченная доступность"]}
+                ]
+            },
+            ar: {
+                send: "إرسال إلى المدير",
+                success: "تم الإرسال بنجاح!",
+                questions: [
+                    {q: "الصبر مع الزبائن؟", opt: ["صبور جداً حتى تحت الضغط", "أحاول البقاء هادئاً", "أفضل تفاعل أقل"]},
+                    {q: "العمل الجماعي؟", opt: ["أزدهر في العمل الجماعي", "يمكنني العمل في فريق", "أفضل العمل بمفردي"]},
+                    {q: "العمل تحت الضغط؟", opt: ["ممتاز تحت الضغط", "سرعة معقولة", "أفضل بيئة هادئة"]},
+                    {q: "النظام والتنظيم؟", opt: ["يجب أن يكون كل شيء في مكانه", "نظام أساسي", "التركيز على المهمة"]},
+                    {q: "التوفر للمناوبات؟", opt: ["توفر كامل ومرن", "معظم المناوبات", "توفر محدود"]}
                 ]
             }
-            // יתר השפות יתווספו כאן באותו מבנה
         };
 
         const intenseDepts = ["פלסטיקה", "חד פעמי", "עונה", "צעצועים", "יצירה"];
@@ -164,6 +206,7 @@ HTML = r"""
         function changeL(l) {
             currentLang = l;
             const t = translations[l] || translations['he'];
+            document.getElementById('submitBtn').innerText = t.send;
             document.getElementById('q-container').innerHTML = t.questions.map((q, i) => `
                 <div class="card"><label style="font-weight:bold;">${q.q}</label>
                 <select id="ans${i}">${q.opt.map(o => `<option>${o}</option>`).join('')}</select></div>
@@ -177,9 +220,9 @@ HTML = r"""
                 dob: document.getElementById('dob').value,
                 answers: t.questions.map((q, i) => ({q: q.q, a: document.getElementById('ans'+i).value}))
             };
-            if(!data.firstName || !data.dob) return alert("מלא פרטים");
+            if(!data.firstName || !data.dob) return alert("Please fill all details");
             await fetch('/api/save', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
-            alert("נשלח!"); location.reload();
+            alert(t.success); location.reload();
         }
 
         async function loadManager() {
@@ -200,18 +243,15 @@ HTML = r"""
             const dept = document.getElementById('selDept').value;
             const job = document.getElementById('selJob').value;
 
-            // שקלול הכרעה סופית: תאריך לידה (cand.num), שם (length), טיב תשובות (quality) ודרגת קושי (difficulty)
             let difficulty = intenseDepts.includes(dept) ? 10 : 5;
-            let base = 72 + (cand.num % 10) + (cand.quality * 1.5);
+            let base = 75 + (cand.num % 10) + (cand.quality * 1.2);
             
-            // התאמה למחלקה (משקל לדרגת קושי)
-            let dScore = base + (difficulty === 10 ? 5 : -5) - (cand.firstName.length % 3);
-            // התאמה לתפקיד (משקל לאורך שם וסוג עבודה)
-            let jScore = base + (job.length * 0.8) + (cand.num % 5);
+            let dScore = base + (difficulty === 10 ? 4 : -4) - (cand.firstName.length % 3);
+            let jScore = base + (job.length * 0.5) + (cand.num % 4);
 
             document.getElementById('deptScore').innerText = Math.min(Math.round(dScore), 99) + "%";
             document.getElementById('jobScore').innerText = Math.min(Math.round(jScore), 99) + "%";
-            document.getElementById('managerInter').innerText = "אינטראקציה מול מנהל: " + (84 + (cand.num % 11)) + "%";
+            document.getElementById('managerInter').innerText = "אינטראקציה מול מנהל: " + (85 + (cand.num % 10)) + "%";
             document.getElementById('fullAnalysis').innerText = cand.analysis;
         }
 
@@ -235,7 +275,7 @@ def index(): return render_template_string(HTML)
 def save():
     d = request.json
     result = analyze_candidate_logic(d)
-    d.update(result) # מוסיף analysis, num, quality
+    d.update(result)
     db = []
     if os.path.exists('data.json'):
         with open('data.json', 'r', encoding='utf-8') as f:
