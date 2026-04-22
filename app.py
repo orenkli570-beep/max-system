@@ -5,7 +5,7 @@ import json
 app = Flask(__name__)
 app.secret_key = 'max_secure_key_2026'
 
-# --- לוגיקת חישוב (פרוטוקול אורן מעודכן לריאליות) ---
+# --- מנוע ניתוח מורחב (פרוטוקול אורן) ---
 def get_num(val):
     if not val: return 0
     num = sum([int(d) for d in str(val) if d.isdigit()])
@@ -13,23 +13,51 @@ def get_num(val):
         num = sum(int(digit) for digit in str(num))
     return num
 
-def analyze_candidate_logic(data):
+def deep_analysis(data):
     num = get_num(data['dob'])
-    # זיהוי איכות תשובות לפי מילות מפתח חיוביות
+    name = data['firstName']
     pos_keywords = ["מאוד", "תמיד", "מצוין", "מלאה", "פורח", "Very", "Always", "Excellent", "มาก", "เสมอ", "Очень", "Всегда", "دائماً", "جداً"]
-    high_quality_ans = sum(1 for a in data['answers'] if any(word in a['a'] for word in pos_keywords))
+    high_quality_count = sum(1 for a in data['answers'] if any(word in a['a'] for word in pos_keywords))
     
-    analysis = ""
-    if num in [1, 8, 22]: analysis = "מועמד בעל חוסן מנטלי וכושר ביצוע. מתאים לעבודה תובענית. "
-    elif num in [2, 6, 9]: analysis = "מועמד עם גישה שירותית מובהקת, מתאים לעבודה מול קהל וסיוע. "
-    elif num in [4, 7]: analysis = "מועמד יסודי ודייקן, מצטיין בארגון וסידור סחורה. "
-    else: analysis = "מועמד דינמי עם יכולת למידה מהירה, מתאים לתפקידים משתנים. "
+    # ניתוח בסיס לפי נומרולוגיה
+    traits = {
+        1: "טיפוס מנהיגותי, עצמאי, דוחף קדימה ובעל כושר ביצוע גבוה.",
+        2: "טיפוס רגיש, שירותי, בעל יכולת הקשבה והכלה מעולה.",
+        3: "יצירתי, תקשורתי, נהנה מאינטראקציה חברתית ובעל חיוך תמידי.",
+        4: "יסודי, דייקן, אוהב סדר וארגון ומתפקד היטב בשגרה.",
+        5: "דינמי, זריז, מסתגל מהר לשינויים ואוהב גיוון בעבודה.",
+        6: "אחראי, משפחתי, שירותי מאוד ורואה את צורכי הזולת.",
+        7: "אנליטי, שקט, מעדיף משימות עומק וריכוז גבוה.",
+        8: "סמכותי, בעל חוסן מנטלי, מתמודד היטב עם לחץ ואחריות.",
+        9: "בעל ראייה רחבה, נדיב, שירותי מאוד ובעל רצון לעזור.",
+        11: "אינטואיטיבי, רגיש מאוד ובעל יכולת הבנה מהירה של אנשים.",
+        22: "בעל יכולת תכנון וביצוע של פרויקטים גדולים ומורכבים."
+    }
+    base_trait = traits.get(num, "בעל יכולות מגוונות המתאימות למערכת.")
 
-    if high_quality_ans >= 8: analysis += "רמת המוטיבציה שהופגנה בשאלון גבוהה ומשלימה את נתוני הפתיחה."
-    elif high_quality_ans <= 4: analysis += "ניכרת הססנות בתשובות, נדרש פיקוח צמוד בשלבים הראשונים."
-    else: analysis += "מפגין נכונות סטנדרטית לעבודה במערכת."
+    # הצלבת נתונים לניתוח מקיף
+    analysis = f"ניתוח עבור {name} (תדר {num}):\n"
+    analysis += f"על פי התדר האישי, המועמד הוא {base_trait} "
     
-    return {"analysis": analysis, "num": num, "quality": high_quality_ans, "name_factor": len(data['firstName'])}
+    if high_quality_count >= 8:
+        analysis += "מהשאלון עולה רמת מוטיבציה יוצאת דופן ונכונות להשקעה מקסימלית במותג. "
+    elif high_quality_count <= 4:
+        analysis += "התשובות בשאלון מעידות על צורך בהכוונה צמודה ועל רמת אנרגיה משתנה. "
+    else:
+        analysis += "המועמד מפגין עקביות ורצון להשתלב בצוות בצורה מאוזנת. "
+
+    # המלצת מחלקות מפורטת
+    intense = ["פלסטיקה", "חד פעמי", "עונה", "צעצועים", "יצירה"]
+    light = ["דקורציה", "כלי כתיבה", "ביוטי", "טקסטיל", "כלי מטבח"]
+    
+    if num in [1, 5, 8, 22]:
+        analysis += "\n\nהתאמה למחלקות: המועמד מתאים מאוד למחלקות אינטנסיביות הדורשות קצב עבודה גבוה ודינמיות, כגון: " + ", ".join(intense[:3]) + "."
+        analysis += "\nפחות מתאים למחלקות סטטיות או כאלו הדורשות ישיבה ממושכת, שכן הוא זקוק לתנועה."
+    else:
+        analysis += "\n\nהתאמה למחלקות: המועמד יפרח במחלקות הדורשות עין אסתטית, סבלנות וסידור קפדני, כגון: " + ", ".join(light) + "."
+        analysis += "\nפחות מומלץ לשבצו במחלקות כבדות ואינטנסיביות כמו " + intense[0] + " או " + intense[1] + ", שם העומס הפיזי עלול לשחוק אותו מהר מדי."
+
+    return analysis
 
 HTML = r"""
 <!DOCTYPE html>
@@ -46,11 +74,8 @@ HTML = r"""
         input, select, button { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; }
         .btn-main { background: var(--red); color: white; border: none; font-weight: bold; cursor: pointer; }
         .card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 15px; }
-        .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 15px 0; }
-        .score-box { text-align: center; padding: 15px; background: white; border-radius: 10px; border: 1px solid #ddd; }
-        .score-val { font-size: 38px; font-weight: bold; color: var(--red); }
-        .analysis-text { background: #fff3f3; padding: 15px; border-radius: 8px; border-right: 4px solid var(--red); line-height: 1.6; font-weight: bold; }
-        .inter-box { color: #2563eb; font-weight: bold; text-align: center; margin: 10px 0; font-size: 18px; }
+        .analysis-text { background: #fff3f3; padding: 20px; border-radius: 8px; border-right: 6px solid var(--red); line-height: 1.8; font-weight: bold; white-space: pre-wrap; font-size: 17px; }
+        .inter-box { color: #2563eb; font-weight: bold; text-align: center; margin: 15px 0; font-size: 24px; border: 2px dashed #2563eb; padding: 10px; border-radius: 10px; }
         .lang-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
         .lang-btn { background: #eee; border: 1px solid #ccc; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; }
     </style>
@@ -86,24 +111,19 @@ HTML = r"""
 
         <div id="man-section" class="hidden">
             <div class="card">
-                <h3>מרכז ניתוח ובקרה</h3>
+                <h3>מרכז בקרה וניתוח מועמד</h3>
                 <select id="selCand" onchange="runAnalysis()"></select>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <select id="selDept" onchange="runAnalysis()" onmouseover="runAnalysis()"></select>
-                    <select id="selJob" onchange="runAnalysis()" onmouseover="runAnalysis()"></select>
-                </div>
-                <div class="score-grid">
-                    <div class="score-box">
-                        <div style="font-size:12px; color:#64748b;">התאמה למחלקה</div>
-                        <div id="deptScore" class="score-val">--%</div>
-                    </div>
-                    <div class="score-box">
-                        <div style="font-size:12px; color:#64748b;">התאמה לתפקיד</div>
-                        <div id="jobScore" class="score-val">--%</div>
-                    </div>
-                </div>
                 <div id="managerInter" class="inter-box"></div>
-                <div id="fullAnalysis" class="analysis-text"></div>
+                <div id="fullAnalysis" class="analysis-text">אנא בחר מועמד לצפייה בניתוח המקיף...</div>
+            </div>
+
+            <div class="card">
+                <h3>Team Sync - סנכרון בין עובדים</h3>
+                <div style="display:flex; gap:10px;">
+                    <select id="workerA" onchange="checkSync()"></select>
+                    <select id="workerB" onchange="checkSync()"></select>
+                </div>
+                <div id="syncResult" style="text-align:center; font-weight:bold; margin-top:10px; font-size:18px;"></div>
             </div>
             <button onclick="location.reload()" style="background:none; color:gray; border:none; text-decoration:underline; cursor:pointer;">התנתק</button>
         </div>
@@ -130,39 +150,20 @@ HTML = r"""
             en: {
                 send: "Send to Manager", success: "Sent Successfully!",
                 questions: [
-                    {q: "Patience with customers?", opt: ["Very patient", "Calm", "Limited"]},
-                    {q: "Teamwork?", opt: ["Love it", "Okay with it", "Solo"]},
-                    {q: "Pressure?", opt: ["Great", "Moderate", "Quiet"]},
-                    {q: "Order?", opt: ["Must have", "Basic", "Task only"]},
-                    {q: "Availability?", opt: ["Full", "Most", "Limited"]},
-                    {q: "Initiative?", opt: ["High", "Medium", "Low"]},
-                    {q: "Service?", opt: ["Natural", "Trying", "Serious"]},
+                    {q: "Patience with customers?", opt: ["Very patient", "Moderate", "Low"]},
+                    {q: "Teamwork?", opt: ["Love it", "Okay", "Solo"]},
+                    {q: "Pressure?", opt: ["Excellent", "Reasonable", "Quiet environment"]},
+                    {q: "Order?", opt: ["Must be organized", "Basic", "Task focused"]},
+                    {q: "Availability?", opt: ["Full/Flexible", "Most shifts", "Limited"]},
+                    {q: "Initiative?", opt: ["Always proactive", "Do what's asked", "Basic requirements"]},
+                    {q: "Service?", opt: ["Natural smile", "Trying", "Focused"]},
                     {q: "Punctuality?", opt: ["Always early", "On time", "Delays"]},
-                    {q: "Physical?", opt: ["No problem", "Moderate", "Light"]},
+                    {q: "Physical?", opt: ["No problem", "Moderate", "Light work"]},
                     {q: "Why MAX?", opt: ["Love brand", "Stability", "Learning"]}
                 ]
-            },
-            th: {
-                send: "ส่งให้ผู้จัดการ", success: "ส่งสำเร็จ!",
-                questions: [
-                    {q: "ความอดทน?", opt: ["มาก", "ปานกลาง", "น้อย"]},
-                    {q: "ทำงานทีม?", opt: ["ชอบมาก", "ได้อยู่", "คนเดียว"]},
-                    {q: "ความดัน?", opt: ["ดีมาก", "พอได้", "เงียบๆ"]},
-                    {q: "ระเบียบ?", opt: ["ต้องมี", "พื้นฐาน", "งานสำคัญกว่า"]},
-                    {q: "เวลา?", opt: ["เต็มที่", "ส่วนใหญ่", "จำกัด"]},
-                    {q: "ริเริ่ม?", opt: ["สูง", "กลาง", "ต่ำ"]},
-                    {q: "บริการ?", opt: ["ยิ้มแย้ม", "พยายาม", "จริงจัง"]},
-                    {q: "ตรงเวลา?", opt: ["เสมอ", "พยายาม", "สายบ้าง"]},
-                    {q: "แรงกาย?", opt: ["ได้เลย", "นิดหน่อย", "เบาๆ"]},
-                    {q: "ทำไม MAX?", opt: ["รักแบรนด์", "มั่นคง", "เรียนรู้"]}
-                ]
             }
-            // רוסית וערבית יתווספו במבנה זהה
+            // שפות נוספות יתווספו באותו מבנה
         };
-
-        const intenseDepts = ["פלסטיקה", "חד פעמי", "עונה", "צעצועים", "יצירה"];
-        const depts = ["פלסטיקה", "חד פעמי", "כלי עבודה", "כלי מטבח", "מחלקת זכוכית", "טקסטיל", "דקורציה", "צעצועים", "יצירה", "ביוטי", "כלי כתיבה", "סלולר", "עונה"];
-        const jobs = ["מנהל", "סגן מנהל", "אחראי מחלקה", "אחראי משמרת", "סדרן", "קופאית ראשית", "עובד כללי", "מנהל מחסן", "מחסנאי", "בודק סחורה", "אדמיניסטרציה"];
 
         function login() {
             const u = document.getElementById('username').value;
@@ -195,7 +196,7 @@ HTML = r"""
                 dob: document.getElementById('dob').value,
                 answers: t.questions.map((q, i) => ({q: q.q, a: document.getElementById('ans'+i).value}))
             };
-            if(!data.firstName || !data.dob) return alert("אנא מלא את כל הפרטים");
+            if(!data.firstName || !data.dob) return alert("Fill all details");
             await fetch('/api/save', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
             alert(t.success); location.reload();
         }
@@ -203,9 +204,9 @@ HTML = r"""
         async function loadManager() {
             const res = await fetch('/api/get');
             const data = await res.json();
-            document.getElementById('selCand').innerHTML = data.map(c => `<option value='${JSON.stringify(c)}'>${c.firstName}</option>`).join('');
-            document.getElementById('selDept').innerHTML = depts.map(d => `<option>${d}</option>`).join('');
-            document.getElementById('selJob').innerHTML = jobs.map(j => `<option>${j}</option>`).join('');
+            ['selCand', 'workerA', 'workerB'].forEach(id => {
+                document.getElementById(id).innerHTML = data.map(c => `<option value='${JSON.stringify(c)}'>${c.firstName}</option>`).join('');
+            });
             runAnalysis();
         }
 
@@ -213,35 +214,17 @@ HTML = r"""
             const val = document.getElementById('selCand').value;
             if(!val) return;
             const cand = JSON.parse(val);
-            const dept = document.getElementById('selDept').value;
-            const job = document.getElementById('selJob').value;
-
-            // --- לוגיקת שקלול ריאלית ---
-            let isIntense = intenseDepts.includes(dept);
-            
-            // בסיס שמשקלל את איכות התשובות (0-100)
-            let baseScore = (cand.quality * 10); 
-            
-            // השפעת נומרולוגיה ושם על הנטייה
-            let numFactor = (cand.num % 5); 
-            let nameFactor = (cand.name_factor % 4);
-
-            // חישוב התאמה למחלקה:
-            // אם המחלקה אינטנסיבית (דרגה 10), הציון יורד משמעותית אם האיכות נמוכה
-            let dScore = baseScore + (isIntense ? -15 : 10) + numFactor;
-            
-            // חישוב התאמה לתפקיד:
-            // משלב את טיב התשובות עם אורך השם (יציבות)
-            let jScore = baseScore + (job.length * 2) - nameFactor;
-
-            // ריסון האחוזים לטווח ריאלי (45-98)
-            dScore = Math.max(45, Math.min(dScore, 98));
-            jScore = Math.max(48, Math.min(jScore, 97));
-
-            document.getElementById('deptScore').innerText = Math.round(dScore) + "%";
-            document.getElementById('jobScore').innerText = Math.round(jScore) + "%";
-            document.getElementById('managerInter').innerText = "אינטראקציה מול מנהל: " + (75 + (cand.num % 20)) + "%";
+            document.getElementById('managerInter').innerText = "אינטראקציה מול מנהל: " + (78 + (cand.num % 18)) + "%";
             document.getElementById('fullAnalysis').innerText = cand.analysis;
+        }
+
+        function checkSync() {
+            const a = JSON.parse(document.getElementById('workerA').value);
+            const b = JSON.parse(document.getElementById('workerB').value);
+            const sync = (a.num + b.num) % 10;
+            const div = document.getElementById('syncResult');
+            div.innerHTML = (sync > 6 || sync === 0) ? "✅ סנכרון גבוה - מומלץ לעבודה יחד" : "⚠️ סנכרון נמוך - מצריך השגחה";
+            div.style.color = (sync > 6 || sync === 0) ? "green" : "orange";
         }
     </script>
 </body>
@@ -254,8 +237,8 @@ def index(): return render_template_string(HTML)
 @app.route('/api/save', methods=['POST'])
 def save():
     d = request.json
-    result = analyze_candidate_logic(d)
-    d.update(result)
+    d['analysis'] = deep_analysis(d)
+    d['num'] = get_num(d['dob'])
     db = []
     if os.path.exists('data.json'):
         with open('data.json', 'r', encoding='utf-8') as f:
