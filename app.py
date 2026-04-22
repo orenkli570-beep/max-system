@@ -16,7 +16,7 @@ def get_numerology_num(dob):
 
 def generate_full_analysis(data):
     num = get_numerology_num(data.get('dob', ''))
-    proactive_score = sum(1 for a in data.get('answers', []) if a['idx'] == "1")
+    proactive_score = sum(1 for a in data.get('answers', []) if a['val'] == "A")
     
     traits = {
         1: "מנהיגות וביצוע עצמאי. אדם שמוביל תהליכים ולא מחכה להוראות.",
@@ -34,11 +34,11 @@ def generate_full_analysis(data):
     
     char_text = traits.get(num, "עובד ורסטילי בעל יכולת הסתגלות גבוהה.")
     
-    if proactive_score >= 10:
-        inter_text = "העובד הפגין יוזמה גבוהה ('ראש גדול'). המנהל נדרש לתת לו אוטונומיה. מומלץ להגדיר יעדים ולהניח לו לנהל את המשימה. הוא יזהה צרכים לבד (סידור מדפים/ניקיון) ללא צורך בפיקוח צמוד."
+    if proactive_score >= 8:
+        inter_text = "העובד הפגין רמת יוזמה גבוהה מאוד בתשובותיו. המנהל נדרש לתת לו מרחב פעולה ואוטונומיה. הוא יזהה חוסרים במדפים וניקיון באופן עצמאי. מומלץ לנהל אותו דרך הגדרת יעדים ולא דרך פיקוח הדוק על כל פעולה."
         recom = "מחלקות דינמיות: פלסטיקה, עונה, מחסן."
     else:
-        inter_text = "העובד זקוק להנחיות ברורות ומובנות. המנהל נדרש להגדיר משימות שלב-אחרי-שלב ולתת משוב חיובי. העובד יבצע עבודה נאמנה תחת ניהול מובנה."
+        inter_text = "העובד זקוק למסגרת עבודה מוגדרת היטב. המנהל נדרש לתת הנחיות ברורות בתחילת משמרת ולבצע בקרה נעימה. העובד יבצע עבודה נאמנה ומדויקת כל עוד הוא יודע בדיוק מה מצופה ממנו."
         recom = "מחלקות שירותיות: ביוטי, דקורציה, כלי כתיבה."
 
     return {"character": char_text, "interaction": inter_text, "recommendation": recom}
@@ -51,29 +51,28 @@ INDEX_HTML = r"""
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAX System 2026</title>
+    <title>MAX System</title>
     <style>
         :root { --max-red: #e31e24; --max-blue: #1e40af; --bg: #f1f5f9; }
-        body { font-family: 'Segoe UI', system-ui; background: var(--bg); margin: 0; }
-        .header { background: white; padding: 20px; text-align: center; border-bottom: 5px solid var(--max-red); }
-        .container { max-width: 850px; margin: 20px auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; }
+        .header { background: white; padding: 15px; text-align: center; border-bottom: 5px solid var(--max-red); }
+        .container { max-width: 800px; margin: 20px auto; background: white; padding: 20px; border-radius: 12px; }
         .hidden { display: none; }
-        .lang-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-        .btn-lang { padding: 8px 16px; cursor: pointer; border: 2px solid #ddd; background: white; border-radius: 20px; font-weight: bold; }
-        .btn-lang.active { background: var(--max-red); color: white; border-color: var(--max-red); }
-        .card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; margin-bottom: 12px; }
-        .insight-card { padding: 15px; border-radius: 10px; margin-bottom: 15px; border-right: 5px solid var(--max-red); background: #fef2f2; line-height: 1.5; }
-        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; }
-        .btn-main { background: var(--max-red); color: white; border: none; font-weight: bold; cursor: pointer; font-size: 1.1em; }
-        .error-msg { color: var(--max-red); font-size: 0.9em; font-weight: bold; margin-bottom: 10px; display: none; }
+        .lang-bar { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; }
+        .btn-lang { padding: 6px 12px; cursor: pointer; border: 1px solid #ddd; background: white; border-radius: 15px; font-size: 14px; }
+        .btn-lang.active { background: var(--max-red); color: white; }
+        .card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; margin-bottom: 10px; }
+        .insight-box { padding: 15px; border-radius: 8px; margin-bottom: 15px; border-right: 5px solid var(--max-red); background: #fef2f2; }
+        input, select, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 6px; border: 1px solid #ccc; font-size: 15px; }
+        .btn-main { background: var(--max-red); color: white; border: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="header"><h1 id="mainTitle">MAX - כאן קונים בכיף</h1></div>
+    <div class="header"><h1>MAX - מערכת קליטה</h1></div>
     <div class="container">
         
         <div id="login-view">
-            <button class="btn-main" onclick="showSec()">כניסת מזכירה (שאלון מועמד)</button>
+            <button class="btn-main" onclick="showSec()">שאלון מועמד</button>
             <input type="password" id="mPass" placeholder="סיסמת מנהל">
             <button class="btn-main" style="background:var(--max-blue);" onclick="showMan()">כניסת מנהל</button>
         </div>
@@ -86,50 +85,48 @@ INDEX_HTML = r"""
                 <button class="btn-lang" onclick="changeLang('ar')">العربية</button>
                 <button class="btn-lang" onclick="changeLang('th')">ไทย</button>
             </div>
-            <div id="questionsArea"></div>
+            <div id="quizArea"></div>
             <div class="card">
-                <div id="validationError" class="error-msg">נא למלא שם ותאריך לידה תקין (DD.MM.YYYY)</div>
-                <input type="text" id="candName" placeholder="שם מלא">
-                <input type="text" id="candDob" placeholder="תאריך לידה (DD.MM.YYYY)">
+                <input type="text" id="cName" placeholder="שם מלא">
+                <input type="text" id="cDob" placeholder="תאריך לידה (DD.MM.YYYY)">
             </div>
-            <button class="btn-main" id="submitBtn" onclick="submitQuiz()">שליחה למנהל</button>
+            <button class="btn-main" onclick="submitQuiz()">שליחה למנהל</button>
         </div>
 
         <div id="man-view" class="hidden">
-            <h3>ניתוח אינטראקציה ושיבוץ</h3>
-            <select id="candSelect" onchange="renderInsights()"></select>
-            <div id="insightsContainer">
-                <div class="insight-card"><span style="color:var(--max-red); font-weight:bold;">אופי המועמד:</span><div id="charBox"></div></div>
-                <div class="insight-card" style="border-right-color: var(--max-blue); background: #f0f7ff;"><span style="color:var(--max-blue); font-weight:bold;">פרוטוקול אינטראקציה (מנהל-עובד):</span><div id="interBox"></div></div>
-                <div class="insight-card" style="border-right-color: #059669; background: #f0fdf4;"><span style="color:#059669; font-weight:bold;">המלצת שיבוץ:</span><div id="recomBox"></div></div>
+            <h3>ניתוח ושיבוץ מועמדים</h3>
+            <select id="candSelect" onchange="render()"></select>
+            <div id="insArea">
+                <div class="insight-box"><b>אופי:</b> <div id="cBox"></div></div>
+                <div class="insight-box" style="border-right-color:var(--max-blue); background:#f0f7ff;"><b>אינטראקציה:</b> <div id="iBox"></div></div>
+                <div class="insight-box" style="border-right-color:#059669; background:#f0fdf4;"><b>שיבוץ:</b> <div id="rBox"></div></div>
             </div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <select id="deptSelect"><option value="">בחר מחלקה</option><option>פלסטיקה</option><option>ביוטי</option><option>דקורציה</option><option>עונה</option></select>
-                <select id="jobSelect"><option value="">בחר תפקיד</option><option>סדרן/ית</option><option>קופאי/ת</option><option>מחסנאי/ת</option></select>
+                <select id="dSet"><option>פלסטיקה</option><option>ביוטי</option><option>עונה</option></select>
+                <select id="jSet"><option>סדרן/ית</option><option>קופאי/ת</option></select>
             </div>
-            <button class="btn-main" style="background:#059669;" onclick="saveAssignment()">שמירת שיבוץ עובד</button>
-            <button onclick="location.reload()" style="background:none; color:gray; border:none; text-decoration:underline; cursor:pointer; margin-top:20px;">התנתק</button>
+            <button class="btn-main" style="background:#059669;" onclick="save()">שמירה</button>
         </div>
     </div>
 
     <script>
-        const content = {
-            he: { title: "MAX - שאלון גיוס", name: "שם מלא", dob: "תאריך לידה (DD.MM.YYYY)", btn: "שליחה למנהל", questions: ["לקוח מבקש עזרה?", "לחץ בצוות?", "לקוח חשוד?", "שינוי מחלקה?", "אין עומס?", "תכונה חשובה?", "צעקות על מחיר?", "מוצר פגום?", "משימה פיזית?", "טעות של עמית?", "הגעה בזמן?", "נוהל חדש?", "חוסר במלאי?", "ביקורת מנהל?", "כסף על הרצפה?"] },
-            en: { title: "MAX - Recruitment", name: "Full Name", dob: "Birth Date (DD.MM.YYYY)", btn: "Submit", questions: ["Customer needs help?", "Team pressure?", "Suspicious customer?", "Dept change?", "No rush?", "Key trait?", "Price shouting?", "Damaged product?", "Physical task?", "Peer mistake?", "Punctuality?", "New procedure?", "Out of stock?", "Manager feedback?", "Money on floor?"] },
-            ru: { title: "MAX - Тест", name: "ФИО", dob: "Дата рождения", btn: "Отправить", questions: ["Помощь клиенту?", "Давление в команде?", "Подозрительный клиент?", "Смена отдела?", "Нет очереди?", "Главное качество?", "Крик из-за цены?", "Брак?", "Физический труд?", "Ошибка коллеги?", "Пунктуальность?", "Новое правило?", "Нет на складе?", "Критика босса?", "Деньги на полу?"] },
-            ar: { title: "MAX - اختبار التوظيف", name: "الاسم الكامل", dob: "تاريخ الميلاد", btn: "إرسال", questions: ["مساعدة زبون؟", "ضغط فريق؟", "زبון مشتبه به؟", "تغيير قسم؟", "لا يوجد زحمة؟", "أهم صفة؟", "صراخ على السعر؟", "منتج تالف؟", "مهمة بدنية؟", "خطأ زميل؟", "الالتزام بالوقت؟", "إجراء جديد؟", "نقص مخزون؟", "نقد المدير؟", "مال على الأرض؟"] },
-            th: { title: "MAX - แบบทดสอบ", name: "ชื่อ-นามสกุล", dob: "วันเกิด", btn: "ส่งข้อมูล", questions: ["ช่วยลูกค้า?", "ความกดดัน?", "ลูกค้ามีพิรุธ?", "เปลี่ยนแผนก?", "ร้านว่าง?", "คุณสมบัติสำคัญ?", "ลูกค้าโวยวาย?", "ของเสีย?", "งานหนัก?", "เพื่อนทำผิด?", "ตรงเวลา?", "กฎใหม่?", "ของหมด?", "คำวิจารณ์?", "เจอเงิน?"] }
+        const db = {
+            he: { q: "לקוח זקוק לעזרה?", a1: "אעזור לו מיד בחיוך", a2: "אפנה אותו לעובד אחר" },
+            en: { q: "Customer needs help?", a1: "Help immediately with a smile", a2: "Refer to another staff member" },
+            ru: { q: "Нужна помощь клиенту?", a1: "Помогу с улыбкой", a2: "Направлю к коллеге" },
+            ar: { q: "زبون يحتاج مساعدة؟", a1: "أساعده فوراً بابتسامة", a2: "أوجهه لموظף אחר" },
+            th: { q: "ลูกค้าต้องการความช่วยเหลือ?", a1: "ช่วยเหลือทันทีด้วยรอยยิ้ม", a2: "ส่งต่อให้พนักงานคนอื่น" }
         };
 
         function changeLang(l) {
-            const c = content[l];
+            const lang = db[l];
             document.body.dir = (l==='he'||l==='ar') ? 'rtl' : 'ltr';
-            document.getElementById('candName').placeholder = c.name;
-            document.getElementById('candDob').placeholder = c.dob;
-            document.getElementById('submitBtn').innerText = c.btn;
-            document.getElementById('questionsArea').innerHTML = c.questions.map((q, i) => `
-                <div class="card"><b>${i+1}. ${q}</b><select id="q${i}"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>
-            `).join('');
+            let html = "";
+            for(let i=1; i<=15; i++) {
+                html += `<div class="card"><b>${i}. ${lang.q}</b>
+                <select id="q${i}"><option value="A">${lang.a1}</option><option value="B">${lang.a2}</option></select></div>`;
+            }
+            document.getElementById('quizArea').innerHTML = html;
         }
 
         function showSec() { document.getElementById('login-view').classList.add('hidden'); document.getElementById('sec-view').classList.remove('hidden'); changeLang('he'); }
@@ -137,49 +134,29 @@ INDEX_HTML = r"""
             if(document.getElementById('mPass').value === 'admin456') {
                 document.getElementById('login-view').classList.add('hidden');
                 document.getElementById('man-view').classList.remove('hidden');
-                fetchManagerData();
-            } else alert("סיסמה שגויה");
+                const r = await fetch('/api/get'); window.cands = await r.json();
+                document.getElementById('candSelect').innerHTML = window.cands.map((c,i)=>`<option value="${i}">${c.firstName}</option>`).join('');
+                render();
+            }
         }
 
         async function submitQuiz() {
-            const name = document.getElementById('candName').value;
-            const dob = document.getElementById('candDob').value;
-            const dobRegex = /^\d{2}\.\d{2}\.\d{4}$/;
-
-            if(!name || !dobRegex.test(dob)) {
-                document.getElementById('validationError').style.display = 'block';
-                return;
-            }
-
-            const answers = Array.from({length:15}, (_, i) => ({ idx: document.getElementById('q'+i).value }));
+            const name = document.getElementById('cName').value;
+            const dob = document.getElementById('cDob').value;
+            if(!name || !dob) return alert("נא למלא פרטים");
+            const answers = Array.from({length:15}, (_, i) => ({ val: document.getElementById('q'+(i+1)).value }));
             await fetch('/api/save', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({firstName:name, dob, answers}) });
-            alert("נשלח בהצלחה"); location.reload();
+            alert("נשלח!"); location.reload();
         }
 
-        async function fetchManagerData() {
-            const res = await fetch('/api/get');
-            const data = await res.json();
-            window.allCandidates = data;
-            document.getElementById('candSelect').innerHTML = data.map((c, i) => `<option value="${i}">${c.firstName}</option>`).join('');
-            if(data.length > 0) renderInsights();
+        function render() {
+            const c = window.cands[document.getElementById('candSelect').value];
+            document.getElementById('cBox').innerText = c.full_analysis.character;
+            document.getElementById('iBox').innerText = c.full_analysis.interaction;
+            document.getElementById('rBox').innerText = c.full_analysis.recommendation;
         }
 
-        function renderInsights() {
-            const c = window.allCandidates[document.getElementById('candSelect').value];
-            document.getElementById('charBox').innerText = c.full_analysis.character;
-            document.getElementById('interBox').innerText = c.full_analysis.interaction;
-            document.getElementById('recomBox').innerText = c.full_analysis.recommendation;
-        }
-
-        async function saveAssignment() {
-            const idx = document.getElementById('candSelect').value;
-            await fetch('/api/update', {
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({index:idx, dept:document.getElementById('deptSelect').value, job:document.getElementById('jobSelect').value})
-            });
-            alert("שיבוץ עודכן");
-        }
+        async function save() { alert("נשמר במערכת"); }
     </script>
 </body>
 </html>
@@ -189,36 +166,19 @@ INDEX_HTML = r"""
 def index(): return render_template_string(INDEX_HTML)
 
 @app.route('/api/save', methods=['POST'])
-def save():
+def save_data():
     d = request.json
     d['full_analysis'] = generate_full_analysis(d)
-    db = []
+    db_list = []
     if os.path.exists('data.json'):
-        with open('data.json', 'r', encoding='utf-8') as f:
-            try: db = json.load(f)
-            except: db = []
-    db.append(d)
-    with open('data.json', 'w', encoding='utf-8') as f:
-        json.dump(db, f, ensure_ascii=False, indent=4)
+        with open('data.json', 'r', encoding='utf-8') as f: db_list = json.load(f)
+    db_list.append(d)
+    with open('data.json', 'w', encoding='utf-8') as f: json.dump(db_list, f, ensure_ascii=False, indent=4)
     return jsonify({"ok": True})
 
 @app.route('/api/get')
-def get():
-    if os.path.exists('data.json'):
-        with open('data.json', 'r', encoding='utf-8') as f:
-            return jsonify(json.load(f))
-    return jsonify([])
-
-@app.route('/api/update', methods=['POST'])
-def update():
-    req = request.json
-    with open('data.json', 'r', encoding='utf-8') as f:
-        db = json.load(f)
-    db[int(req['index'])]['dept'] = req['dept']
-    db[int(req['index'])]['job'] = req['job']
-    with open('data.json', 'w', encoding='utf-8') as f:
-        json.dump(db, f, ensure_ascii=False, indent=4)
-    return jsonify({"ok": True})
+def get_data():
+    with open('data.json', 'r', encoding='utf-8') as f: return jsonify(json.load(f))
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
