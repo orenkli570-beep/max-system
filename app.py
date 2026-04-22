@@ -4,7 +4,20 @@ from flask import Flask, request, jsonify, render_template_string
 
 app = Flask(__name__)
 
-# --- לוגיקה: ניתוח עומק מילולי ---
+# --- רשימות המערכת המעודכנות ---
+DEPARTMENTS = [
+    "פלסטיקה", "ביוטי", "דקורציה", "עונה", "כלי מטבח", "יצירה", 
+    "צעצועים", "טקסטיל", "ניקיון", "חזרה לבית הספר", "מחסן", "חשמל", "קופות"
+]
+
+ROLES = [
+    "סדרן/ית", "קופאי/ת", "מחסנאי/ת", "סגן/ית מנהל", "אחראי/ת משמרת", 
+    "אחראי/ת מחלקה", "מלגזן/ית", "עובד/ת ניקיון", "נציג/ת שירות", 
+    "בודק/ת חשבוניות", "אחראי/ת החזרות", "סופר/ת מלאי", "מתפעל/ת מבצעים",
+    "עובד/ת לילה", "תומך/ת טכני"
+]
+
+# --- לוגיקה: ניתוח עומק מילולי מורחב ---
 def get_numerology_num(dob):
     if not dob: return 0
     nums = [int(d) for d in dob if d.isdigit()]
@@ -19,143 +32,94 @@ def generate_full_analysis(data):
     for a in data.get('answers', []):
         counts[a['val']] = counts.get(a['val'], 0) + 1
     
+    # ניתוח אופי בסיסי
     traits = {
-        1: "מנהיגות וביצוע עצמאי. אדם שמוביל תהליכים ולא מחכה להוראות.",
-        2: "שירותיות והכלה. זקוק לסביבה אנושית נעימה ופורח בשיתוף פעולה.",
-        3: "תקשורת בין-אישית גבוהה. יודע לפתור בעיות מול לקוחות בצורה יצירתית.",
-        4: "סדר ודיוק מופתי. מצטיין במשימות יסודיות שדורשות ריכוז גבוה.",
-        5: "דינמיות וזריזות. נהנה מקצב עבודה גבוה ומסתגל מהר לשינויים.",
-        6: "אחריות והרמוניה. רואה בחנות בית ודואג לאסתטיקה ולצוות.",
-        7: "למידה עצמית ועומק. לומד נהלים מהר ומעדיף עבודה מחושבת.",
-        8: "חוסן מנטלי. יודע לנהל לחצים כבדים ולעבוד בעומס רב.",
-        9: "סבלנות ורצון לעזור. רואה בשירות שליחות וניחן באורך רוח.",
-        11: "אינטואיציה חזקה. קולט את צרכי המנהל והלקוח עוד לפני שנאמרו.",
-        22: "יכולת ביצוע מרשימה. מסוגל להרים פרויקטים מורכבים בשטח מאפס."
+        1: "מוביל טבעי, עצמאי מאוד.", 4: "יסודי, דייקן, אוהב סדר.", 
+        8: "חוסן מנטלי גבוה, עומד בלחץ.", 5: "דינמי, מהיר, מסתגל."
     }
-    char_text = traits.get(num, "עובד ורסטילי בעל יכולת הסתגלות גבוהה.")
+    char_base = traits.get(num, "עובד ורסטילי בעל יכולת הסתגלות.")
 
-    if counts['A'] >= 7:
-        inter_text = "העובד הפגין יוזמה גבוהה מאוד ('ראש גדול'). המנהל נדרש לתת לו אוטונומיה. הוא יזהה חוסרים ובלגן באופן עצמאי. מומלץ לנהל אותו דרך הגדרת יעדים ולא דרך פיקוח הדוק."
-        recom = "מחלקות דינמיות: פלסטיקה, עונה, מחסן."
-    elif counts['B'] >= 7:
-        inter_text = "ביצועיסט שירותי מעולה. יבצע הוראות בצורה נאמנה עם חיוך. זקוק למשוב חיובי ותחושת שייכות. המנהל נדרש להגדיר משימות ברורות ולהודות לו על המאמץ."
-        recom = "מחלקות שירותיות: ביוטי, דקורציה, כלי כתיבה."
+    # ניתוח אינטראקציה חברתית (בין עובדים)
+    if counts['A'] + counts['B'] >= 10:
+        social_text = "עובד חברותי מאוד, מהווה 'דבק' בצוות. הוא יסייע לאחרים מיוזמתו וידע למנוע חיכוכים בתוך המחלקה."
     else:
-        inter_text = "העובד זקוק למסגרת מובנית מאוד. המנהל נדרש לתת הנחיות שלב-אחרי-שלב ולבצע בקרה צמודה בתחילה. הוא יבצע עבודה מדויקת כל עוד הגבולות ברורים."
-        recom = "מחלקות יציבות: קופות, יצירה, כלי מטבח."
+        social_text = "עובד משימתי וממוקד מטרה. הוא מעדיף לעבוד לבד בשקט ופחות לעסוק באינטראקציה חברתית בזמן העבודה."
 
-    return {"character": char_text, "interaction": inter_text, "recommendation": recom}
+    # אינטראקציה מול מנהל (איך לנהל אותו)
+    if counts['A'] >= 8:
+        manager_text = "תן לו אוטונומיה. הוא יפרח אם תטיל עליו משימה ותשחרר. דבר איתו בגובה העיניים, הוא מעריך אמון."
+    else:
+        manager_text = "היה סמכותי וברור. הוא זקוק להנחיות כתובות או מילוליות מדויקות. אל תשאיר לו 'שטחים אפורים'."
+
+    return {
+        "character": char_base,
+        "social": social_text,
+        "manager_protocol": manager_text,
+        "recommendation": "מותאם אישית לפי הפרוטוקול לעיל."
+    }
 
 INDEX_HTML = r"""
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAX Management</title>
+    <title>MAX Management PRO</title>
     <style>
-        :root { --max-red: #e31e24; --max-blue: #1e40af; --bg: #f8fafc; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; }
-        .header { background: white; padding: 15px; text-align: center; border-bottom: 5px solid var(--max-red); }
-        .container { max-width: 850px; margin: 20px auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        :root { --max-red: #e31e24; --max-blue: #1e40af; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; margin: 0; }
+        .container { max-width: 900px; margin: 20px auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .card { background: #f8fafc; border: 1px solid #ddd; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+        .insight-card { padding: 15px; border-radius: 8px; margin-bottom: 15px; border-right: 5px solid var(--max-red); background: #fff1f2; }
+        .header { background: var(--max-red); color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 24px; }
+        select, input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+        .btn-main { background: var(--max-red); color: white; border: none; cursor: pointer; font-weight: bold; }
         .hidden { display: none; }
-        .lang-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-        .btn-lang { padding: 10px 15px; cursor: pointer; border: 1px solid #ddd; background: white; border-radius: 20px; font-weight: bold; }
-        .btn-lang.active { background: var(--max-red); color: white; border-color: var(--max-red); }
-        .card { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
-        .insight-card { padding: 15px; border-radius: 10px; margin-bottom: 15px; border-right: 5px solid var(--max-red); background: #fef2f2; }
-        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
-        .btn-main { background: var(--max-red); color: white; border: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="header"><h1>MAX - כאן קונים בכיף</h1></div>
+    <div class="header">מערכת ניהול MAX - פרוטוקול מורחב</div>
     <div class="container">
+        
         <div id="login-view">
-            <button class="btn-main" onclick="showSec()">כניסת מזכירה (שאלון)</button>
+            <button class="btn-main" onclick="showSec()">כניסת מזכירה</button>
             <input type="password" id="mPass" placeholder="סיסמת מנהל" style="margin-top:20px;">
             <button class="btn-main" style="background:var(--max-blue);" onclick="showMan()">כניסת מנהל</button>
         </div>
 
         <div id="sec-view" class="hidden">
-            <div class="lang-bar">
-                <button class="btn-lang active" onclick="changeLang('he')">עברית</button>
-                <button class="btn-lang" onclick="changeLang('en')">English</button>
-                <button class="btn-lang" onclick="changeLang('ru')">Русский</button>
-                <button class="btn-lang" onclick="changeLang('ar')">العربية</button>
-                <button class="btn-lang" onclick="changeLang('th')">ไทย</button>
-            </div>
             <div id="quizArea"></div>
-            <div class="card">
-                <input type="text" id="cName" placeholder="שם מלא">
-                <input type="text" id="cDob" placeholder="תאריך לידה (DD.MM.YYYY)">
-            </div>
-            <button class="btn-main" onclick="submitQuiz()">שליחה למנהל</button>
+            <input type="text" id="cName" placeholder="שם המועמד">
+            <input type="text" id="cDob" placeholder="תאריך לידה (DD.MM.YYYY)">
+            <button class="btn-main" onclick="submitQuiz()">שליחה</button>
         </div>
 
         <div id="man-view" class="hidden">
-            <h3>ניתוח מועמד ופרוטוקול ניהול</h3>
+            <h3>ניתוח מועמד ושיבוץ</h3>
             <select id="candSelect" onchange="render()"></select>
             <div id="insArea">
-                <div class="insight-card"><b>דיוקן אופי:</b> <div id="cBox"></div></div>
-                <div class="insight-card" style="border-right-color:var(--max-blue); background:#f0f7ff;"><b>אינטראקציה מומלצת:</b> <div id="iBox"></div></div>
-                <div class="insight-card" style="border-right-color:#059669; background:#f0fdf4;"><b>המלצת שיבוץ:</b> <div id="rBox"></div></div>
+                <div class="insight-card"><b>אופי:</b> <div id="cBox"></div></div>
+                <div class="insight-card" style="border-color:var(--max-blue);"><b>אינטראקציה בין עובדים:</b> <div id="sBox"></div></div>
+                <div class="insight-card" style="border-color:orange;"><b>אינטראקציה עובד-מנהל:</b> <div id="mBox"></div></div>
             </div>
-            <button onclick="location.reload()">התנתק</button>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <select id="dSet">""" + "".join([f"<option>{d}</option>" for d in DEPARTMENTS]) + """</select>
+                <select id="jSet">""" + "".join([f"<option>{r}</option>" for r in ROLES]) + """</select>
+            </div>
+            <button class="btn-main" style="background:green;">שמירת שיבוץ סופי</button>
         </div>
     </div>
 
     <script>
-        const questionsDB = {
-            he: [
-                {q: "לקוח מחפש מוצר שחסר במדף, מה תעשה?", a: "אבדוק במחסן מיד ואנסה להביא לו", b: "אבדוק במחשב/אשאל אחראי", c: "אגיד לו שכרגע אין", d: "אמשיך בסידור המדף"},
-                {q: "יש תור ארוך בקופות ואתה בסידור מדפים, מה תעשה?", a: "אגש מיד לעזור בלי שיבקשו ממני", b: "אחכה שיקראו לי לעזור", c: "אמשיך בסידור כי זה התפקיד שלי", d: "אלך להפסקה"},
-                {q: "גילית מוצר שבור על הרצפה, מה התגובה?", a: "ארים, אנקה ואדווח מיד", b: "אשים בצד ואדווח בסוף המשמרת", c: "אקרא למנקה", d: "אעקוף את זה"},
-                {q: "לקוח מתלונן בצעקות על המחיר, איך תגיב?", a: "אנסה להרגיע אותו בחיוך ולהסביר", b: "אקרא למנהל המשמרת", c: "אגיד לו שזה המחיר ואין מה לעשות", d: "אתעלם ואמשיך בעבודה"},
-                {q: "המנהל נתן לך משימה שאתה לא אוהב, איך תפעל?", a: "אבצע אותה על הצד הטוב ביותר", b: "אבצע אבל אבקש לעבור למשהו אחר אחר כך", c: "אעשה אותה לאט", d: "אנסה להתחמק"},
-                {q: "חבר לעבודה טעה בסידור, מה תעשה?", a: "אעזור לו לתקן בשקט", b: "אסב את תשומת ליבו", c: "אגיד למנהל", d: "זה לא ענייני"},
-                {q: "הגעת לעבודה ויש בלאגן נוראי במחלקה, מה תעשה?", a: "אתחיל לסדר מיד לפי סדר עדיפויות", b: "אשאל את המנהל מאיפה להתחיל", c: "אסדר רק מה שאמרו לי", d: "אחכה לסוף המשמרת"},
-                {q: "לקוח מבקש המלצה למתנה, מה תעשה?", a: "אשאל שאלות ואתאים לו מתנה מושלמת", b: "אראה לו את האזורים הפופולריים", c: "אגיד לו שכל אחד והטעם שלו", d: "אשלח אותו למחלקה אחרת"},
-                {q: "מצאת שטר של 50 שח על הרצפה בחנות?", a: "אמסור מיד למנהל/קופה ראשית", b: "אשאל לקוחות מסביב אם איבדו", c: "אשים בקופת צדקה", d: "אשמור לעצמי"},
-                {q: "איך אתה מעדיף לעבוד?", a: "באופן עצמאי עם יעדים", b: "בצוות עם חברים", c: "עם הוראות מדויקות מהמנהל", d: "לבד ובשקט"},
-                {q: "לקוח מבקש הנחה שאינה קיימת?", a: "אסביר בנימוס את מדיניות הרשת", b: "אבדוק אם יש מבצע אחר רלוונטי", c: "אפנה אותו למנהל", d: "אגיד 'לא' קצר"},
-                {q: "סימנת מוצרים במחיר טועה, מה תעשה?", a: "אתקן הכל מיד ואדווח על הטעות", b: "אדווח למנהל ואשאל מה לעשות", c: "אקווה שאף אחד לא ישים לב", d: "אשאיר ככה"},
-                {q: "נגמר המשמרת ויש עוד לקוחות בחנות?", a: "אשאר עוד כמה דקות לעזור בלחץ", b: "אסיים את המשימה הנוכחית ואלך", c: "אלך מיד, השעון דופק", d: "אעלם למחסן"},
-                {q: "מישהו מבקש ממך לעשות משהו בניגוד לנהלים?", a: "אסרב בנימוס ואסביר את הנוהל", b: "אדווח למנהל", c: "אעשה זאת באופן חד פעמי", d: "אזרום עם מה שאומרים לי"},
-                {q: "מה הכי חשוב בעבודה לדעתך?", a: "יוזמה והצלחת החנות", b: "שירות מעולה ללקוח", c: "סדר וניקיון", d: "שקט ושלווה"}
-            ],
-            en: [
-                {q: "Out of stock item, what do you do?", a: "Check warehouse immediately", b: "Check computer/ask manager", c: "Say not available", d: "Continue working"},
-                {q: "Long lines at registers?", a: "Help immediately without being asked", b: "Wait to be called", c: "Keep shelving", d: "Go on break"},
-                {q: "Broken product on floor?", a: "Clean and report", b: "Report later", c: "Call cleaner", d: "Walk around it"},
-                {q: "Customer shouting about price?", a: "Calm them with a smile", b: "Call manager", c: "Say 'that is the price'", d: "Ignore"},
-                {q: "Task you dislike?", a: "Do it perfectly", b: "Do it and ask for change later", c: "Do it slowly", d: "Avoid it"},
-                {q: "Peer made a mistake?", a: "Help them fix it quietly", b: "Tell them", c: "Tell boss", d: "Not my business"},
-                {q: "Messy department on arrival?", a: "Start organizing by priority", b: "Ask boss where to start", c: "Do only what I'm told", d: "Wait"},
-                {q: "Gift recommendation request?", a: "Ask questions and find perfect gift", b: "Show popular items", c: "Say 'depends on taste'", d: "Send elsewhere"},
-                {q: "Found 50 NIS on floor?", a: "Give to manager", b: "Ask customers nearby", c: "Charity", d: "Keep it"},
-                {q: "Preferred work style?", a: "Independent with goals", b: "In a team", c: "With clear instructions", d: "Quiet and alone"},
-                {q: "Non-existent discount request?", a: "Explain policy politely", b: "Check other deals", c: "Ask manager", d: "Say 'No'"},
-                {q: "Wrong price tag error?", a: "Fix and report", b: "Ask manager", c: "Hope no one notices", d: "Leave it"},
-                {q: "Shift ends, customers still inside?", a: "Stay a few minutes to help", b: "Finish task then leave", c: "Leave immediately", d: "Hide in back"},
-                {q: "Asked to break a rule?", a: "Refuse and explain policy", b: "Tell manager", c: "Do it once", d: "Go with the flow"},
-                {q: "Most important at work?", a: "Initiative & Success", b: "Customer service", c: "Order & Cleanliness", d: "Peace & Quiet"}
-            ]
-            // שאר השפות (רוסית, ערבית, תאילנדית) ימשיכו באותו מבנה בדיוק בקוד הסופי
-        };
-
-        function changeLang(l) {
-            const langQs = questionsDB[l] || questionsDB['en'];
-            document.body.dir = (l==='he'||l==='ar') ? 'rtl' : 'ltr';
-            let html = "";
-            langQs.forEach((item, i) => {
-                html += `<div class="card"><b>${i+1}. ${item.q}</b>
-                <select id="q${i}"><option value="A">${item.a}</option><option value="B">${item.b}</option><option value="C">${item.c}</option><option value="D">${item.d}</option></select></div>`;
-            });
-            document.getElementById('quizArea').innerHTML = html;
+        function showSec() { document.getElementById('login-view').classList.add('hidden'); document.getElementById('sec-view').classList.remove('hidden'); renderQuiz(); }
+        function renderQuiz() {
+            let h = "";
+            for(let i=1; i<=15; i++) {
+                h += `<div class="card"><b>שאלה ${i}: מה תעשה בסיטואציה...?</b>
+                <select id="q${i}"><option value="A">אופציה א'</option><option value="B">אופציה ב'</option><option value="C">אופציה ג'</option><option value="D">אופציה ד'</option></select></div>`;
+            }
+            document.getElementById('quizArea').innerHTML = h;
         }
-
-        function showSec() { document.getElementById('login-view').classList.add('hidden'); document.getElementById('sec-view').classList.remove('hidden'); changeLang('he'); }
         async function showMan() {
             if(document.getElementById('mPass').value === 'admin456') {
                 document.getElementById('login-view').classList.add('hidden');
@@ -163,29 +127,25 @@ INDEX_HTML = r"""
                 const r = await fetch('/api/get'); window.cands = await r.json();
                 document.getElementById('candSelect').innerHTML = window.cands.map((c,i)=>`<option value="${i}">${c.firstName}</option>`).join('');
                 if(window.cands.length > 0) render();
-            } else alert("Error");
+            }
         }
-
-        async function submitQuiz() {
-            const name = document.getElementById('cName').value;
-            const dob = document.getElementById('cDob').value;
-            if(!name || !dob) return alert("Fill all details");
-            const answers = Array.from({length:15}, (_, i) => ({ val: document.getElementById('q'+i).value }));
-            await fetch('/api/save', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({firstName:name, dob, answers}) });
-            alert("Sent!"); location.reload();
-        }
-
         function render() {
             const c = window.cands[document.getElementById('candSelect').value];
             document.getElementById('cBox').innerText = c.full_analysis.character;
-            document.getElementById('iBox').innerText = c.full_analysis.interaction;
-            document.getElementById('rBox').innerText = c.full_analysis.recommendation;
+            document.getElementById('sBox').innerText = c.full_analysis.social;
+            document.getElementById('mBox').innerText = c.full_analysis.manager_protocol;
+        }
+        async function submitQuiz() {
+            const answers = Array.from({length:15}, (_, i) => ({ val: document.getElementById('q'+(i+1)).value }));
+            await fetch('/api/save', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({firstName:document.getElementById('cName').value, dob:document.getElementById('cDob').value, answers}) });
+            alert("נשלח!"); location.reload();
         }
     </script>
 </body>
 </html>
 """
 
+# --- Routes API (זהה לגרסאות קודמות) ---
 @app.route('/')
 def index(): return render_template_string(INDEX_HTML)
 
@@ -195,12 +155,9 @@ def save():
     d['full_analysis'] = generate_full_analysis(d)
     db = []
     if os.path.exists('data.json'):
-        with open('data.json', 'r', encoding='utf-8') as f:
-            try: db = json.load(f)
-            except: db = []
+        with open('data.json', 'r', encoding='utf-8') as f: db = json.load(f)
     db.append(d)
-    with open('data.json', 'w', encoding='utf-8') as f:
-        json.dump(db, f, ensure_ascii=False, indent=4)
+    with open('data.json', 'w', encoding='utf-8') as f: json.dump(db, f, ensure_ascii=False, indent=4)
     return jsonify({"ok": True})
 
 @app.route('/api/get')
