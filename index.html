@@ -3,36 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MAX STOCK | HR System</title>
+    <title>MAX - HR SMART SYSTEM 2026</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
     <style>
-        :root { --gold: #c9a84c; --bg: #0b0f1a; --card: #161e2d; --text: #f8fafc; --accent: #38bdf8; --success: #22c55e; --danger: #ef4444; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body { background: var(--bg); color: var(--text); margin: 0; padding: 10px; line-height: 1.4; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .glass-card { background: var(--card); border: 1px solid var(--gold); border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .lang-bar { display: flex; justify-content: center; gap: 5px; margin-bottom: 20px; flex-wrap: wrap; }
-        .lang-btn { background: #000; border: 1px solid var(--gold); color: #fff; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .lang-btn.active { background: var(--gold); color: #000; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--gold); padding-bottom: 10px; }
-        input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #000; color: #fff; margin-bottom: 10px; font-size: 1rem; }
-        .q-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px; border-right: 4px solid var(--gold); }
-        .btn-main { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
-        .admin-card { background: #1e293b; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #444; }
-        .analysis-item { background: rgba(0,0,0,0.2); padding: 8px; border-radius: 5px; margin-top: 5px; font-size: 0.9rem; border-right: 3px solid var(--accent); }
-        .badge { background: var(--danger); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; float: left; }
-        .admin-trigger { margin-top: 40px; padding: 15px; text-align: center; border: 1px dashed var(--gold); color: var(--gold); cursor: pointer; border-radius: 10px; font-weight: bold; }
+        :root { --gold: #c9a84c; --bg: #0b0f1a; --card: #161e2d; --text: #ecf0f1; --accent: #3498db; --success: #27ae60; --danger: #e74c3c; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .glass-card { background: var(--card); border: 1px solid var(--gold); border-radius: 24px; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
+        
+        /* Lang Bar */
+        .lang-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
+        .lang-btn { background: rgba(0,0,0,0.3); border: 1px solid var(--gold); color: white; padding: 10px 18px; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        .lang-btn.active { background: var(--gold); color: black; font-weight: bold; }
+
+        /* Form Elements */
+        input, select { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #2c3e50; background: #000; color: #fff; margin-bottom: 15px; font-size: 1rem; }
+        .q-card { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 18px; margin-bottom: 15px; border-right: 5px solid var(--gold); }
+        .btn-main { width: 100%; padding: 20px; background: var(--gold); color: black; border: none; border-radius: 15px; font-weight: 900; cursor: pointer; font-size: 1.2rem; text-transform: uppercase; }
+        
+        /* Admin View */
+        .admin-card { background: #1c2636; border: 1px solid #34495e; border-radius: 20px; padding: 25px; margin-bottom: 25px; position: relative; overflow: hidden; }
+        .admin-card::before { content: ""; position: absolute; top: 0; right: 0; width: 6px; height: 100%; background: var(--gold); }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .stat-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #2c3e50; }
+        .stat-box label { display: block; font-size: 0.75rem; color: var(--gold); margin-bottom: 5px; text-transform: uppercase; }
+        .stat-box span { font-weight: bold; font-size: 1rem; }
+        
+        .score-bar { background: #000; height: 10px; border-radius: 5px; margin-top: 10px; overflow: hidden; }
+        .score-fill { height: 100%; background: var(--gold); transition: 0.5s; }
+        
+        .rec-label { display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; margin: 4px; }
+        .rec-role { background: rgba(52, 152, 219, 0.2); color: #3498db; border: 1px solid #3498db; }
+        .rec-dept { background: rgba(39, 174, 96, 0.2); color: #27ae60; border: 1px solid #27ae60; }
+        
+        .warning-badge { background: var(--danger); color: white; padding: 5px 15px; border-radius: 50px; font-size: 0.75rem; font-weight: bold; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% {opacity: 1} 50% {opacity: 0.5} 100% {opacity: 1} }
     </style>
 </head>
 <body>
     <div id="root"></div>
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
         const ADMIN_PASS = "MAX2026";
 
-        const QUESTIONS_HE = [
+        const DEPARTMENTS = ["צעצועים", "כלי בית", "טקסטיל", "ניקיון", "חד פעמי", "יצירה", "חשמל", "גינון", "קמפינג", "ריהוט", "משרד", "ביוטי", "ממתקים"];
+        const ROLES = ["קופאי/ת", "סדרן/ית", "מחסנאי/ת", "סגן/ית מנהל", "אחראי/ת משמרת", "נציג/ת שירות", "מלקט/ת", "בודק/ת חשבוניות", "אחראי/ת החזרות", "סדרן/ית עגלה", "מנהל/ת מחלקה", "אחראי/ת סטוק", "דיילת מכירות", "מוביל/ה", "עובד/ת כללי"];
+
+        const QUESTIONS = [
             { q: "1. לקוח מחפש מוצר שחסר על המדף?", a: ["אבדוק במחסן", "אבדוק במחשב", "אכוון לדומה", "אמשיך בעבודתי"] },
             { q: "2. תור ארוך מאוד בקופות ואתה בסידור מדף?", a: ["אגש מיד לעזור", "אחכה שיקראו לי", "אסיים קודם את המדף", "אלך למחסן"] },
             { q: "3. ראית מוצר שבור או נוזל על הרצפה?", a: ["אנקה מיד", "אדווח למנהל", "אקרא לעובד ניקיון", "אעקוף את המפגע"] },
@@ -58,61 +78,89 @@
             const [answers, setAnswers] = useState({});
             const [startTime, setStartTime] = useState(Date.now());
 
-            const runAnalysis = (ans, bday, dur) => {
-                let res = { team: "ניטרלי", boss: "ביצועיסט", num: "-", warn: dur < 90 };
-                if (ans[5] == 0 && ans[9] == 1) res.team = "דבק חברתי - בונה צוות";
-                else if (ans[9] == 0) res.team = "זאב בודד - לעבודה עצמאית";
-                if (ans[4] == 0) res.boss = "ראש גדול - לויאלי מאוד";
+            const analyze = (ans, bday, dur) => {
+                let scores = { service: 50, loyalty: 50, order: 50, energy: 50 };
+                
+                // Logic Processing
+                if (ans[1] == 0) scores.service += 20; // עוזר בתור לקופות
+                if (ans[4] == 0) scores.loyalty += 25; // מבצע משימה שפחות אוהב
+                if (ans[6] == 0) scores.order += 20; // מסדר מחלקה הפוכה מיד
+                if (ans[9] == 1) scores.energy += 15; // מעדיף עבודת צוות
+                
+                // תפקיד מומלץ
+                let role = "עובד/ת כללי";
+                if (scores.service > 65) role = "קופאי/ת או נציג שירות";
+                if (scores.order > 65 && scores.energy < 55) role = "מחסנאי/ת או סדרן/ית";
+                if (scores.loyalty > 70 && ans[14] == 1) role = "סגן/ית מנהל או אחמ\"ש";
+                
+                // מחלקה מומלצת
+                let dept = DEPARTMENTS[Math.floor(Math.random() * DEPARTMENTS.length)];
+                if (scores.order > 60) dept = "חשמל / כלי בית (דורש דיוק)";
+                if (scores.energy > 60) dept = "צעצועים / ממתקים (דורש קצב)";
+                if (scores.service > 60) dept = "ביוטי / טקסטיל (דורש סבלנות)";
+
+                // נומרולוגיה
+                let numStr = "בבדיקה";
                 if (bday) {
                     const n = bday.replace(/\D/g,'').split('').reduce((a,b)=>a+parseInt(b),0) % 9 || 9;
-                    const m = {1:"מנהיג",2:"תומך",3:"תקשורתי",4:"פרקטי",5:"זריז",6:"אחראי",7:"יסודי",8:"ניהולי",9:"עוזר"};
-                    res.num = m[n];
+                    const m = {1:"מנהיגות", 2:"עבודת צוות", 3:"תקשורת", 4:"יסודיות", 5:"זריזות", 6:"אחריות", 7:"ניתוח", 8:"ניהול", 9:"שירותיות"};
+                    numStr = m[n];
                 }
-                return res;
+
+                return { scores, role, dept, numStr, warn: dur < 100 };
             };
 
             const handleSend = () => {
-                if (!form.fn) { alert("אנא מלא שם"); return; }
+                if (!form.fn || !form.ln) return alert("חובה למלא שם מלא");
                 const dur = Math.floor((Date.now() - startTime)/1000);
-                const analysis = runAnalysis(answers, form.bday, dur);
+                const analysis = analyze(answers, form.bday, dur);
                 setCandidates([{id: Date.now(), ...form, analysis, lang, dur}, ...candidates]);
                 setView('done');
             };
 
-            const openAdmin = () => {
-                const pass = prompt("הזן סיסמת מנהל (MAX2026):");
-                if (pass && pass.trim().toUpperCase() === "MAX2026") {
-                    setView('admin');
-                } else if (pass !== null) {
-                    alert("סיסמה שגויה! וודא שכתבת MAX2026");
-                }
-            };
-
             if (view === 'admin') return (
                 <div className="container" dir="rtl">
-                    <div className="header"><h2>ניהול מועמדים (MAX)</h2></div>
-                    <button className="btn-main" style={{marginBottom:20}} onClick={()=>setView('quiz')}>חזרה לשאלון</button>
-                    {candidates.length === 0 ? <p style={{textAlign:'center'}}>טרם נאספו מועמדים.</p> : 
-                        candidates.map(c => (
-                            <div key={c.id} className="admin-card">
-                                <strong>{c.fn} {c.ln}</strong> <span style={{fontSize:'0.8rem'}}>({c.lang})</span>
-                                {c.analysis.warn && <span className="badge">מילוי מהיר!</span>}
-                                <div className="analysis-item"><b>יחס לצוות:</b> {c.analysis.team}</div>
-                                <div className="analysis-item"><b>יחס למנהל:</b> {c.analysis.boss}</div>
-                                <div className="analysis-item"><b>נומרולוגיה:</b> {c.analysis.num}</div>
-                                <div className="analysis-item"><b>יומולדת:</b> {c.bday || "לא הוזן"}</div>
+                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:30}}>
+                        <h2>לוח בקרה מנהל - MAX</h2>
+                        <button className="lang-btn" onClick={()=>setView('quiz')}>+ מועמד חדש</button>
+                    </div>
+                    {candidates.length === 0 ? <p>ממתין למועמדים...</p> : candidates.map(c => (
+                        <div key={c.id} className="admin-card">
+                            <div style={{display:'flex', justifyContent:'space-between'}}>
+                                <div>
+                                    <h3 style={{margin:0}}>{c.fn} {c.ln}</h3>
+                                    <span style={{fontSize:'0.8rem', opacity:0.6}}>זמן מילוי: {c.dur} שנ' | שפה: {c.lang}</span>
+                                </div>
+                                {c.analysis.warn && <div className="warning-badge">חשד לחוסר רצינות</div>}
                             </div>
-                        ))
-                    }
+                            
+                            <div className="grid-3">
+                                <div className="stat-box"><label>התאמה לתפקיד</label><span>{c.analysis.role}</span></div>
+                                <div className="stat-box"><label>שיבוץ מחלקה</label><span>{c.analysis.dept}</span></div>
+                                <div className="stat-box"><label>תכונה נומרולוגית</label><span>{c.analysis.numStr}</span></div>
+                            </div>
+
+                            <div style={{marginTop:20}}>
+                                <label style={{fontSize:'0.8rem', color: 'var(--gold)'}}>פרופיל אישיותי:</label>
+                                <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:15, marginTop:10}}>
+                                    <div>שירותיות: <div className="score-bar"><div className="score-fill" style={{width: `${c.analysis.scores.service}%`}}></div></div></div>
+                                    <div>לויאליות: <div className="score-bar"><div className="score-fill" style={{width: `${c.analysis.scores.loyalty}%`}}></div></div></div>
+                                    <div>סדר וארגון: <div className="score-bar"><div className="score-fill" style={{width: `${c.analysis.scores.order}%`}}></div></div></div>
+                                    <div>אנרגיה ויוזמה: <div className="score-bar"><div className="score-fill" style={{width: `${c.analysis.scores.energy}%`}}></div></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             );
 
             if (view === 'done') return (
-                <div className="container" style={{textAlign:'center', padding:50}}>
+                <div className="container" style={{textAlign:'center', paddingTop:100}}>
                     <div className="glass-card">
-                        <h1 style={{color:'var(--success)', fontSize:'4rem'}}>✓</h1>
-                        <h2>השאלון נשלח!</h2>
-                        <button className="btn-main" onClick={()=>{setForm({fn:'',ln:'',bday:''}); setAnswers({}); setView('quiz'); setStartTime(Date.now());}}>מועמד חדש</button>
+                        <h1 style={{fontSize:'5rem', color:'var(--success)', margin:0}}>✓</h1>
+                        <h2>השאלון עבר למנהל</h2>
+                        <p>תודה על הזמן שלך, המתן להמשך הנחיות.</p>
+                        <button className="btn-main" onClick={()=>{setForm({fn:'',ln:'',bday:''}); setAnswers({}); setView('quiz'); setStartTime(Date.now());}}>חזרה להתחלה</button>
                     </div>
                 </div>
             );
@@ -125,21 +173,34 @@
                                 <button key={l} className={`lang-btn ${lang===l?'active':''}`} onClick={()=>setLang(l)}>{l}</button>
                             ))}
                         </div>
-                        <div className="header"><h1>שאלון מועמד - MAX</h1></div>
-                        <input placeholder="שם פרטי" value={form.fn} onChange={e=>setForm({...form, fn: e.target.value})} />
-                        <input placeholder="שם משפחה" value={form.ln} onChange={e=>setForm({...form, ln: e.target.value})} />
-                        <input type="date" value={form.bday} onChange={e=>setForm({...form, bday: e.target.value})} />
-                        {QUESTIONS_HE.map((q, i) => (
+                        <header style={{textAlign:'center', marginBottom:30}}>
+                            <h1 style={{color: 'var(--gold)', margin:0}}>MAX STOCK</h1>
+                            <p style={{opacity:0.7}}>Career Opportunities | 2026</p>
+                        </header>
+                        
+                        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:10}}>
+                            <input placeholder="שם פרטי" value={form.fn} onChange={e=>setForm({...form, fn:e.target.value})} />
+                            <input placeholder="שם משפחה" value={form.ln} onChange={e=>setForm({...form, ln:e.target.value})} />
+                        </div>
+                        <label style={{fontSize:'0.8rem', display:'block', marginBottom:5}}>תאריך לידה:</label>
+                        <input type="date" value={form.bday} onChange={e=>setForm({...form, bday:e.target.value})} />
+
+                        {QUESTIONS.map((q, i) => (
                             <div key={i} className="q-card">
-                                <p><strong>{q.q}</strong></p>
+                                <p style={{marginTop:0}}><strong>{q.q}</strong></p>
                                 <select onChange={e=>setAnswers({...answers, [i]: e.target.value})}>
                                     <option value="">בחר תשובה...</option>
                                     {q.a.map((ans, idx) => <option key={idx} value={idx}>{ans}</option>)}
                                 </select>
                             </div>
                         ))}
-                        <button className="btn-main" onClick={handleSend}>שלח שאלון</button>
-                        <div className="admin-trigger" onClick={openAdmin}>כניסת מנהל (ADMIN)</div>
+
+                        <button className="btn-main" onClick={handleSend}>סיום ושליחה</button>
+                        
+                        <div style={{marginTop:40, textAlign:'center', opacity:0.1}} 
+                             onClick={()=>{if(prompt("Pass:")===ADMIN_PASS) setView('admin')}}>
+                             System Admin Login
+                        </div>
                     </div>
                 </div>
             );
