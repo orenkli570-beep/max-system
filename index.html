@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAX STOCK | OREN PROTOCOL FINAL</title>
+    <title>MAX STOCK | OREN PROTOCOL FULL DEPT</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -11,22 +11,16 @@
         :root { --gold: #c9a84c; --bg: #0f172a; --card: rgba(30, 41, 59, 0.95); }
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background: var(--bg); color: #fff; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 650px; padding-bottom: 50px; }
+        .container { width: 100%; max-width: 900px; padding-bottom: 50px; }
         .glass-card { background: var(--card); border: 1px solid rgba(201,168,76,0.3); border-radius: 28px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
-        .header h1 { color: var(--gold); text-align: center; font-size: 2.2rem; margin: 10px 0; letter-spacing: 2px; }
-        .lang-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-        .btn-lang { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .btn-lang.active { background: var(--gold); color: #000; }
-        .input-group { margin-bottom: 15px; text-align: inherit; }
-        label { display: block; margin-bottom: 5px; color: var(--gold); font-weight: 600; }
-        input, select { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #000; color: #fff; font-size: 1rem; text-align: inherit; }
-        .dob-grid { display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 8px; }
-        .question-box { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 18px; margin-bottom: 15px; border-inline-start: 4px solid var(--gold); text-align: inherit; }
+        .header h1 { color: var(--gold); text-align: center; font-size: 2rem; margin: 10px 0; }
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; }
+        .admin-table th, .admin-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: right; }
+        .badge { padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 0.75rem; color: #000; background: var(--gold); }
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .question-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-right: 4px solid var(--gold); }
+        input, select { width: 100%; padding: 12px; border-radius: 10px; background: #000; color: #fff; border: 1px solid rgba(255,255,255,0.2); }
         .btn-main { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; border-radius: 16px; font-weight: 800; cursor: pointer; font-size: 1.2rem; }
-        .admin-footer { margin-top: 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
-        .btn-admin-access { background: transparent; border: 1px dashed var(--gold); color: var(--gold); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; opacity: 0.6; }
-        .admin-item { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-right: 4px solid var(--gold); text-align: right; position: relative; }
-        .prof-tag { background: var(--gold); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; position: absolute; left: 10px; top: 10px; }
     </style>
 </head>
 <body>
@@ -34,13 +28,8 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        const TXT = {
-            HE: { dir: 'rtl', start: 'התחל שאלון גיוס', name: 'שם המועמד מלא', dob: 'תאריך לידה מלא', d: 'יום', m: 'חודש', y: 'שנה', sel: 'בחר תשובה...', sub: 'שלח שאלון', succ: 'נשלח בהצלחה!', back: 'חזרה לדף הבית', admin: 'כניסת מנהל 🔒' },
-            EN: { dir: 'ltr', start: 'Start Application', name: 'Full Name', dob: 'Date of Birth', d: 'Day', m: 'Month', y: 'Year', sel: 'Select...', sub: 'Submit', succ: 'Submitted!', back: 'Home', admin: 'Admin Login 🔒' },
-            RU: { dir: 'ltr', start: 'Начать анкету', name: 'ФИО', dob: 'Дата рождения', d: 'День', m: 'Месяц', y: 'Год', sel: 'Выбрать...', sub: 'Отправить', succ: 'Отправлено!', back: 'Домой', admin: 'Вход 🔒' },
-            AR: { dir: 'rtl', start: 'ابدأ الاستبيان', name: 'الاسم الكامل', dob: 'تاريخ الميلاد', d: 'يوم', m: 'شهر', y: 'سنة', sel: 'اختر...', sub: 'إرسال', succ: 'تم الإرسال!', back: 'الرئيسية', admin: 'دخول المدير 🔒' },
-            TH: { dir: 'ltr', start: 'เริ่มใบสมัคร', name: 'ชื่อ-นามสกุล', dob: 'วันเกิด', d: 'วัน', m: 'เดือน', y: 'ปี', sel: 'เลือก...', sub: 'ส่งข้อมูล', succ: 'สำเร็จ!', back: 'หน้าหลัก', admin: 'ผู้ดูแลระบบ 🔒' }
-        };
+        const DEPTS = ["צעצועים", "בית ונוי", "מטבח", "יצירה", "חשמל", "טקסטיל", "ניקיון", "קוסמטיקה", "גינה", "חד פעמי", "חזרה לביה\"ס", "ריהוט", "מחסן"];
+        const ROLES = ["קופאי/ת", "סדרן/ית", "מחסנאי/ת", "מנהל/ת מחלקה", "סגן/ית מנהל", "מנהל/ת סניף", "אחראי/ת משמרת", "שירות לקוחות", "עובד/ת כללי", "ניקיון", "אבטחה", "מוביל/ה", "מלקט/ת", "בודק/ת חשבוניות", "אחראי/ת החזרות"];
 
         const Q_LIST = [
             { q: "לקוח מחפש מוצר שחסר על המדף. מה תעשה?", a: ["אבדוק במחסן ואביא לו אישית", "אבדוק במחשב אם קיים במלאי", "אגיד שחסר ואכוון למוצר דומה", "אמשיך בעבודתי הרגילה"] },
@@ -62,84 +51,90 @@
 
         const App = () => {
             const [v, setV] = useState('home');
-            const [l, setL] = useState('HE');
             const [ans, setAns] = useState(Array(15).fill(null));
-            const [f, setF] = useState({ n: '', d: '', m: '', y: '' });
+            const [f, setF] = useState({ n: '', d: '', m: '', y: '', dept: '', role: '' });
             const [db, setDb] = useState([]);
 
             useEffect(() => {
-                const s = localStorage.getItem('MAX_V_FINAL_STABLE');
+                const s = localStorage.getItem('MAX_DB_FINAL_V1');
                 if (s) setDb(JSON.parse(s));
             }, []);
 
-            const send = () => {
-                if (!f.n || !f.y || ans.includes(null)) return alert("נא לענות על כל השאלות ולמלא שם ושנת לידה");
+            const save = () => {
+                if (!f.n || !f.dept || !f.role || ans.includes(null)) return alert("נא למלא את כל השדות ולענות על כל השאלות");
                 const score = ans.filter(a => a === 0).length;
                 const prof = score >= 10 ? "יוזמה גבוהה" : score >= 6 ? "ביצועיסט" : "משימתי";
-                const up = [...db, { ...f, prof, ts: new Date().toLocaleString() }];
-                setDb(up); localStorage.setItem('MAX_V_FINAL_STABLE', JSON.stringify(up));
+                const up = [...db, { ...f, score, prof, ts: new Date().toLocaleString() }];
+                setDb(up); localStorage.setItem('MAX_DB_FINAL_V1', JSON.stringify(up));
                 setV('done');
             };
 
-            const t = TXT[l];
-
             if (v === 'admin') return (
                 <div className="container" dir="rtl"><div className="glass-card">
-                    <h2 style={{color:'var(--gold)'}}>ניהול מועמדים ({db.length})</h2>
-                    <button onClick={()=>setV('home')} className="btn-lang" style={{marginBottom:20}}>חזרה</button>
-                    {db.map((r, i) => (
-                        <div key={i} className="admin-item">
-                            <span className="prof-tag">{r.prof}</span>
-                            <strong>{r.n}</strong><br/>
-                            <small>{r.d}/{r.m}/{r.y} | {r.ts}</small>
-                        </div>
-                    ))}
+                    <h2 style={{color:'var(--gold)'}}>לוח מנהל - סינון ושיבוץ</h2>
+                    <button onClick={()=>setV('home')} className="btn-main" style={{width:'auto', padding:'8px 20px', marginBottom:20}}>חזרה</button>
+                    <table className="admin-table">
+                        <thead>
+                            <tr>
+                                <th>מועמד</th>
+                                <th>מחלקה</th>
+                                <th>תפקיד</th>
+                                <th>פרופיל</th>
+                                <th>ציון</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {db.map((r, i) => (
+                                <tr key={i}>
+                                    <td><strong>{r.n}</strong><br/><small>{r.y}</small></td>
+                                    <td>{r.dept}</td>
+                                    <td>{r.role}</td>
+                                    <td><span className="badge">{r.prof}</span></td>
+                                    <td>{r.score}/15</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div></div>
             );
 
             return (
-                <div className="container" dir={t.dir}>
+                <div className="container" dir="rtl">
                     <div className="glass-card">
                         <div className="header"><h1>MAX STOCK</h1></div>
-                        <div className="lang-bar">
-                            {Object.keys(TXT).map(k => (
-                                <button key={k} className={`btn-lang ${l === k ? 'active' : ''}`} onClick={() => setL(k)}>{k}</button>
-                            ))}
-                        </div>
-
                         {v === 'home' ? (
                             <div style={{textAlign:'center'}}>
-                                <button className="btn-main" onClick={()=>setV('quiz')}>{t.start}</button>
-                                <div className="admin-footer">
-                                    <button className="btn-admin-access" onClick={() => { if(prompt('סיסמה:')==='1234') setV('admin'); }}>{t.admin}</button>
-                                </div>
+                                <button className="btn-main" onClick={()=>setV('quiz')}>התחל שאלון גיוס</button>
+                                <p style={{marginTop:30, opacity:0.3, cursor:'pointer'}} onClick={()=>{if(prompt('סיסמה:')==='1234') setV('admin')}}>כניסת מנהל 🔒</p>
                             </div>
                         ) : v === 'done' ? (
-                            <div style={{textAlign:'center'}}>
-                                <h1 style={{fontSize:'4rem', color:'var(--gold)'}}>✔</h1>
-                                <h2>{t.succ}</h2>
-                                <button className="btn-main" onClick={()=>{setV('home'); setAns(Array(15).fill(null));}}>{t.back}</button>
-                            </div>
+                            <div style={{textAlign:'center'}}><h1>✔</h1><h2>השאלון נשלח!</h2><button className="btn-main" onClick={()=>setV('home')}>חזרה</button></div>
                         ) : (
                             <div>
-                                <div className="input-group"><label>{t.name}</label><input onChange={e=>setF({...f, n: e.target.value})} /></div>
-                                <div className="input-group"><label>{t.dob}</label>
-                                    <div className="dob-grid">
-                                        <input placeholder={t.d} onChange={e=>setF({...f, d: e.target.value})} />
-                                        <input placeholder={t.m} onChange={e=>setF({...f, m: e.target.value})} />
-                                        <input placeholder={t.y} onChange={e=>setF({...f, y: e.target.value})} />
-                                    </div>
+                                <div className="input-grid">
+                                    <input placeholder="שם מלא" onChange={e=>setF({...f, n: e.target.value})} />
+                                    <input placeholder="שנת לידה" onChange={e=>setF({...f, y: e.target.value})} />
+                                </div>
+                                <div className="input-grid">
+                                    <select onChange={e=>setF({...f, dept: e.target.value})}>
+                                        <option value="">בחר מחלקה מועדפת...</option>
+                                        {DEPTS.map(d => <option key={d} value={d}>{d}</option>)}
+                                    </select>
+                                    <select onChange={e=>setF({...f, role: e.target.value})}>
+                                        <option value="">בחר תפקיד מבוקש...</option>
+                                        {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                                    </select>
                                 </div>
                                 {Q_LIST.map((q, i) => (
                                     <div key={i} className="question-box">
                                         <p><strong>{i+1}. {q.q}</strong></p>
                                         <select onChange={e=>{const n=[...ans]; n[i]=parseInt(e.target.value); setAns(n)}}>
-                                            <option value="">{t.sel}</option>
+                                            <option value="">בחר תשובה...</option>
                                             {q.a.map((at, ai) => <option key={ai} value={ai}>{at}</option>)}
                                         </select>
                                     </div>
                                 ))}
-                                <button className="btn-main" onClick={send}>{t.sub}</button>
+                                <button className="btn-main" onClick={save}>שלח שאלון</button>
                             </div>
                         )}
                     </div>
