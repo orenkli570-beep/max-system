@@ -23,9 +23,11 @@
         .dob-grid { display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 8px; }
         .question-box { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 18px; margin-bottom: 15px; border-right: 4px solid var(--gold); text-align: right; }
         .btn-main { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; border-radius: 16px; font-weight: 800; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
-        .btn-main:hover { transform: scale(1.02); }
-        .success-screen { text-align: center; padding: 40px 0; }
-        [dir="ltr"] .question-box { border-right: none; border-left: 4px solid var(--gold); text-align: left; }
+        .admin-footer { margin-top: 40px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+        .btn-admin-access { background: rgba(255,255,255,0.05); border: 1px dashed var(--gold); color: var(--gold); padding: 10px 20px; border-radius: 30px; cursor: pointer; font-size: 0.9rem; transition: 0.3s; }
+        .btn-admin-access:hover { background: var(--gold); color: #000; border-style: solid; }
+        .admin-list-item { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-right: 4px solid var(--gold); text-align: right; }
+        .tag-prof { background: var(--gold); color: #000; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; float: left; }
     </style>
 </head>
 <body>
@@ -34,11 +36,8 @@
         const { useState, useEffect } = React;
 
         const TXT = {
-            HE: { dir: 'rtl', start: 'התחל שאלון גיוס', name: 'שם המועמד מלא', dob: 'תאריך לידה מלא', d: 'יום', m: 'חודש', y: 'שנה', sel: 'בחר תשובה...', sub: 'שלח שאלון למערכת', succ: 'השאלון נשלח בהצלחה!', back: 'חזרה לדף הבית' },
-            EN: { dir: 'ltr', start: 'Start Application', name: 'Full Name', dob: 'Full Date of Birth', d: 'Day', m: 'Month', y: 'Year', sel: 'Select answer...', sub: 'Submit Application', succ: 'Submitted Successfully!', back: 'Back to Home' },
-            RU: { dir: 'ltr', start: 'Начать анкету', name: 'ФИО', dob: 'Дата рождения', d: 'День', m: 'Месяц', y: 'Год', sel: 'Выберите ответ...', sub: 'Отправить анкету', succ: 'Успешно отправлено!', back: 'На главную' },
-            AR: { dir: 'rtl', start: 'ابدأ الاستبيان', name: 'الاسم الكامل', dob: 'تاريخ الميلاد الكامل', d: 'يوم', m: 'شهر', y: 'سنة', sel: 'اختر إجابة...', sub: 'إرسال الاستبيان', succ: 'تم الإرسال بنجاح!', back: 'العودة לרף הבית' },
-            TH: { dir: 'ltr', start: 'เริ่มใบสมัคร', name: 'ชื่อ-นามสกุล', dob: 'วันเกิด', d: 'วัน', m: 'เดือน', y: 'ปี', sel: 'เลือกคำตอบ...', sub: 'ส่งใบสมัคร', succ: 'ส่งข้อมูลสำเร็จ!', back: 'กลับหน้าหลัก' }
+            HE: { dir: 'rtl', start: 'התחל שאלון גיוס', name: 'שם המועמד מלא', dob: 'תאריך לידה מלא', d: 'יום', m: 'חודש', y: 'שנה', sel: 'בחר תשובה...', sub: 'שלח שאלון למערכת', succ: 'נשלח בהצלחה!', back: 'חזרה לדף הבית' },
+            EN: { dir: 'ltr', start: 'Start Application', name: 'Full Name', dob: 'DOB', d: 'Day', m: 'Month', y: 'Year', sel: 'Select...', sub: 'Submit', succ: 'Success!', back: 'Back' }
         };
 
         const Q_LIST = [
@@ -67,38 +66,29 @@
             const [db, setDb] = useState([]);
 
             useEffect(() => {
-                const s = localStorage.getItem('MAX_V5_FINAL');
+                const s = localStorage.getItem('MAX_V_FINAL_SECURE');
                 if (s) setDb(JSON.parse(s));
             }, []);
 
             const send = () => {
-                if (!f.n || !f.y || ans.includes(null)) return alert("נא למלא את כל הפרטים ולענות על כל השאלות");
+                if (!f.n || !f.y || ans.includes(null)) return alert("נא למלא הכל");
                 const score = ans.filter(a => a === 0).length;
                 const prof = score >= 10 ? "יוזמה גבוהה" : score >= 6 ? "ביצועיסט" : "משימתי";
-                const newRec = { ...f, prof, ts: new Date().toLocaleString() };
-                const up = [...db, newRec];
-                setDb(up); localStorage.setItem('MAX_V5_FINAL', JSON.stringify(up));
+                const up = [...db, { ...f, prof, ts: new Date().toLocaleString() }];
+                setDb(up); localStorage.setItem('MAX_V_FINAL_SECURE', JSON.stringify(up));
                 setV('done');
             };
 
-            const t = TXT[l];
-
-            if (v === 'done') return (
-                <div className="container" dir={t.dir}><div className="glass-card success-screen">
-                    <h1 style={{fontSize:'5rem', color:'var(--gold)', margin:0}}>✔</h1>
-                    <h2 style={{color:'var(--gold)'}}>{t.succ}</h2>
-                    <p style={{opacity:0.8, marginBottom:30}}>תודה רבה, המתן לנציג שלנו.</p>
-                    <button className="btn-main" onClick={()=> { setV('home'); setAns(Array(15).fill(null)); }}>{t.back}</button>
-                </div></div>
-            );
+            const t = TXT[l] || TXT.HE;
 
             if (v === 'admin') return (
                 <div className="container" dir="rtl"><div className="glass-card">
                     <h2 style={{color:'var(--gold)'}}>ניהול מועמדים ({db.length})</h2>
                     <button onClick={()=>setV('home')} className="btn-lang" style={{marginBottom:20}}>חזרה</button>
                     {db.map((r, i) => (
-                        <div key={i} style={{background:'rgba(0,0,0,0.3)', padding:15, borderRadius:12, marginBottom:10, borderRight:'4px solid var(--gold)'}}>
-                            <strong>{r.n}</strong> | <span style={{color:'var(--gold)'}}>{r.prof}</span><br/>
+                        <div key={i} className="admin-list-item">
+                            <span className="tag-prof">{r.prof}</span>
+                            <strong>{r.n}</strong><br/>
                             <small>{r.d}/{r.m}/{r.y} | {r.ts}</small>
                         </div>
                     ))}
@@ -109,22 +99,30 @@
                 <div className="container" dir={t.dir}>
                     <div className="glass-card">
                         <div className="header"><h1>MAX STOCK</h1></div>
-                        <div className="lang-bar">
-                            {Object.keys(TXT).map(k => (
-                                <button key={k} className={`btn-lang ${l === k ? 'active' : ''}`} onClick={() => setL(k)}>{k}</button>
-                            ))}
-                        </div>
-
                         {v === 'home' ? (
-                            <button className="btn-main" onClick={()=>setV('quiz')}>{t.start}</button>
+                            <div style={{textAlign:'center'}}>
+                                <div className="lang-bar">
+                                    <button className={`btn-lang ${l==='HE'?'active':''}`} onClick={()=>setL('HE')}>עברית</button>
+                                    <button className={`btn-lang ${l==='EN'?'active':''}`} onClick={()=>setL('EN')}>English</button>
+                                </div>
+                                <button className="btn-main" onClick={()=>setV('quiz')}>{t.start}</button>
+                                
+                                <div className="admin-footer">
+                                    <button className="btn-admin-access" onClick={() => {
+                                        if(prompt('סיסמת מנהל:') === '1234') setV('admin');
+                                    }}>כניסת מנהל 🔒</button>
+                                </div>
+                            </div>
+                        ) : v === 'done' ? (
+                            <div style={{textAlign:'center'}}>
+                                <h1 style={{fontSize:'4rem', color:'var(--gold)'}}>✔</h1>
+                                <h2>{t.succ}</h2>
+                                <button className="btn-main" onClick={()=>{setV('home'); setAns(Array(15).fill(null));}}>{t.back}</button>
+                            </div>
                         ) : (
                             <div>
-                                <div className="input-group">
-                                    <label>{t.name}</label>
-                                    <input placeholder="הכנס שם מלא" onChange={e=>setF({...f, n: e.target.value})} />
-                                </div>
-                                <div className="input-group">
-                                    <label>{t.dob}</label>
+                                <div className="input-group"><label>{t.name}</label><input onChange={e=>setF({...f, n: e.target.value})} /></div>
+                                <div className="input-group"><label>{t.dob}</label>
                                     <div className="dob-grid">
                                         <input placeholder={t.d} onChange={e=>setF({...f, d: e.target.value})} />
                                         <input placeholder={t.m} onChange={e=>setF({...f, m: e.target.value})} />
@@ -133,19 +131,16 @@
                                 </div>
                                 {Q_LIST.map((q, i) => (
                                     <div key={i} className="question-box">
-                                        <p style={{fontSize:'1.1rem'}}><strong>{i+1}. {q.q}</strong></p>
-                                        <select style={{marginTop:10}} onChange={e=>{const n=[...ans]; n[i]=parseInt(e.target.value); setAns(n)}}>
+                                        <p><strong>{i+1}. {q.q}</strong></p>
+                                        <select onChange={e=>{const n=[...ans]; n[i]=parseInt(e.target.value); setAns(n)}}>
                                             <option value="">{t.sel}</option>
-                                            {q.a.map((at, ai) => (
-                                                <option key={ai} value={ai}>{at}</option>
-                                            ))}
+                                            {q.a.map((at, ai) => <option key={ai} value={ai}>{at}</option>)}
                                         </select>
                                     </div>
                                 ))}
                                 <button className="btn-main" onClick={send}>{t.sub}</button>
                             </div>
                         )}
-                        <div style={{marginTop:40, opacity:0.01, cursor:'pointer', textAlign:'center'}} onClick={()=>{if(prompt('!')==='1234') setV('admin')}}>Admin</div>
                     </div>
                 </div>
             );
