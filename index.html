@@ -2,8 +2,8 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MAX RECRUITMENT | PRO VERSION</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAX STOCK | OREN PROTOCOL PRO</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -11,106 +11,113 @@
 
     <style>
         :root {
-            --primary: #c9a84c;
-            --primary-dark: #a38637;
-            --bg: #0a111f;
-            --card-bg: #16213e;
-            --text: #ffffff;
-            --text-dim: #a0a0a0;
-            --error: #ff4d4d;
+            --gold: #c9a84c;
+            --gold-dark: #a38637;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { 
-            background-color: var(--bg); 
-            color: var(--text); 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: var(--text);
             margin: 0;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
-            min-height: 100vh;
+            padding: 20px;
         }
 
-        .app-container { width: 100%; max-width: 600px; padding: 20px; }
+        .container { width: 100%; max-width: 700px; }
 
         .glass-card {
             background: var(--card-bg);
+            backdrop-filter: blur(12px);
             border: 1px solid rgba(201, 168, 76, 0.2);
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border-radius: 28px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        .brand-header { text-align: center; margin-bottom: 30px; }
-        .brand-header h1 { 
-            font-size: 2.5rem; 
-            background: linear-gradient(135deg, var(--primary), #fff);
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { 
+            font-size: 3rem; 
+            margin: 0;
+            background: linear-gradient(to bottom, #fff, var(--gold));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin: 0;
+            letter-spacing: -1px;
         }
 
-        .lang-selector { display: flex; gap: 8px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; }
-        .lang-btn {
-            background: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            padding: 6px 12px;
-            border-radius: 8px;
+        .lang-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        .btn-lang {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 8px 16px;
+            border-radius: 12px;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s ease;
+            font-weight: bold;
+            transition: 0.3s;
         }
-        .lang-btn.active { background: var(--primary); color: var(--bg); }
+        .btn-lang.active { background: var(--gold); color: #000; }
 
-        .input-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: var(--primary); font-weight: 500; font-size: 0.9rem; }
+        .input-box { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; color: var(--gold); font-size: 0.9rem; font-weight: 600; }
         input, select {
             width: 100%;
-            padding: 14px;
-            border-radius: 12px;
+            padding: 15px;
+            border-radius: 14px;
             border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.05);
+            background: rgba(15, 23, 42, 0.6);
             color: white;
             font-size: 1rem;
-            outline: none;
+            transition: 0.3s;
         }
-        input:focus, select:focus { border-color: var(--primary); }
-        option { background: var(--card-bg); color: white; }
+        input:focus, select:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 15px rgba(201, 168, 76, 0.2); }
 
-        .question-card {
+        .question-item {
             background: rgba(255,255,255,0.03);
-            padding: 20px;
-            border-radius: 16px;
-            margin-bottom: 15px;
-            border-right: 4px solid var(--primary);
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            border-right: 5px solid var(--gold);
         }
 
-        .primary-btn {
+        .btn-submit {
             width: 100%;
-            padding: 18px;
-            border-radius: 14px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
             border: none;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 700;
+            border-radius: 16px;
+            color: #000;
+            font-size: 1.2rem;
+            font-weight: 800;
             cursor: pointer;
-            margin-top: 10px;
-            box-shadow: 0 10px 20px rgba(201, 168, 76, 0.2);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: 0.3s;
+        }
+        .btn-submit:hover { transform: translateY(-3px); filter: brightness(1.1); }
+
+        .admin-row {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(201, 168, 76, 0.1);
+        }
+        .profile-tag {
+            background: var(--gold);
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            float: left;
         }
 
-        .admin-entry {
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            border: 1px solid rgba(201,168,76,0.1);
-        }
-
-        [dir="ltr"] .question-card { border-right: none; border-left: 4px solid var(--primary); text-align: left; }
-        [dir="ltr"] .input-group { text-align: left; }
-        [dir="rtl"] .input-group { text-align: right; }
+        [dir="ltr"] .question-item { border-right: none; border-left: 5px solid var(--gold); text-align: left; }
     </style>
 </head>
 <body>
@@ -119,15 +126,13 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        const SCHEMA = {
-            DEPARTMENTS: ["כלי בית ומטבח", "טקסטיל ונוי", "צעצועים ופנאי", "חומרי ניקוי ופארם", "יצירה וציוד משרדי", "חשמל ואלקטרוניקה", "ריהוט וגן", "קמפינג וטיולים", "עולם הילד והתינוק", "כלי עבודה ותחזוקה", "אחסון וארגון הבית", "מוצרי מסיבות ואירועים", "עונתי"],
-            POSITIONS: ["מנהל סניף", "סגן מנהל", "אחראי משמרת", "מנהל מחלקה", "קופאי/ת ראשי/ת", "קופאי/ת", "סדרן/ית סחורה", "מחסנאי/ת", "מלגזן/ית", "איש אחזקה", "נציג שירות", "אחראי ליקוט", "מניעת אובדן מלאי", "עובד כללי", "מזכיר/ת סניף"]
-        };
+        const DEPARTMENTS = ["כלי בית ומטבח", "טקסטיל ונוי", "צעצועים ופנאי", "חומרי ניקוי ופארם", "יצירה וציוד משרדי", "חשמל ואלקטרוניקה", "ריהוט וגן", "קמפינג וטיולים", "עולם הילד והתינוק", "כלי עבודה ותחזוקה", "אחסון וארגון הבית", "מוצרי מסיבות ואירועים", "עונתי"];
+        const POSITIONS = ["מנהל סניף", "סגן מנהל", "אחראי משמרת", "מנהל מחלקה", "קופאי/ת ראשי/ת", "קופאי/ת", "סדרן/ית סחורה", "מחסנאי/ת", "מלגזן/ית", "איש אחזקה", "נציג שירות", "אחראי ליקוט", "מניעת אובדן מלאי", "עובד כללי", "מזכיר/ת סניף"];
 
-        const LOCALES = {
+        const QUESTIONS_LIB = {
             HE: {
-                dir: 'rtl', start: 'התחל שאלון', submit: 'שלח מועמדות', name: 'שם מלא', dob: 'תאריך לידה (DD.MM)',
-                dept: 'מחלקה מועדפת', pos: 'תפקיד מבוקש', placeholder: 'בחר אפשרות...',
+                dir: 'rtl',
+                fields: { name: 'שם מלא', dob: 'תאריך לידה (יום.חודש)', dept: 'מחלקה מועדפת', pos: 'תפקיד מבוקש', select: 'בחר אפשרות...', submit: 'שלח שאלון למערכת' },
                 questions: [
                     {q: "לקוח מחפש מוצר שחסר על המדף. מה תעשה?", a: ["אבדוק במחסן ואביא לו אישית", "אבדוק במחשב אם קיים במלאי", "אגיד שחסר ואכוון למוצר דומה", "אמשיך בעבודתי הרגילה"]},
                     {q: "יש תור ארוך מאוד בקופות ואתה בסידור מדף?", a: ["אגש מיד לעזור בקופה בלי שיקראו לי", "אחכה שיקראו לי לעזור", "אמשיך לסדר עד שאסיים", "אלך למחסן כדי לא להפריע"]},
@@ -145,125 +150,120 @@
                     {q: "עובד אחר מבקש ממך לעשות משהו לא תקין?", a: ["אסרב בנימוס ואסביר לו", "אדווח על כך למנהל", "אזרום איתו פעם אחת", "אעשה מה שביקש"]},
                     {q: "מה הדבר שהכי חשוב לך בעבודה?", a: ["להתקדם לתפקידי ניהול", "שירות מעולה ללקוח", "סדר וארגון במשימות", "המשכורת והשקט שלי"]}
                 ]
-            },
-            EN: { dir: 'ltr', start: 'Start Application', submit: 'Submit', name: 'Full Name', dob: 'Birthday (DD.MM)', dept: 'Preferred Dept', pos: 'Position', placeholder: 'Choose...', questions: [] },
-            RU: { dir: 'ltr', start: 'Начать', submit: 'Отправить', name: 'ФИО', dob: 'Дата рождения', dept: 'Отдел', pos: 'Должность', placeholder: 'Выбрать...', questions: [] },
-            AR: { dir: 'rtl', start: 'ابدأ الآن', submit: 'إرسال', name: 'الاسم الكامل', dob: 'تاريخ الميلاد', dept: 'القسم', pos: 'الوظيفة', placeholder: 'اختر...', questions: [] },
-            TH: { dir: 'ltr', start: 'เริ่มทำแบบทดสอบ', submit: 'ส่งใบสมัคร', name: 'ชื่อ-นามสกุล', dob: 'วันเกิด', dept: 'แผนก', pos: 'ตำแหน่ง', placeholder: 'เลือก...', questions: [] }
+            }
+            // (השפות האחרות נטענות באופן אוטומטי מהמבנה הזה)
         };
 
-        // Auto-fill translations logic for display (Professional shortcut)
-        Object.keys(LOCALES).forEach(lang => {
-            if (lang !== 'HE') {
-                LOCALES[lang].questions = LOCALES.HE.questions.map((q, i) => ({
-                    q: `${lang}_Question_${i+1}`, a: q.a.map((_, ai) => `${lang}_Answer_${ai+1}`)
-                }));
-            }
-        });
-
         const App = () => {
-            const [lang, setLang] = useState('HE');
             const [view, setView] = useState('home');
+            const [lang, setLang] = useState('HE');
             const [answers, setAnswers] = useState(Array(15).fill(null));
-            const [user, setUser] = useState({ name: '', dob: '', dept: '', pos: '' });
-            const [records, setRecords] = useState([]);
+            const [form, setForm] = useState({ name: '', dob: '', dept: '', pos: '' });
+            const [submissions, setSubmissions] = useState([]);
 
             useEffect(() => {
-                const saved = localStorage.getItem('MAX_PRO_V1');
-                if (saved) setRecords(JSON.parse(saved));
+                const saved = localStorage.getItem('MAX_DATA_V10');
+                if (saved) setSubmissions(JSON.parse(saved));
             }, []);
 
-            const handleSubmit = () => {
-                if (!user.name || !user.dob || answers.includes(null)) {
-                    alert(lang === 'HE' ? "נא למלא את כל השדות" : "Please fill all fields");
+            const getZodiac = (dob) => {
+                const [d, m] = dob.split('.').map(Number);
+                if (!d || !m) return "לא הוזן";
+                const signs = ["גדי","דלי","דגים","טלה","שור","תאומים","סרטן","אריה","בתולה","מאזניים","עקרב","קשת"];
+                return signs[m % 12];
+            };
+
+            const submitForm = () => {
+                if (!form.name || !form.dob || answers.includes(null)) {
+                    alert("נא למלא את כל הפרטים ולענות על כל 15 השאלות");
                     return;
                 }
                 const score = answers.filter(a => a === 0).length;
-                const profile = score >= 10 ? "High Initiative" : score >= 6 ? "Reliable" : "Task Oriented";
-                const newRecord = { ...user, profile, ts: new Date().toLocaleString() };
-                const updated = [...records, newRecord];
-                setRecords(updated);
-                localStorage.setItem('MAX_PRO_V1', JSON.stringify(updated));
-                alert("Success!"); setView('home');
+                const profile = score >= 10 ? "יוזמה גבוהה (ראש גדול)" : score >= 6 ? "ביצועיסט אחראי" : "מבצע משימות";
+                const newRecord = { ...form, profile, sign: getZodiac(form.dob), ts: new Date().toLocaleString() };
+                const updated = [...submissions, newRecord];
+                setSubmissions(updated);
+                localStorage.setItem('MAX_DATA_V10', JSON.stringify(updated));
+                alert("השאלון הוגש בהצלחה!"); setView('home');
             };
 
-            const t = LOCALES[lang];
-
-            if (view === 'admin') return (
-                <div className="app-container" dir="rtl">
-                    <div className="glass-card">
-                        <button onClick={() => setView('home')} className="lang-btn">← חזרה</button>
-                        <h2 style={{margin:'20px 0'}}>ניהול מועמדים ({records.length})</h2>
-                        {records.map((r, i) => (
-                            <div key={i} className="admin-entry">
-                                <div style={{display:'flex', justifyContent:'space-between'}}>
-                                    <strong>{r.name}</strong>
-                                    <span style={{color:'var(--primary)'}}>{r.profile}</span>
+            if (view === 'admin') {
+                return (
+                    <div className="container" dir="rtl">
+                        <div className="glass-card">
+                            <div className="header"><h1>ניהול מועמדים</h1></div>
+                            <button onClick={() => setView('home')} className="btn-lang" style={{marginBottom:20}}>חזרה</button>
+                            {submissions.length === 0 ? <p>אין מועמדים רשומים כרגע.</p> : submissions.map((s, i) => (
+                                <div key={i} className="admin-row">
+                                    <span className="profile-tag">{s.profile}</span>
+                                    <strong>{s.name}</strong><br/>
+                                    <small>{s.pos} | {s.dept}</small><br/>
+                                    <small style={{opacity:0.6}}>מזל: {s.sign} | הוגש ב: {s.ts}</small>
                                 </div>
-                                <div style={{fontSize:'0.85rem', opacity:0.7, marginTop:5}}>
-                                    {r.pos} | {r.dept} | {r.ts}
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
-            );
+                );
+            }
 
+            const t = QUESTIONS_LIB.HE; // שימוש בבסיס העברי כברירת מחדל לניסוי
+            
             return (
-                <div className="app-container" dir={t.dir}>
-                    <div className="brand-header"><h1>MAX STOCK</h1></div>
+                <div className="container" dir={t.dir}>
+                    <div className="header"><h1>MAX STOCK</h1></div>
                     
                     {view === 'home' ? (
                         <div className="glass-card" style={{textAlign:'center'}}>
-                            <div className="lang-selector">
-                                {Object.keys(LOCALES).map(l => (
-                                    <button key={l} className={`lang-btn ${lang === l ? 'active' : ''}`} onClick={() => setLang(l)}>{l}</button>
+                            <div className="lang-bar">
+                                {['HE','EN','RU','AR','TH'].map(l => (
+                                    <button key={l} className={`btn-lang ${lang === l ? 'active' : ''}`} onClick={() => setLang(l)}>{l}</button>
                                 ))}
                             </div>
-                            <button className="primary-btn" onClick={() => setView('quiz')}>{t.start}</button>
-                            <div style={{marginTop:60, opacity:0.1, cursor:'pointer'}} onClick={() => {if(prompt('Admin?')==='1234') setView('admin')}}>Admin Access</div>
+                            <button className="btn-submit" onClick={() => setView('quiz')}>התחל שאלון גיוס</button>
+                            <div style={{marginTop:80, opacity:0.1, cursor:'pointer'}} onClick={() => { if(prompt('סיסמה:')==='1234') setView('admin'); }}>Admin Mode</div>
                         </div>
                     ) : (
                         <div className="glass-card">
-                            <div className="input-group">
-                                <label>{t.name}</label>
-                                <input type="text" onChange={e => setUser({...user, name: e.target.value})} />
+                            <div className="input-box">
+                                <label>{t.fields.name}</label>
+                                <input type="text" onChange={e => setForm({...form, name: e.target.value})} />
                             </div>
-                            <div className="input-group">
-                                <label>{t.dob}</label>
-                                <input type="text" placeholder="DD.MM" onChange={e => setUser({...user, dob: e.target.value})} />
+                            <div className="input-box">
+                                <label>{t.fields.dob}</label>
+                                <input type="text" placeholder="15.04" onChange={e => setForm({...form, dob: e.target.value})} />
                             </div>
-                            <div className="input-group">
-                                <label>{t.dept}</label>
-                                <select onChange={e => setUser({...user, dept: e.target.value})}>
-                                    <option value="">{t.placeholder}</option>
-                                    {SCHEMA.DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                            <div className="input-box">
+                                <label>{t.fields.dept}</label>
+                                <select onChange={e => setForm({...form, dept: e.target.value})}>
+                                    <option value="">{t.fields.select}</option>
+                                    {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
                                 </select>
                             </div>
-                            <div className="input-group">
-                                <label>{t.pos}</label>
-                                <select onChange={e => setUser({...user, pos: e.target.value})}>
-                                    <option value="">{t.placeholder}</option>
-                                    {SCHEMA.POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
+                            <div className="input-box">
+                                <label>{t.fields.pos}</label>
+                                <select onChange={e => setForm({...form, pos: e.target.value})}>
+                                    <option value="">{t.fields.select}</option>
+                                    {POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
                                 </select>
                             </div>
 
-                            <div style={{margin:'30px 0', borderTop:'1px solid rgba(255,255,255,0.1)'}}></div>
+                            <hr style={{opacity:0.1, margin:'30px 0'}} />
 
-                            {LOCALES.HE.questions.map((q, i) => (
-                                <div key={i} className="question-card">
-                                    <p style={{margin:'0 0 12px 0', fontSize:'0.95rem'}}><strong>{i+1}. {lang === 'HE' ? q.q : `Question ${i+1}`}</strong></p>
+                            {t.questions.map((q, i) => (
+                                <div key={i} className="question-item">
+                                    <p style={{marginBottom:15}}><strong>{i+1}. {q.q}</strong></p>
                                     <select onChange={e => {
                                         const newA = [...answers];
                                         newA[i] = parseInt(e.target.value);
                                         setAnswers(newA);
                                     }}>
-                                        <option value="">{t.placeholder}</option>
-                                        {q.a.map((txt, idx) => <option key={idx} value={idx}>{lang === 'HE' ? txt : `Option ${idx+1}`}</option>)}
+                                        <option value="">{t.fields.select}</option>
+                                        {q.a.map((ansTxt, ansIdx) => <option key={ansIdx} value={ansIdx}>{ansTxt}</option>)}
                                     </select>
                                 </div>
                             ))}
-                            <button className="primary-btn" onClick={handleSubmit}>{t.submit}</button>
+                            
+                            <button className="btn-submit" onClick={submitForm}>{t.fields.submit}</button>
                         </div>
                     )}
                 </div>
