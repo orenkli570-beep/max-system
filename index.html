@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>יהודה | ניתוח אינטראקציה - MAX STOCK</title>
+    <title>יהודה | ניהול סניף MAX STOCK</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -11,24 +11,26 @@
         :root { --gold: #c9a84c; --bg: #0b0f1a; --card: #161c2d; --danger: #ef4444; --success: #22c55e; --info: #3b82f6; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--bg); color: #e2e8f0; margin: 0; padding: 20px; }
-        .dashboard { max-width: 1300px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); padding-bottom: 20px; margin-bottom: 30px; }
+        .dashboard { max-width: 1400px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); padding-bottom: 20px; margin-bottom: 25px; }
         .header h1 { color: var(--gold); margin: 0; font-size: 1.8rem; }
         
-        table { width: 100%; border-collapse: separate; border-spacing: 0 12px; }
-        tr.candidate-row { background: var(--card); border: 1px solid rgba(255,255,255,0.05); }
+        /* סרגל סינון */
+        .filter-bar { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; border: 1px solid rgba(201,168,76,0.1); }
+        select { background: #000; color: #fff; border: 1px solid var(--gold); padding: 10px; border-radius: 8px; cursor: pointer; }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        tr.candidate-row { background: var(--card); }
         td { padding: 20px; vertical-align: top; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        td:first-child { border-radius: 0 15px 15px 0; border-right: 1px solid rgba(255,255,255,0.05); }
-        td:last-child { border-radius: 15px 0 0 15px; border-left: 1px solid rgba(255,255,255,0.05); }
+        td:first-child { border-radius: 0 15px 15px 0; }
+        td:last-child { border-radius: 15px 0 0 15px; }
 
         .time-badge { padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; }
         .fast { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid var(--danger); }
         .solid { background: rgba(34,197,94,0.15); color: var(--success); border: 1px solid var(--success); }
 
-        .interaction-card { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; margin-top: 10px; border-right: 3px solid var(--info); }
-        .interaction-title { font-size: 0.8rem; color: var(--info); font-weight: bold; margin-bottom: 5px; display: block; }
-        
-        .personality-tag { display: inline-block; padding: 3px 8px; border-radius: 5px; font-size: 0.75rem; margin-left: 5px; background: rgba(201,168,76,0.1); color: var(--gold); border: 1px solid var(--gold); }
+        .interaction-box { background: rgba(59, 130, 246, 0.05); padding: 12px; border-radius: 10px; border-right: 3px solid var(--info); font-size: 0.9rem; line-height: 1.5; }
+        .tag { display: inline-block; padding: 3px 8px; border-radius: 5px; font-size: 0.7rem; margin: 3px; background: rgba(201,168,76,0.1); color: var(--gold); border: 1px solid var(--gold); }
     </style>
 </head>
 <body>
@@ -36,64 +38,72 @@
     <script type="text/babel">
         const { useState } = React;
 
+        const DEPARTMENTS = ["כל המחלקות", "צעצועים", "יצירה", "חשמל", "בית ונוי", "כלי בית", "חד פעמי", "טקסטיל", "ניקיון", "קוסמטיקה", "משרדי", "מזון", "גינון", "פנאי"];
+        const ROLES = ["קופאי", "סדרן מחלקה", "מחסנאי", "אחראי משמרת", "מנהל מחלקה", "נציג שירות", "מלגזן", "עובד דלפק", "סדרן קופות", "אחראי החזרות", "בודק ביטחון", "מנהל סניף", "סגן מנהל", "עובד כללי", "ניקיון ואחזקה"];
+
         const CANDIDATES = [
-            { 
-                id: 1, name: "ישראל ישראלי", age: 24, time: "1:45", status: "fast",
-                analysis: "מועמד אימפולסיבי. ענה על השאלון במהירות שמעידה על רצון 'לסיים עם זה'.",
-                social: "עלול לייצר חיכוכים עם עובדים איטיים ממנו. נוטה לפתור בעיות בקיצורי דרך במקום לעבוד לפי הפרוטוקול של המנהל."
-            },
-            { 
-                id: 2, name: "מיכל אברהם", age: 29, time: "3:40", status: "solid",
-                analysis: "גישה שירותית מובהקת. יסודית מאוד בפרטים הקטנים של סידור המדף.",
-                social: "עובדת צוות קלאסית. תהיה זו שתעזור לעובדים חדשים ותגבה את המנהל בזמן לחץ. מקבלת מרות בצורה מכבדת."
-            },
-            { 
-                id: 3, name: "יוסי לוי", age: 21, time: "3:10", status: "solid",
-                analysis: "מועמד משימתי. ממוקד מאוד במה שאמרו לו לעשות.",
-                social: "יסתדר מצוין עם עובדים אחרים כל עוד הגדרות התפקיד ברורות. פחות יזום אינטראקציה חברתית, אך יציית לכל הוראת מנהל ללא ערעור."
-            }
+            { id: 1, name: "משה כהן", age: 22, dept: "צעצועים", role: "סדרן מחלקה", time: "1:35", status: "fast", analysis: "רמה גבוהה של חפיפה. המועמד דילג על שאלות מהותיות.", social: "יחסים עם המנהל: ינסה להתחמק ממטלות משעממות. יחסים עם הצוות: עלול להעמיס עבודה על אחרים." },
+            { id: 2, name: "אילנה לוי", age: 35, dept: "בית ונוי", role: "מנהלת מחלקה", time: "4:20", status: "solid", analysis: "ניתוח זהוב: יסודיות יוצאת דופן, הבנה מעמיקה של סדר וניקיון.", social: "יחסים עם המנהל: יד ימינו של המנהל, תקשורת מעולה. יחסים עם הצוות: מנהיגה טבעית, תומכת בעובדים חלשים." },
+            { id: 3, name: "דניאל אביב", age: 20, dept: "חשמל", role: "קופאי", time: "3:05", status: "solid", analysis: "מועמד יציב ומשימתי. פועל לפי הספר.", social: "יחסים עם המנהל: ציות מלא. יחסים עם הצוות: עובד בשקט, לא מייצר חיכוכים חברתיים." }
         ];
 
         const App = () => {
+            const [selectedDept, setSelectedDept] = useState("כל המחלקות");
+
             return (
                 <div className="dashboard">
                     <div className="header">
-                        <h1>יהודה | ניתוח עומק למנהל</h1>
-                        <div style={{opacity:0.7}}>מודל חיזוי התנהגות ואינטראקציה</div>
+                        <h1>פרוטוקול יהודה | מרכז בקרה וניהול</h1>
+                        <div style={{color: 'var(--gold)'}}>MAX STOCK - לוח מנהל פעיל</div>
+                    </div>
+
+                    <div className="filter-bar">
+                        <div style={{display:'flex', flexDirection:'column'}}>
+                            <label style={{fontSize:'0.8rem', marginBottom:'5px'}}>סינון לפי מחלקה:</label>
+                            <select onChange={(e) => setSelectedDept(e.target.value)}>
+                                {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                            </select>
+                        </div>
+                        <div style={{display:'flex', flexDirection:'column'}}>
+                            <label style={{fontSize:'0.8rem', marginBottom:'5px'}}>חיפוש לפי תפקיד:</label>
+                            <select>
+                                <option>כל התפקידים</option>
+                                {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                            </select>
+                        </div>
                     </div>
 
                     <table>
                         <thead>
                             <tr>
-                                <th style={{width:'15%'}}>מועמד וגיל</th>
-                                <th style={{width:'12%'}}>זמן (יעד: 3:00)</th>
-                                <th style={{width:'30%'}}>ניתוח אופי מילולי</th>
-                                <th style={{width:'43%'}}>דינמיקה חברתית ואינטראקציה</th>
+                                <th>מועמד</th>
+                                <th>שיבוץ מבוקש</th>
+                                <th>מדד "חפיף"</th>
+                                <th>ניתוח אינטראקציה חברתית (יהודה)</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {CANDIDATES.map(c => (
+                            {CANDIDATES.filter(c => selectedDept === "כל המחלקות" || c.dept === selectedDept).map(c => (
                                 <tr key={c.id} className="candidate-row">
                                     <td>
                                         <strong>{c.name}</strong><br/>
-                                        <span>גיל: {c.age}</span>
+                                        <span style={{fontSize:'0.8rem'}}>גיל: {c.age}</span><br/>
+                                        <span className="tag">אמינות גבוהה</span>
                                     </td>
                                     <td>
-                                        <span className={`time-badge ${c.status === 'fast' ? 'fast' : 'solid'}`}>
-                                            {c.time} {c.status === 'fast' ? 'חפיף' : 'יסודי'}
-                                        </span>
+                                        <div style={{color:'var(--gold)', fontWeight:'bold'}}>{c.dept}</div>
+                                        <div style={{fontSize:'0.9rem'}}>{c.role}</div>
                                     </td>
-                                    <td className="analysis-text">
-                                        {c.analysis}
-                                        <div style={{marginTop:'10px'}}>
-                                            <span className="personality-tag">אנרגטי</span>
-                                            {c.status === 'solid' && <span className="personality-tag">אמין</span>}
+                                    <td>
+                                        <div className={`time-badge ${c.status === 'fast' ? 'fast' : 'solid'}`}>
+                                            {c.time} {c.status === 'fast' ? 'חפיפה!' : 'יסודי'}
                                         </div>
                                     </td>
                                     <td>
-                                        <div className="interaction-card">
-                                            <span className="interaction-title">יחסים עם המנהל והצוות:</span>
-                                            <div style={{fontSize:'0.9rem', color:'#cbd5e1'}}>{c.social}</div>
+                                        <div className="interaction-box">
+                                            <strong>ניתוח פסיכולוגי:</strong> {c.analysis}<br/>
+                                            <hr style={{opacity:0.1, margin:'10px 0'}} />
+                                            <strong>דינמיקה בסניף:</strong> {c.social}
                                         </div>
                                     </td>
                                 </tr>
