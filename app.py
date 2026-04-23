@@ -20,6 +20,7 @@
         .admin-box{border-right:6px solid #e31e24;background:#fff5f5;padding:15px;margin-bottom:15px;border-radius:8px}
         .lang-btn{padding:8px 15px;margin:5px;border-radius:8px;border:1px solid #ddd;background:white;cursor:pointer}
         .lang-active{background:#e31e24;color:white;border-color:#e31e24}
+        .save-tag { background: #10b981; color: white; padding: 2px 8px; border-radius: 5px; font-size: 12px; margin-right: 10px; }
     </style>
 </head>
 <body>
@@ -34,14 +35,23 @@
             save: (list) => localStorage.setItem("max_candidates", JSON.stringify(list)),
             add: (item) => {
                 const l = DB.load();
-                l.push({...item, id: Date.now(), submittedAt: new Date().toISOString()});
+                l.push({...item, id: Date.now(), submittedAt: new Date().toISOString(), assignedDept: "", assignedRole: ""});
+                DB.save(l);
+            },
+            update: (id, updates) => {
+                const l = DB.load();
+                const i = l.findIndex(c => c.id === id);
+                if (i !== -1) l[i] = {...l[i], ...updates};
                 DB.save(l);
             }
         };
 
-        // --- נתוני שפות (15 שאלות כפול 5 שפות) ---
+        const DEPARTMENTS = ["פלסטיקה", "ביוטי", "דקורציה", "עונה", "כלי מטבח", "יצירה", "צעצועים", "טקסטיל", "ניקיון", "חזרה לבית הספר", "מחסן", "חשמל", "קופות"];
+        const ROLES = ["סדרן/ית", "קופאי/ת", "מחסנאי/ת", "סגן/ית מנהל", "אחראי/ת משמרת", "אחראי/ת מחלקה"];
+
+        // --- נתוני שפות (15 שאלות) ---
         const LANGS = {
-            he: { dir:"rtl", label:"עברית", title:"ברוכים הבאים למקס סטוק", subtitle:"אנא מלא את פרטיך", name:"שם מלא", dob:"תאריך לידה (DD.MM.YYYY)", next:"הבא", send:"שלח שאלון", allReq:"נא לענות על כל השאלות", questions: [
+            he: { dir:"rtl", label:"עברית", title:"ברוכים הבאים למקס סטוק", subtitle:"אנא מלא את פרטיך", name:"שם מלא", dob:"תאריך לידה (DD.MM.YYYY)", send:"שלח שאלון", allReq:"נא לענות על כל השאלות", questions: [
                 {q:"לקוח מחפש מוצר שחסר על המדף, מה תעשה?", a:["אבדוק מיד במחסן ואנסה להביא לו","אבדוק במחשב או אשאל אחראי","אעדכן שחסר במלאי","אמשיך בעבודתי"]},
                 {q:"יש תור ארוך בקופות ואתה בסידור מדף?", a:["אגש מיד לעזור בקופה","אחכה שיקראו לי","אמשיך לסדר מדפים","אלך למחסן"]},
                 {q:"ראית מוצר שבור על הרצפה?", a:["אנקה מיד ואדאג לבטיחות","אדווח למנהל המשמרת","אקרא לעובד ניקיון","אעקוף ואמשיך לעבוד"]},
@@ -58,7 +68,7 @@
                 {q:"עובד מבקש לעשות משהו לא תקין?", a:["אסרב ואסביר את הנוהל","אדווח למנהל","אעזור לו באופן חד פעמי","אעשה מה שביקש"]},
                 {q:"מה הכי מניע אותך?", a:["להתקדם ולהצליח","שירות מעולה ולקוח מרוצה","סדר וארגון מושלם","משכורת ושקט"]}
             ]},
-            en: { dir:"ltr", label:"English", title:"Welcome to MAX", subtitle:"Please fill details", name:"Full Name", dob:"DOB (DD.MM.YYYY)", next:"Next", send:"Submit", allReq:"Answer all questions", questions: [
+            en: { dir:"ltr", label:"English", title:"Welcome to MAX", name:"Full Name", dob:"DOB (DD.MM.YYYY)", send:"Submit", allReq:"Answer all questions", questions: [
                 {q:"Customer looks for missing item?", a:["Check warehouse immediately","Check computer/Ask manager","Say out of stock","Continue working"]},
                 {q:"Long line at registers and you are stocking?", a:["Help immediately","Wait to be called","Keep stocking","Go to warehouse"]},
                 {q:"Found broken item on floor?", a:["Clean immediately","Report to manager","Call cleaning staff","Ignore and continue"]},
@@ -92,8 +102,8 @@
                 {q:"Просят сделать не по правилам?", a:["Откажусь","Сообщу менеджеру","Помогу один раз","Сделаю как просят"]},
                 {q:"Что вас мотивирует?", a:["Карьера","Довольный клиент","Порядок","Зарплата"]}
             ]},
-            ar: { dir:"rtl", label:"العربية", title:"أهلاً بكم في ماكس ستوك", name:"الاسم الكامل", dob:"تاريخ الميلاد", questions: [
-                {q:"زبون يبحث عن منتج مفقود؟", a:["أفحص المخزن فوراً","أفحص الحاسوب","أقول إنه غير متوفر","أكمل عملي"]},
+            ar: { dir:"rtl", label:"العربية", title:"أهلاً بكم في ماكس סטוק", name:"الاسم الكامل", dob:"تاريخ الميلاد", questions: [
+                {q:"زبون يبحث عن منتג مفقוד؟", a:["أفحص المخزن فوراً","أفحص الحاسوب","أقول إنه غير متوفر","أكمل عملي"]},
                 {q:"طابور طويل وأنت ترتب الرفوف؟", a:["أذهب للمساعدة فوراً","أنتظر المناداة","أكمل الرفوف","أذهب للمخزن"]},
                 {q:"منتج مكسور على الأرض؟", a:["أنظف فوراً","أبلغ المدير","أنادي عامل النظافة","أكمل طريقي"]},
                 {q:"زبون يصرخ بسبب السعر؟", a:["أستمع بصبر","أنادي المدير","أقول هذا هو السعر","أتجاهل وأبتعد"]},
@@ -101,13 +111,13 @@
                 {q:"زميل أخطأ في الترتيب؟", a:["أساعده بلطف","أنبهه للخطأ","أبلغ المدير","ليس من شأني"]},
                 {q:"وصلت والقسم في فوضى؟", a:["أبدأ بالترتيب حسب الأهمية","أسأل المدير من أين أبدأ","أرتب منطقتي فقط","أنتظر التعليمات"]},
                 {q:"زبون محتار في هدية؟", a:["أقترح خيارات","أوجهه لقسم الهدايا","أقول هذا ذوق شخصي","أحوله لموظف آخر"]},
-                {q:"وجدت نقوداً على الأرض؟", a:["أسلمها للمدير","أسأل الزبائن","أضعها في صندوق الصدقة","أضعها في جيبي"]},
+                {q:"وجدت نقوداً على الأرض؟", a:["أسلمها للمدير","أسأل الزבائن","أضعها في صندوق الصדقة","أضعها في جيبي"]},
                 {q:"كيف تحب أن تعمل؟", a:["مسؤولية شخصية وحدي","مع الفريق","تلقي أوامر مباشرة","وحدي بهدوء"]},
                 {q:"طلب خصم غير ممكن؟", a:["أشرح سياسة المحل","أبحث عن عرض بديل","أرسله للمدير","أقول لا ببساطة"]},
                 {q:"أخطأت في وضع السعر؟", a:["أصحح وأبلغ المدير","أسأل كيف أصحح","أمل ألا يلاحظ أحد","أتركها كما هي"]},
                 {q:"انتهى الوقت والمحل مزدحم؟", a:["أبقى للمساعدة","أنهي المهمة وأرحل","أرحل فوراً","أختفي في المخزن"]},
                 {q:"موظف يطلب شيئاً غير قانوني؟", a:["أرفض وأشرح القانون","أبلغ المدير","أساعد لمرة واحدة","أفعل ما طلب"]},
-                {q:"ما الذي يحفزك؟", a:["الترقية والنجاح","خدمة الزبائن","النظام والترتيب","المعاش والهدوء"]}
+                {q:"ما الذي يحفזك؟", a:["الترقية والنجاح","خدمة الزبائن","النظام والترتيب","المعاش والهدوء"]}
             ]},
             th: { dir:"ltr", label:"ภาษาไทย", title:"ยินดีต้อนรับสู่ MAX", name:"ชื่อ-นามสกุล", dob:"วันเกิด", questions: [
                 {q:"ลูกค้ามองหาสินค้าที่ไม่มีบนชั้น?", a:["เช็คในโกดังทันที","เช็คคอมพิวเตอร์/ถามหัวหน้า","บอกว่าหมดสต็อก","ทำงานต่อ"]},
@@ -128,16 +138,13 @@
             ]}
         };
 
-        // --- פונקציות ניתוח (תמיד בעברית למנהל) ---
         function analyze(ans) {
             let aCount = ans.filter(x => x === 0).length;
-            let bCount = ans.filter(x => x === 1).length;
-            const style = aCount >= 8 ? "יוזם (ראש גדול)" : bCount >= 7 ? "שירותי (שחקן נשמה)" : "ביצועיסט (צייתן)";
-            const desc = aCount >= 8 ? "מועמד עצמאי שדוחף קדימה. לא לחנוק אותו במיקרו-ניהול." : "מתאים מאוד לעבודה עם אנשים. סבלני ונעים.";
+            const style = aCount >= 8 ? "יוזם (ראש גדול)" : "ביצועיסט (צייתן)";
+            const desc = aCount >= 8 ? "עצמאי, דוחף קדימה, מתאים לניהול מחלקה." : "זקוק להנחיות ברורות, עקבי ומדויק.";
             return { style, desc };
         }
 
-        // --- קומפוננטת האפליקציה ---
         function App() {
             const [view, setView] = useState("home");
             const [lang, setLang] = useState("he");
@@ -148,58 +155,47 @@
 
             const L = LANGS[lang];
 
-            const submitQuiz = () => {
-                if(!name || !dob || answers.includes(null)) return alert(L.allReq);
-                const analysis = analyze(answers);
-                DB.add({ name, dob, answers, analysis });
-                alert("Success / תודה רבה");
-                setView("home");
-                setAnswers(Array(15).fill(null));
-                setName(""); setDob("");
+            const handleSaveAssignment = (id, dept, role) => {
+                DB.update(id, { assignedDept: dept, assignedRole: role });
+                setAdminData(DB.load());
+                alert("השיבוץ נשמר!");
             };
 
-            const openAdmin = () => {
-                const pass = prompt("Password:");
-                if(pass === "1234") {
-                    setAdminData(DB.load());
-                    setView("admin");
-                }
+            const submitQuiz = () => {
+                if(!name || !dob || answers.includes(null)) return alert(L.allReq);
+                DB.add({ name, dob, answers, analysis: analyze(answers) });
+                alert("תודה / Thank you");
+                setView("home");
             };
 
             if (view === "home") return (
                 <div className="container" style={{textAlign:'center', marginTop:'100px'}}>
                     <div className="header"><h1>MAX STOCK</h1></div>
                     <div className="glass-card">
-                        <h2>Select Language / בחר שפה</h2>
+                        <h2>בחר שפה / Select Language</h2>
                         <div style={{margin:'20px 0'}}>
                             {Object.keys(LANGS).map(k => (
                                 <button key={k} onClick={()=>setLang(k)} className={`lang-btn ${lang===k?'lang-active':''}`}>{LANGS[k].label}</button>
                             ))}
                         </div>
-                        <button className="btn-gold" onClick={()=>setView("quiz")}>התחל שאלון / Start</button>
-                        <button onClick={openAdmin} style={{marginTop:'30px', background:'none', border:'none', color:'#999', cursor:'pointer'}}>Admin</button>
+                        <button className="btn-gold" onClick={()=>setView("quiz")}>התחל / Start</button>
+                        <button onClick={()=>{ if(prompt("Pass:")==="1234") {setAdminData(DB.load()); setView("admin");} }} style={{marginTop:'40px', background:'none', border:'none', color:'#ccc'}}>Admin</button>
                     </div>
                 </div>
             );
 
             if (view === "quiz") return (
                 <div className="container" style={{direction: L.dir}}>
-                    <div className="header"><h1>{L.title}</h1></div>
+                    <div className="header"><h1>שאלון מועמד</h1></div>
                     <div className="glass-card">
-                        <div className="q-card">
-                            <input type="text" placeholder={L.name} value={name} onChange={e=>setName(e.target.value)} style={{marginBottom:'10px', width:'100%', padding:'10px'}} />
-                            <input type="text" placeholder={L.dob} value={dob} onChange={e=>setDob(e.target.value)} style={{width:'100%', padding:'10px'}} />
-                        </div>
+                        <input type="text" placeholder={L.name} onChange={e=>setName(e.target.value)} style={{width:'100%', padding:'10px', marginBottom:'10px'}} />
+                        <input type="text" placeholder={L.dob} onChange={e=>setDob(e.target.value)} style={{width:'100%', padding:'10px', marginBottom:'20px'}} />
                         {L.questions.map((q, i) => (
                             <div key={i} className="q-card">
                                 <strong>{i+1}. {q.q}</strong>
-                                <select onChange={e=> {
-                                    const newAns = [...answers];
-                                    newAns[i] = parseInt(e.target.value);
-                                    setAnswers(newAns);
-                                }} style={{width:'100%', marginTop:'10px', padding:'5px'}}>
+                                <select onChange={e=> {const n=[...answers]; n[i]=parseInt(e.target.value); setAnswers(n);}} style={{width:'100%', marginTop:'10px'}}>
                                     <option value="">--</option>
-                                    {q.a.map((opt, idx) => <option key={idx} value={idx}>{opt}</option>)}
+                                    {q.a.map((opt,idx)=><option key={idx} value={idx}>{opt}</option>)}
                                 </select>
                             </div>
                         ))}
@@ -210,15 +206,18 @@
 
             if (view === "admin") return (
                 <div className="container">
-                    <div className="header"><h1>ניהול מועמדים (עברית)</h1></div>
+                    <div className="header"><h1>ניהול מועמדים</h1></div>
                     <div className="glass-card">
-                        <button onClick={()=>setView("home")} style={{marginBottom:'20px'}}>חזרה לתפריט</button>
-                        {adminData.length === 0 ? <p>אין מועמדים רשומים</p> : adminData.map((c, i) => (
+                        <button onClick={()=>setView("home")}>יציאה</button>
+                        {adminData.map((c, i) => (
                             <div key={i} className="admin-box">
-                                <h3>{c.name} | {c.dob}</h3>
-                                <p><strong>סיווג:</strong> {c.analysis.style}</p>
-                                <p><strong>ניתוח:</strong> {c.analysis.desc}</p>
-                                <small>הוגש ב: {new Date(c.submittedAt).toLocaleString()}</small>
+                                <h3>{c.name} {c.assignedDept && <span className="save-tag">משובץ ב: {c.assignedDept}</span>}</h3>
+                                <p>ניתוח: {c.analysis.style}</p>
+                                <div style={{marginTop:'10px', display:'flex', gap:'10px'}}>
+                                    <select id={`d-${c.id}`} defaultValue={c.assignedDept}><option value="">בחר מחלקה</option>{DEPARTMENTS.map(d=><option key={d}>{d}</option>)}</select>
+                                    <select id={`r-${c.id}`} defaultValue={c.assignedRole}><option value="">בחר תפקיד</option>{ROLES.map(r=><option key={r}>{r}</option>)}</select>
+                                    <button onClick={()=>handleSaveAssignment(c.id, document.getElementById(`d-${c.id}`).value, document.getElementById(`r-${c.id}`).value)} style={{background:'#10b981', color:'white', border:'none', padding:'5px 10px', borderRadius:'5px'}}>שמור</button>
+                                </div>
                             </div>
                         ))}
                     </div>
