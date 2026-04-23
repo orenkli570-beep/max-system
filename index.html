@@ -3,52 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MAX STOCK | HR Smart System</title>
+    <title>MAX STOCK | HR System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
     <style>
         :root { --gold: #c9a84c; --bg: #0b0f1a; --card: #161e2d; --text: #f8fafc; --accent: #38bdf8; --success: #22c55e; --danger: #ef4444; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background: var(--bg); color: var(--text); margin: 0; padding: 10px; }
-        .container { max-width: 700px; margin: 0 auto; }
-        .glass-card { background: var(--card); border: 1px solid var(--gold); border-radius: 20px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-        
-        .lang-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-        .lang-btn { background: #000; border: 1px solid var(--gold); color: #fff; padding: 10px 15px; border-radius: 10px; cursor: pointer; transition: 0.3s; }
-        .lang-btn.active { background: var(--gold); color: #000; font-weight: bold; }
-        
-        .header { text-align: center; border-bottom: 2px solid var(--gold); margin-bottom: 25px; padding-bottom: 10px; }
-        .header img { max-width: 150px; margin-bottom: 10px; }
-
-        input, select { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #334155; background: #000; color: #fff; margin-bottom: 15px; font-size: 1rem; }
-        .q-card { background: rgba(255,255,255,0.03); padding: 18px; border-radius: 15px; margin-bottom: 15px; border-right: 4px solid var(--gold); }
-        .q-card p { margin-top: 0; font-weight: 600; }
-
-        .btn-main { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
-        .btn-main:hover { opacity: 0.9; transform: translateY(-2px); }
-
-        /* Admin Styles */
-        .admin-card { background: #1e293b; border-radius: 18px; padding: 20px; margin-bottom: 20px; border: 1px solid #444; }
-        .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .analysis-item { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border-top: 2px solid var(--accent); font-size: 0.85rem; }
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; margin-left: 5px; text-transform: uppercase; }
-        .badge-warning { background: var(--danger); color: white; }
-        .badge-info { background: var(--accent); color: #000; }
-        
-        .footer-link { text-align: center; margin-top: 30px; opacity: 0.4; font-size: 0.8rem; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: var(--bg); color: var(--text); margin: 0; padding: 10px; line-height: 1.4; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .glass-card { background: var(--card); border: 1px solid var(--gold); border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .lang-bar { display: flex; justify-content: center; gap: 5px; margin-bottom: 20px; flex-wrap: wrap; }
+        .lang-btn { background: #000; border: 1px solid var(--gold); color: #fff; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .lang-btn.active { background: var(--gold); color: #000; }
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--gold); padding-bottom: 10px; }
+        input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #000; color: #fff; margin-bottom: 10px; font-size: 1rem; }
+        .q-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px; border-right: 4px solid var(--gold); }
+        .btn-main { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        .admin-card { background: #1e293b; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #444; }
+        .analysis-item { background: rgba(0,0,0,0.2); padding: 8px; border-radius: 5px; margin-top: 5px; font-size: 0.9rem; border-left: 3px solid var(--accent); }
+        .badge { background: var(--danger); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
     <div id="root"></div>
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState } = React;
         const ADMIN_PASS = "MAX2026";
 
         const TRANSLATIONS = {
             HE: {
-                title: "שאלון מועמד - MAX", fname: "שם פרטי", lname: "שם משפחה", bday: "תאריך לידה", send: "סיום ושליחה", select: "בחר תשובה...",
-                questions: [
+                title: "שאלון מועמד MAX", fname: "שם פרטי", lname: "שם משפחה", bday: "תאריך לידה", send: "שלח שאלון", select: "בחר תשובה...",
+                qs: [
                     { q: "1. לקוח מחפש מוצר שחסר על המדף?", a: ["אבדוק במחסן", "אבדוק במחשב", "אכוון לדומה", "אמשיך בעבודתי"] },
                     { q: "2. תור ארוך מאוד בקופות ואתה בסידור מדף?", a: ["אגש מיד לעזור", "אחכה שיקראו לי", "אסיים קודם את המדף", "אלך למחסן"] },
                     { q: "3. ראית מוצר שבור או נוזל על הרצפה?", a: ["אנקה מיד", "אדווח למנהל", "אקרא לעובד ניקיון", "אעקוף את המפגע"] },
@@ -67,26 +53,85 @@
                 ]
             },
             EN: {
-                title: "MAX Candidate Form", fname: "First Name", lname: "Last Name", bday: "Date of Birth", send: "Submit Form", select: "Select...",
-                questions: [
-                    { q: "1. Customer looking for item missing from shelf?", a: ["Check warehouse", "Check computer", "Suggest alternative", "Keep working"] },
-                    { q: "2. Long lines at checkout while restocking?", a: ["Help immediately", "Wait to be called", "Finish shelf first", "Go to warehouse"] },
-                    { q: "3. Found broken or leaking product?", a: ["Clean immediately", "Report to manager", "Call cleaner", "Bypass"] },
-                    { q: "4. Customer shouting about high prices?", a: ["Listen patiently", "Refer to manager", "State fixed price", "Ignore"] },
-                    { q: "5. Manager gives task you don't like?", a: ["Do it best/fastest", "Do it then ask change", "Work slowly", "Ask for swap"] },
-                    { q: "6. Co-worker made mistake in department?", a: ["Help them fix", "Alert them privately", "Report to manager", "Not my business"] },
-                    { q: "7. Arrived to a messy department?", a: ["Start tidying", "Ask where to start", "Tidy my area only", "Wait for orders"] },
-                    { q: "8. Customer hesitating for long time?", a: ["Offer help", "Point to area", "Say it's taste-based", "Refer to colleague"] },
-                    { q: "9. Found cash on store floor?", a: ["Give to manager", "Ask customers", "Donate it", "Keep it"] },
-                    { q: "10. Preferred work style?", a: ["Independent", "Teamwork", "Directed", "Quiet/Back office"] },
-                    { q: "11. Customer demands impossible discount?", a: ["Explain policy", "Check alternative", "Send to manager", "Say no"] },
-                    { q: "12. You marked wrong prices on items?", a: ["Fix & report", "Ask what to do", "Hope no one sees", "Leave it"] },
-                    { q: "13. Shift over but store is packed?", a: ["Stay few mins", "Finish task then go", "Leave immediately", "Slip away"] },
-                    { q: "14. Co-worker asks you to break rules?", a: ["Refuse & explain", "Report to manager", "Follow once", "Do as asked"] },
-                    { q: "15. What's most important to you?", a: ["Great service", "Promotion", "Order/Organization", "Salary/Peace"] }
+                title: "MAX Candidate Form", fname: "First Name", lname: "Last Name", bday: "Date of Birth", send: "Submit", select: "Select...",
+                qs: [
+                    { q: "1. Item missing from shelf?", a: ["Check warehouse", "Check computer", "Suggest alternative", "Continue working"] },
+                    { q: "2. Long lines at checkout?", a: ["Go help immediately", "Wait to be called", "Finish shelf first", "Go to warehouse"] },
+                    { q: "3. Broken/leaking product?", a: ["Clean immediately", "Report to manager", "Call cleaner", "Ignore"] },
+                    { q: "4. Customer complaining about prices?", a: ["Listen patiently", "Send to manager", "State fixed price", "Ignore"] },
+                    { q: "5. Task you dislike?", a: ["Do it fast/best", "Do then ask change", "Work slowly", "Find swap"] },
+                    { q: "6. Co-worker mistake?", a: ["Help them fix", "Tell them privately", "Report to manager", "Not my business"] },
+                    { q: "7. Messy department?", a: ["Start tidying", "Ask where to start", "Tidy my area", "Wait for orders"] },
+                    { q: "8. Hesitating customer?", a: ["Offer help", "Point to area", "Say it's taste", "Refer to others"] },
+                    { q: "9. Money on floor?", a: ["Give to manager", "Ask customers", "Donate", "Keep"] },
+                    { q: "10. Work style?", a: ["Independent", "Teamwork", "Follow orders", "Quiet/Warehouse"] },
+                    { q: "11. Impossible discount?", a: ["Explain policy", "Check alternative", "Send to manager", "Say no"] },
+                    { q: "12. Price error?", a: ["Fix and report", "Ask what to do", "Hope no notice", "Leave it"] },
+                    { q: "13. Busy at shift end?", a: ["Stay few mins", "Finish task then go", "Leave immediately", "Slip away"] },
+                    { q: "14. Rule breaking request?", a: ["Refuse/Explain", "Report to manager", "Follow once", "Do it"] },
+                    { q: "15. Most important?", a: ["Service", "Promotion", "Order", "Salary"] }
                 ]
             },
-            // ניתן להוסיף כאן RU, AR, TH באותה צורה.
+            RU: {
+                title: "Анкета MAX", fname: "Имя", lname: "Фамилия", bday: "Дата рождения", send: "Отправить", select: "Выберите...",
+                qs: [
+                    { q: "1. Товар отсутствует?", a: ["Склад", "Компьютер", "Аналог", "Работаю дальше"] },
+                    { q: "2. Очередь на кассе?", a: ["Помогу сразу", "Жду вызова", "Сначала полка", "Склад"] },
+                    { q: "3. Разбитый товар?", a: ["Уберу сразу", "Менеджеру", "Уборка", "Мимо"] },
+                    { q: "4. Жалоба на цену?", a: ["Слушаю", "К менеджеру", "Это цена", "Игнор"] },
+                    { q: "5. Скучное задание?", a: ["Быстро сделаю", "Сделаю и спрошу", "Медленно", "Замена"] },
+                    { q: "6. Ошибка коллеги?", a: ["Помогу исправить", "Скажу ему", "Менеджеру", "Не мое дело"] },
+                    { q: "7. Беспорядок?", a: ["Начну убирать", "Спрошу план", "Свою зону", "Жду"] },
+                    { q: "8. Сомнения клиента?", a: ["Помогу", "Покажу отдел", "Дело вкуса", "Другой работник"] },
+                    { q: "9. Нашли деньги?", a: ["Менеджеру", "Спрошу людей", "Благотворительность", "Себе"] },
+                    { q: "10. Стиль работы?", a: ["Сам", "Команда", "По инструкции", "Тишина"] },
+                    { q: "11. Просят скидку?", a: ["Правила", "Акция", "Менеджеру", "Нет"] },
+                    { q: "12. Ошибка в цене?", a: ["Исправлю", "Спрошу", "Надеюсь", "Оставлю"] },
+                    { q: "13. Конец смены?", a: ["Останусь", "Закончу и уйду", "Сразу", "Тихо уйду"] },
+                    { q: "14. Нарушить правила?", a: ["Отказ", "Менеджеру", "Один раз", "Сделаю"] },
+                    { q: "15. Что важно?", a: ["Сервис", "Карьера", "Порядок", "Деньги"] }
+                ]
+            },
+            AR: {
+                title: "استبيان ماكس", fname: "الاسم", lname: "العائلة", bday: "تاريخ الميلاد", send: "إرسال", select: "اختر...",
+                qs: [
+                    { q: "1. منتج مفقود؟", a: ["المخزن", "الحاسوب", "بديل", "أكمل عملي"] },
+                    { q: "2. طابور طويل؟", a: ["أساعد فوراً", "أنتظر نداء", "أنهي الرف", "المخزن"] },
+                    { q: "3. منتج مكسور؟", a: ["أنظف فوراً", "المدير", "التنظيف", "أتجاهل"] },
+                    { q: "4. شكوى السعر؟", a: ["أستمع", "المدير", "هذا السعر", "تجاهل"] },
+                    { q: "5. مهمة مملة؟", a: ["أنجزها", "أنجز وأطلب", "ببطء", "بديل"] },
+                    { q: "6. خطأ زميل؟", a: ["أساعد", "أنبهه", "المدير", "لا يهمني"] },
+                    { q: "7. فوضى؟", a: ["أرتب فوراً", "أسأل", "منطقتي", "أنتظر"] },
+                    { q: "8. زبون متردد؟", a: ["أساعد", "أوجهه", "ذوق", "موظف آخر"] },
+                    { q: "9. وجدت مالاً؟", a: ["المدير", "أسأل الناس", "صدقة", "لي"] },
+                    { q: "10. أسلوب عمل؟", a: ["وحدي", "فريق", "تعليمات", "هدوء"] },
+                    { q: "11. طلب خصم؟", a: ["أشرح", "بديل", "المدير", "لا"] },
+                    { q: "12. خطأ سعر؟", a: ["أصلح", "أسأل", "أمل", "أترك"] },
+                    { q: "13. نهاية الدوام؟", a: ["أبقى قليلاً", "أنهي وأرحل", "فوراً", "بصمت"] },
+                    { q: "14. مخالفة؟", a: ["أرفض", "المدير", "مرة واحدة", "أفعل"] },
+                    { q: "15. الأهم؟", a: ["خدمة", "ترقية", "نظام", "راتب"] }
+                ]
+            },
+            TH: {
+                title: "แบบฟอร์ม MAX", fname: "ชื่อ", lname: "นามสกุล", bday: "วันเกิด", send: "ส่ง", select: "เลือก...",
+                qs: [
+                    { q: "1. ของหมดชั้น?", a: ["เช็คสต็อก", "เช็คคอม", "แนะนำอื่น", "ทำต่อ"] },
+                    { q: "2. คิวยาว?", a: ["ช่วยทันที", "รอเรียก", "ทำชั้นเสร็จ", "เข้าคลัง"] },
+                    { q: "3. ของแตก?", a: ["เช็ดทันที", "บอกหัวหน้า", "เรียกแม่บ้าน", "เดินผ่าน"] },
+                    { q: "4. บ่นราคาแพง?", a: ["ฟัง", "หาหัวหน้า", "ราคาคงที่", "ไม่สน"] },
+                    { q: "5. งานที่เบื่อ?", a: ["รีบทำ", "ทำแล้วขอย้าย", "ทำช้าๆ", "หาคนแทน"] },
+                    { q: "6. เพื่อนทำผิด?", a: ["ช่วยแก้", "บอกเขา", "บอกหัวหน้า", "ไม่สน"] },
+                    { q: "7. ร้านรก?", a: ["จัดทันที", "ถามเริ่มไหน", "จัดโซนตัวเอง", "รอสั่ง"] },
+                    { q: "8. ลูกค้าลังเล?", a: ["ช่วย", "ชี้เป้า", "แล้วแต่ชอบ", "ส่งต่อ"] },
+                    { q: "9. เจอเงิน?", a: ["ส่งหัวหน้า", "ถามลูกค้า", "บริจาค", "เก็บไว้"] },
+                    { q: "10. สไตล์งาน?", a: ["เดี่ยว", "ทีม", "ตามสั่ง", "เงียบๆ"] },
+                    { q: "11. ขอส่วนลด?", a: ["อธิบาย", "หาโปร", "หาหัวหน้า", "ไม่ให้"] },
+                    { q: "12. ราคาผิด?", a: ["แก้ทันที", "ถาม", "ภาวนา", "ปล่อยไว้"] },
+                    { q: "13. หมดกะแต่ยุ่ง?", a: ["อยู่ต่อ", "จบงานแล้วไป", "ไปเลย", "แอบไป"] },
+                    { q: "14. ทำผิดกฎ?", a: ["ปฏิเสธ", "บอกหัวหน้า", "ครั้งเดียว", "ทำตาม"] },
+                    { q: "15. สำคัญสุด?", a: ["บริการ", "ก้าวหน้า", "ระเบียบ", "เงิน"] }
+                ]
+            }
         };
 
         const App = () => {
@@ -97,114 +142,75 @@
             const [answers, setAnswers] = useState({});
             const [startTime, setStartTime] = useState(Date.now());
 
-            const runAnalysis = (ans, bday, duration) => {
-                let report = { social: "ניטרלי", manager: "ביצועיסט", num: "בבדיקה", warning: false };
-                
-                // ניתוח אינטראקציה עובדים (שאלה 6 ו-10)
-                if (ans[5] == 0 && ans[9] == 1) report.social = "דבק חברתי - עוזר ומפרגן";
-                else if (ans[9] == 0) report.social = "עובד עצמאי - מתאים למשימות לבד";
-                else report.social = "ממוקד משימה - פחות מעורב חברתית";
-
-                // ניתוח מול מנהל (שאלה 5)
-                if (ans[4] == 0) report.manager = "ראש גדול - מבצע בשמחה";
-                else if (ans[4] == 1) report.manager = "תקשורתי - מבצע ומציף קשיים";
-                else report.manager = "ראש קטן - זקוק לפיקוח";
-
-                // נומרולוגיה
+            const runAnalysis = (ans, bday, dur) => {
+                let res = { team: "רגיל", boss: "ביצועיסט", num: "-", warn: dur < 100 };
+                if (ans[5] == 0 && ans[9] == 1) res.team = "דבק חברתי - בונה צוות";
+                else if (ans[9] == 0) res.team = "זאב בודד - לעבודה לבד";
+                if (ans[4] == 0) res.boss = "ראש גדול - לויאלי";
                 if (bday) {
                     const n = bday.replace(/\D/g,'').split('').reduce((a,b)=>a+parseInt(b),0) % 9 || 9;
-                    const map = {1:"מנהיג", 2:"רגיש", 3:"יצירתי", 4:"יסודי", 5:"זריז", 6:"אחראי", 7:"רוחני", 8:"חומרני", 9:"רחב אופקים"};
-                    report.num = map[n];
+                    const m = {1:"מנהיג",2:"תומך",3:"תקשורתי",4:"פרקטי",5:"זריז",6:"אחראי",7:"יסודי",8:"ניהולי",9:"עוזר"};
+                    res.num = m[n];
                 }
-                
-                if (duration < 120) report.warning = true;
-                return report;
+                return res;
             };
 
             const handleSend = () => {
-                if (!form.fn || !form.ln) return alert("אנא מלא שם מלא");
-                const duration = Math.floor((Date.now() - startTime) / 1000);
-                const analysis = runAnalysis(answers, form.bday, duration);
-                
-                const cand = { id: Date.now(), ...form, answers, analysis, duration, lang, status: 'חדש' };
-                setCandidates([cand, ...candidates]);
+                if (!form.fn) return alert("שם חסר");
+                const dur = Math.floor((Date.now() - startTime)/1000);
+                const analysis = runAnalysis(answers, form.bday, dur);
+                setCandidates([{id: Date.now(), ...form, analysis, lang, dur}, ...candidates]);
                 setView('done');
             };
 
-            const isRTL = lang === 'HE' || lang === 'AR';
-
             if (view === 'admin') return (
                 <div className="container" dir="rtl">
-                    <header className="header"><h1>ניהול מועמדים - MAX</h1></header>
-                    <button className="lang-btn" style={{marginBottom:20}} onClick={()=>setView('quiz')}>חזרה לשאלון</button>
-                    {candidates.length === 0 && <p>אין מועמדים רשומים כרגע.</p>}
+                    <h2>ניהול מועמדים</h2>
+                    <button className="lang-btn" onClick={()=>setView('quiz')}>חזרה</button>
                     {candidates.map(c => (
                         <div key={c.id} className="admin-card">
-                            <div style={{display:'flex', justifyContent:'space-between', borderBottom:'1px solid #444', paddingBottom:10}}>
-                                <strong>{c.fn} {c.ln} ({c.lang})</strong>
-                                <span style={{fontSize:'0.8rem'}}>זמן: {Math.floor(c.duration/60)}:{(c.duration%60).toString().padStart(2,'0')}</span>
-                            </div>
-                            {c.analysis.warning && <div className="badge badge-warning">מילוי מהיר מדי - חשד לחוסר רצינות</div>}
-                            <div className="analysis-grid">
-                                <div className="analysis-item"><strong>חברה:</strong><br/>{c.analysis.social}</div>
-                                <div className="analysis-item"><strong>מנהל:</strong><br/>{c.analysis.manager}</div>
-                                <div className="analysis-item"><strong>נומרולוגיה:</strong><br/>{c.analysis.num}</div>
-                                <div className="analysis-item"><strong>גיל:</strong><br/>{c.bday || 'לא הוזן'}</div>
-                            </div>
-                            <div style={{marginTop:15, color:'var(--gold)', fontSize:'0.85rem'}}>
-                                <strong>טיפ:</strong> {c.analysis.social.includes('עצמאי') ? 'שבץ אותו במחסן/סידור.' : 'מתאים לקופות/שירות.'}
-                            </div>
+                            <strong>{c.fn} {c.ln} ({c.lang})</strong> {c.analysis.warn && <span className="badge">מהיר!</span>}
+                            <div className="analysis-item"><b>צוות:</b> {c.analysis.team}</div>
+                            <div className="analysis-item"><b>מנהל:</b> {c.analysis.boss}</div>
+                            <div className="analysis-item"><b>נומרולוגיה:</b> {c.analysis.num}</div>
                         </div>
                     ))}
                 </div>
             );
 
             if (view === 'done') return (
-                <div className="container" style={{textAlign:'center', paddingTop:100}}>
-                    <div className="glass-card">
-                        <div style={{fontSize:'4rem', color:var(--success)}}>✓</div>
-                        <h2>השאלון נשלח בהצלחה!</h2>
-                        <p>תודה רבה, ניתן להעזיר את המכשיר למנהל.</p>
-                        <button className="btn-main" onClick={()=>{ setForm({fn:'', ln:'', bday:''}); setAnswers({}); setStartTime(Date.now()); setView('quiz'); }}>מועמד חדש</button>
-                    </div>
+                <div className="container" style={{textAlign:'center', padding:50}}>
+                    <div className="glass-card"><h1>✓</h1><h2>נשלח בהצלחה</h2><button className="btn-main" onClick={()=>{setForm({fn:'',ln:'',bday:''}); setView('quiz'); setStartTime(Date.now());}}>מועמד חדש</button></div>
                 </div>
             );
+
+            const isRTL = lang === 'HE' || lang === 'AR';
+            const t = TRANSLATIONS[lang] || TRANSLATIONS.HE;
 
             return (
                 <div className="container" dir={isRTL ? 'rtl' : 'ltr'}>
                     <div className="glass-card">
                         <div className="lang-bar">
                             {Object.keys(TRANSLATIONS).map(l => (
-                                <button key={l} className={`lang-btn ${lang === l ? 'active' : ''}`} onClick={()=>setLang(l)}>{l}</button>
+                                <button key={l} className={`lang-btn ${lang===l?'active':''}`} onClick={()=>setLang(l)}>{l}</button>
                             ))}
-                            <button className="lang-btn" style={{borderStyle:'dashed'}}>RU</button>
-                            <button className="lang-btn" style={{borderStyle:'dashed'}}>AR</button>
-                            <button className="lang-btn" style={{borderStyle:'dashed'}}>TH</button>
                         </div>
-                        <header className="header">
-                            <h1>{TRANSLATIONS[lang]?.title || "MAX"}</h1>
-                        </header>
-                        
-                        <input placeholder={TRANSLATIONS[lang]?.fname} value={form.fn} onChange={e=>setForm({...form, fn:e.target.value})} />
-                        <input placeholder={TRANSLATIONS[lang]?.lname} value={form.ln} onChange={e=>setForm({...form, ln:e.target.value})} />
-                        <label style={{fontSize:'0.8rem', display:'block', marginBottom:5}}>{TRANSLATIONS[lang]?.bday}:</label>
-                        <input type="date" value={form.bday} onChange={e=>setForm({...form, bday:e.target.value})} />
-
-                        {(TRANSLATIONS[lang]?.questions || TRANSLATIONS.HE.questions).map((q, i) => (
+                        <div className="header"><h1>{t.title}</h1></div>
+                        <input placeholder={t.fname} onChange={e=>setForm({...form, fn: e.target.value})} />
+                        <input placeholder={t.lname} onChange={e=>setForm({...form, ln: e.target.value})} />
+                        <label style={{fontSize:'0.8rem'}}>{t.bday}:</label>
+                        <input type="date" onChange={e=>setForm({...form, bday: e.target.value})} />
+                        {t.qs.map((q, i) => (
                             <div key={i} className="q-card">
-                                <p>{q.q}</p>
-                                <select onChange={e=>setAnswers({...answers, [i]:e.target.value})}>
-                                    <option value="">{TRANSLATIONS[lang]?.select || "בחר..."}</option>
+                                <p><strong>{q.q}</strong></p>
+                                <select onChange={e=>setAnswers({...answers, [i]: e.target.value})}>
+                                    <option value="">{t.select}</option>
                                     {q.a.map((ans, idx) => <option key={idx} value={idx}>{ans}</option>)}
                                 </select>
                             </div>
                         ))}
-
-                        <button className="btn-main" onClick={handleSend}>{TRANSLATIONS[lang]?.send || "שלח"}</button>
-                        
-                        <div className="footer-link">
-                            <span onClick={()=>{ if(prompt("Pass:")===ADMIN_PASS) setView('admin'); }}>Admin Login</span>
-                        </div>
+                        <button className="btn-main" onClick={handleSend}>{t.send}</button>
+                        <div style={{marginTop:30, textAlign:'center', opacity:0.2}} onClick={()=>{if(prompt("Pass:")===ADMIN_PASS) setView('admin')}}>Admin</div>
                     </div>
                 </div>
             );
