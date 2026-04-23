@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAX STOCK | מערכת גיוס</title>
+    <title>MAX STOCK | מערכת גיוס חכמה</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
     <style>
-        :root { --gold: #c9a84c; --bg: #0f172a; --card: rgba(30, 41, 59, 0.98); --danger: #ef4444; --success: #22c55e; }
+        :root { --gold: #c9a84c; --bg: #0f172a; --card: rgba(30, 41, 59, 0.98); --danger: #ef4444; --success: #22c55e; --accent: #38bdf8; }
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background: var(--bg); color: #fff; margin: 0; padding: 10px; min-height: 100vh; }
         
+        /* תצוגת מזכירה ומועמד */
         .glass-card { background: var(--card); border: 1px solid rgba(201,168,76,0.3); border-radius: 25px; padding: 20px; max-width: 600px; margin: 0 auto; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
-        .header h1 { color: var(--gold); text-align: center; margin-bottom: 20px; font-size: 2.2rem; }
-        
+        .header h1 { color: var(--gold); text-align: center; margin-bottom: 20px; font-size: 2.2rem; letter-spacing: 1px; }
         .lang-selector { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 25px; }
         .btn-lang { background: rgba(255,255,255,0.05); border: 1px solid var(--gold); color: #fff; padding: 12px 5px; border-radius: 12px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
         .btn-lang.active { background: var(--gold); color: #000; box-shadow: 0 0 15px var(--gold); }
@@ -23,16 +23,23 @@
         .q-card { background: rgba(255,255,255,0.03); padding: 18px; border-radius: 18px; margin-bottom: 15px; border-right: 5px solid var(--gold); }
         .btn-submit { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 1.3rem; }
         
-        /* לוח מנהל - עיצוב כרטיסים נקי */
-        .admin-container { max-width: 800px; margin: 0 auto; }
-        .candidate-card { background: #1e293b; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        .card-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .status-badge { padding: 8px 15px; border-radius: 12px; font-size: 0.9rem; font-weight: bold; text-align: center; display: flex; flex-direction: column; min-width: 100px; }
-        .badge-fast { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
-        .badge-solid { background: rgba(34, 197, 94, 0.2); color: var(--success); border: 1px solid var(--success); }
-        .analysis-area { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; border-right: 4px solid var(--gold); font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
+        /* תצוגת מנהל משופרת */
+        .admin-container { max-width: 850px; margin: 0 auto; }
+        .candidate-card { background: #1e293b; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); position: relative; }
+        .card-row-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+        .candidate-info h2 { margin: 0; color: #fff; font-size: 1.5rem; }
+        .candidate-info span { opacity: 0.6; font-size: 0.9rem; }
         
-        .btn-admin-gate { background: transparent; color: var(--gold); border: 1px solid var(--gold); padding: 10px; border-radius: 10px; margin: 40px auto; display: block; opacity: 0.3; cursor: pointer; }
+        .status-badge { padding: 10px; border-radius: 12px; font-size: 0.9rem; font-weight: bold; text-align: center; min-width: 110px; }
+        .badge-fast { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); }
+        .badge-solid { background: rgba(34, 197, 94, 0.15); color: var(--success); border: 1px solid var(--success); }
+        
+        .analysis-box { background: rgba(56, 189, 248, 0.05); padding: 15px; border-radius: 15px; border-right: 4px solid var(--accent); margin-top: 15px; }
+        .analysis-text { font-size: 1rem; line-height: 1.6; color: #e2e8f0; }
+        .tags-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .tag { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; background: rgba(255,255,255,0.1); color: var(--gold); border: 1px solid var(--gold); }
+        
+        .btn-admin-gate { background: transparent; color: var(--gold); border: 1px solid var(--gold); padding: 10px; border-radius: 10px; margin: 40px auto; display: block; opacity: 0.2; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -40,16 +47,20 @@
     <script type="text/babel">
         const { useState } = React;
 
-        // --- הגדרות מערכת ---
-        const MASTER_PASS = "MAX2026"; 
-        const DEPARTMENTS = ["פלסטיקה", "חד פעמי", "כלי עבודה", "כלי מטבח", "טקסטיל", "דקורציה", "צעצועים", "ביוטי", "סלולר", "כלי כתיבה", "יצירה", "עונה"];
-        const ROLES = ["סדרן", "אחראי מחלקה", "אחראי משמרת", "מחסנאי", "קופאית"];
+        const MASTER_PASS = "MAX2026";
+        
+        // רשימת מחלקות מורחבת
+        const DEPARTMENTS = ["פלסטיקה", "חד פעמי", "כלי עבודה", "כלי מטבח", "טקסטיל", "דקורציה", "צעצועים", "ביוטי", "סלולר", "כלי כתיבה", "יצירה", "עונה/חגים", "ניקיון", "טואלטיקה", "חשמל"];
+        
+        // רשימת תפקידים מורחבת
+        const ROLES = ["סדרן/ית", "אחראי/ת מחלקה", "אחראי/ת משמרת", "מחסנאי/ת", "מלגזן/ית", "קופאי/ת", "עובד/ת דלפק", "סגן/ית מנהל", "מנהל/ת סניף", "עובד/ת כללי"];
 
         const LANGUAGES = {
-            HE: { dir: 'rtl', h1: 'MAX STOCK', fname: 'שם פרטי', lname: 'שם משפחה', y: 'שנת לידה', sel: 'בחר תשובה...', send: 'שלח שאלון', done: 'תודה!', msg: 'הפרטים התקבלו.', btnDone: 'מועמד חדש', admin: 'מנהל 🔒' },
-            EN: { dir: 'ltr', h1: 'MAX STOCK', fname: 'First Name', lname: 'Last Name', y: 'Birth Year', sel: 'Select...', send: 'Submit', done: 'Thanks!', msg: 'Received.', btnDone: 'New', admin: 'Admin 🔒' },
-            RU: { dir: 'ltr', h1: 'MAX STOCK', fname: 'Имя', lname: 'Фамилия', y: 'Год рождения', sel: 'Выбрать...', send: 'Отправить', done: 'Спасибо!', msg: 'Получено.', btnDone: 'Новый', admin: 'Admin 🔒' },
-            AR: { dir: 'rtl', h1: 'MAX STOCK', fname: 'الاسم الأول', lname: 'اسم العائلة', y: 'سنة الميلاد', sel: 'اختر...', send: 'إرسال', done: 'شكراً!', msg: 'تم الاستلام.', btnDone: 'חדש', admin: 'دخول 🔒' }
+            HE: { dir: 'rtl', h1: 'MAX STOCK', fname: 'שם פרטי', lname: 'שם משפחה', y: 'שנת לידה', sel: 'בחר תשובה...', send: 'שלח שאלון למנהל' },
+            EN: { dir: 'ltr', h1: 'MAX STOCK', fname: 'First Name', lname: 'Last Name', y: 'Birth Year', sel: 'Select...', send: 'Submit' },
+            RU: { dir: 'ltr', h1: 'MAX STOCK', fname: 'Имя', lname: 'Фамилия', y: 'Год рождения', sel: 'Выбрать...', send: 'Отправить' },
+            AR: { dir: 'rtl', h1: 'MAX STOCK', fname: 'الاسم الأول', lname: 'اسم العائلة', y: 'سنة الميلاد', sel: 'اختر...', send: 'إرسال' },
+            TH: { dir: 'ltr', h1: 'MAX STOCK', fname: 'ชื่อจริง', lname: 'นามสกุล', y: 'ปีเกิด', sel: 'เลือก...', send: 'ส่งข้อมูล' }
         };
 
         const QUESTIONS = [
@@ -76,60 +87,84 @@
             const [candidates, setCandidates] = useState([]);
             const [startTime, setStartTime] = useState(Date.now());
             const [form, setForm] = useState({ fn: '', ln: '', y: '' });
+            const [answers, setAnswers] = useState(Array(15).fill(null));
 
             const t = LANGUAGES[lang];
 
             const handleSend = () => {
                 const duration = Math.floor((Date.now() - startTime) / 1000);
+                
+                // לוגיקת ניתוח מעמיקה יותר
+                let profileTags = [];
+                let detailedAnalysis = "";
+                
+                if (duration < 180) {
+                    detailedAnalysis = "המועמד סיים את השאלון במהירות חריגה (פחות מ-3 דקות). הדבר מעלה חשש לחוסר יסודיות או אי-קריאת השאלות לעומק. ";
+                    profileTags.push("מהיר/חפיף");
+                } else {
+                    detailedAnalysis = "המועמד השקיע זמן סביר בקריאת השאלות, מה שמעיד על רצינות ויסודיות. ";
+                    profileTags.push("שקול/יסודי");
+                }
+
+                // בדיקת שירותיות (שאלה 1, 2, 4)
+                if (answers[0] == 0 || answers[1] == 0) {
+                    detailedAnalysis += "מפגין נכונות גבוהה לעזרה ויוזמה מול לקוחות. ";
+                    profileTags.push("שירותי");
+                }
+                
+                // בדיקת ראש גדול/ניהול (שאלה 10, 15)
+                if (answers[14] == 1 || answers[9] == 0) {
+                    detailedAnalysis += "בעל פוטנציאל להובלת מחלקה או אחריות עצמאית. ";
+                    profileTags.push("פוטנציאל קידום");
+                }
+
                 const newCand = {
                     id: Date.now(),
                     name: `${form.fn} ${form.ln}`,
                     age: new Date().getFullYear() - parseInt(form.y) || "?",
                     time: `${Math.floor(duration/60)}:${(duration%60).toString().padStart(2,'0')}`,
                     status: duration < 180 ? 'fast' : 'solid',
-                    analysis: duration < 180 ? 
-                        "ניתוח יהודה: המועמד ענה במהירות רבה. מומלץ לבדוק יסודיות בסידור ובביצוע משימות שגרתיות." : 
-                        "ניתוח יהודה: מועמד יסודי ושקול. נראה שהשקיע מחשבה בתשובותיו ומבין את חשיבות הסדר."
+                    analysis: detailedAnalysis,
+                    tags: profileTags
                 };
+                
                 setCandidates([newCand, ...candidates]);
                 setView('done');
             };
 
             const checkAdmin = () => {
                 const pass = prompt("נא להזין סיסמת מנהל:");
-                if (pass && pass.toUpperCase() === MASTER_PASS) {
-                    setView('admin');
-                } else if (pass !== null) {
-                    alert("סיסמה שגויה!");
-                }
+                if (pass && pass.toUpperCase() === MASTER_PASS) setView('admin');
             };
 
             if (view === 'admin') return (
                 <div className="admin-container" dir="rtl">
                     <div style={{textAlign:'center', marginBottom:30}}>
-                        <h1 style={{color:'var(--gold)'}}>לוח מנהל - MAX</h1>
-                        <button onClick={()=>setView('quiz')} style={{background:'var(--gold)', border:'none', padding:'10px 20px', borderRadius:10, fontWeight:'bold', cursor:'pointer'}}>חזרה למזכירה</button>
+                        <h1 style={{color:'var(--gold)'}}>לוח בקרה למנהל</h1>
+                        <button onClick={()=>setView('quiz')} style={{background:'var(--gold)', border:'none', padding:'10px 20px', borderRadius:10, fontWeight:'bold', cursor:'pointer'}}>חזרה לעמדת המזכירה</button>
                     </div>
-                    {candidates.length === 0 ? <p style={{textAlign:'center', opacity:0.5}}>ממתין למועמדים...</p> : 
-                    candidates.map(c => (
+                    {candidates.map(c => (
                         <div key={c.id} className="candidate-card">
                             <div className="card-row-top">
-                                <div>
-                                    <div style={{fontSize:'1.4rem', fontWeight:'bold'}}>{c.name}</div>
-                                    <div style={{opacity:0.7}}>גיל: {c.age}</div>
+                                <div className="candidate-info">
+                                    <h2>{c.name}</h2>
+                                    <span>גיל: {c.age} | זמן מילוי: {c.time} דקות</span>
+                                    <div className="tags-row">
+                                        {c.tags.map(tag => <span key={tag} className="tag">{tag}</span>)}
+                                    </div>
                                 </div>
                                 <div className={`status-badge ${c.status === 'fast' ? 'badge-fast' : 'badge-solid'}`}>
-                                    {c.status === 'fast' ? 'חשד לחפיף' : 'יסודי'}
-                                    <span style={{fontSize:'0.75rem', marginTop:3}}>{c.time} דקות</span>
+                                    {c.status === 'fast' ? 'חשד לחפיף' : 'יסודי/שקול'}
                                 </div>
                             </div>
-                            <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:15}}>
-                                <select><option>בחר מחלקה...</option>{DEPARTMENTS.map(d=><option key={d}>{d}</option>)}</select>
-                                <select><option>בחר תפקיד...</option>{ROLES.map(r=><option key={r}>{r}</option>)}</select>
+                            
+                            <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:10}}>
+                                <select><option>שבץ למחלקה...</option>{DEPARTMENTS.map(d=><option key={d}>{d}</option>)}</select>
+                                <select><option>קבע תפקיד...</option>{ROLES.map(r=><option key={r}>{r}</option>)}</select>
                             </div>
-                            <div className="analysis-area">
-                                <strong style={{color:'var(--gold)', fontSize:'0.85rem'}}>ניתוח יהודה:</strong><br/>
-                                {c.analysis}
+
+                            <div className="analysis-box">
+                                <div className="analysis-text">{c.analysis}</div>
                             </div>
                         </div>
                     ))}
@@ -139,8 +174,9 @@
             if (view === 'done') return (
                 <div className="glass-card" style={{textAlign:'center'}} dir={t.dir}>
                     <h1 style={{fontSize:'5rem', color: 'var(--success)'}}>✓</h1>
-                    <h2>{t.done}</h2>
-                    <button className="btn-submit" onClick={()=>{setForm({fn:'',ln:'',y:''}); setStartTime(Date.now()); setView('quiz');}}>{t.btnDone}</button>
+                    <h2 style={{color: 'var(--gold)'}}>השאלון הושלם</h2>
+                    <p>תודה רבה, המידע עבר למנהל הסניף.</p>
+                    <button className="btn-submit" onClick={()=>{setForm({fn:'',ln:'',y:''}); setAnswers(Array(15).fill(null)); setStartTime(Date.now()); setView('quiz');}}>מועמד חדש</button>
                 </div>
             );
 
@@ -159,7 +195,14 @@
                     {QUESTIONS.map((q, i) => (
                         <div key={i} className="q-card">
                             <p><strong>{i+1}. {q.q}</strong></p>
-                            <select><option value="">{t.sel}</option>{q.a.map((ans,idx)=><option key={idx}>{ans}</option>)}</select>
+                            <select onChange={(e) => {
+                                let newAns = [...answers];
+                                newAns[i] = e.target.value;
+                                setAnswers(newAns);
+                            }}>
+                                <option value="">{t.sel}</option>
+                                {q.a.map((ans,idx)=><option key={idx} value={idx}>{ans}</option>)}
+                            </select>
                         </div>
                     ))}
                     
