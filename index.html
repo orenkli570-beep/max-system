@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAX STOCK | OREN PROTOCOL</title>
+    <title>MAX STOCK | OREN PROTOCOL PRO</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -23,10 +23,7 @@
         .dob-grid { display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 8px; }
         .question-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; margin-bottom: 12px; border-right: 4px solid var(--gold); text-align: right; }
         .btn-main { width: 100%; padding: 16px; background: var(--gold); color: #000; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 1.1rem; }
-        .admin-row { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 10px; margin-bottom: 8px; text-align: right; border-right: 3px solid var(--gold); position: relative; }
-        .tag { background: var(--gold); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; position: absolute; left: 10px; top: 10px; }
         [dir="ltr"] .question-box { border-right: none; border-left: 4px solid var(--gold); text-align: left; }
-        [dir="ltr"] .input-group { text-align: left; }
     </style>
 </head>
 <body>
@@ -35,42 +32,50 @@
         const { useState, useEffect } = React;
 
         const TXT = {
-            HE: { dir: 'rtl', start: 'התחל שאלון', name: 'שם המועמד', dob: 'תאריך לידה', d: 'יום', m: 'חודש', y: 'שנה', sel: 'בחר...', sub: 'שלח שאלון', succ: 'נשלח בהצלחה!', back: 'חזרה' },
-            EN: { dir: 'ltr', start: 'Start', name: 'Name', dob: 'DOB', d: 'Day', m: 'Month', y: 'Year', sel: 'Choose...', sub: 'Submit', succ: 'Success!', back: 'Back' },
+            HE: { dir: 'rtl', start: 'התחל שאלון', name: 'שם המועמד', dob: 'תאריך לידה', d: 'יום', m: 'חודש', y: 'שנה', sel: 'בחר תשובה...', sub: 'שלח שאלון למערכת', succ: 'נשלח בהצלחה!', back: 'חזרה לדף הבית' },
+            EN: { dir: 'ltr', start: 'Start', name: 'Full Name', dob: 'DOB', d: 'Day', m: 'Month', y: 'Year', sel: 'Choose...', sub: 'Submit Application', succ: 'Success!', back: 'Back' },
             RU: { dir: 'ltr', start: 'Начать', name: 'ФИО', dob: 'Дата рождения', d: 'День', m: 'Месяץ', y: 'Год', sel: 'Выбрать...', sub: 'Отправить', succ: 'Успешно!', back: 'Назад' },
-            AR: { dir: 'rtl', start: 'ابدأ', name: 'الاسم', dob: 'تاريخ الميلاد', d: 'يום', m: 'شهر', y: 'سنة', sel: 'اختر...', sub: 'إرسال', succ: 'تم بنجاح!', back: 'عودة' },
+            AR: { dir: 'rtl', start: 'ابدأ', name: 'الاسم', dob: 'تاريخ الميلاد', d: 'يوم', m: 'شهر', y: 'سنة', sel: 'اختر...', sub: 'إرسال', succ: 'تم بنجاح!', back: 'عودة' },
             TH: { dir: 'ltr', start: 'เริ่ม', name: 'ชื่อ', dob: 'วันเกิด', d: 'วัน', m: 'เดือน', y: 'ปี', sel: 'เลือก...', sub: 'ส่ง', succ: 'สำเร็จ!', back: 'กลับ' }
         };
 
-        const Q_DATA = [
-            "לקוח מחפש מוצר שחסר על המדף. מה תעשה?", "יש תור ארוך בקופות ואתה בסידור מדף?", "ראית מוצר שבור או נוזל על הרצפה?",
-            "לקוח מתלונן בקול רם על מחיר גבוה?", "המנהל נתן לך משימה שאתה פחות אוהב?", "חבר לעבודה טעה בסידור המחלקה?",
-            "הגעת למשמרת והמחלקה הפוכה לגמרי?", "לקוח מתלבט זמן רב לגבי קניית מתנה?", "מצאת שטר כסף על הרצפה בחנות?",
-            "איזו צורת עבודה אתה הכי מעדיף?", "לקוח דורש הנחה שאי אפשר לתת?", "סימנת מחיר טעות על קבוצת מוצרים?",
-            "המשמרת נגמרה והחנות עמוסה מאוד?", "עובד אחר מבקש לעשות משהו לא תקין?", "מה הדבר שהכי חשוב לך בעבודה?"
+        const Q_LIST = [
+            { q: "לקוח מחפש מוצר שחסר על המדף. מה תעשה?", a: ["אבדוק במחסן ואביא לו אישית", "אבדוק במחשב אם קיים במלאי", "אגיד שחסר ואכוון למוצר דומה", "אמשיך בעבודתי הרגילה"] },
+            { q: "יש תור ארוך מאוד בקופות ואתה בסידור מדף?", a: ["אגש מיד לעזור בקופה בלי שיקראו לי", "אחכה שיקראו לי לעזור", "אמשיך לסדר עד שאסיים", "אלך למחסן כדי לא להפריע"] },
+            { q: "ראית מוצר שבור או נוזל על הרצפה במעבר?", a: ["אנקה מיד ואדאג לבטיחות", "אדווח למנהל המשמרת", "אקרא לעובד ניקיון", "אעקוף את המפגע"] },
+            { q: "לקוח מתלונן בקול רם על מחיר גבוה?", a: ["אקשיב בסבלנות ואסביר בנועם", "אפנה אותו למנהל הסניף", "אגיד שזה המחיר ואין מה לעשות", "אתעלם ואעבור מחלקה"] },
+            { q: "המנהל נתן לך משימה שאתה פחות אוהב?", a: ["אבצע אותה הכי טוב ומהר", "אבצע ואז אבקש לגוון", "אעשה לאט כדי שלא יבקשו שוב", "אנסה למצוא עובד שיחליף אותי"] },
+            { q: "חבר לעבודה טעה בסידור המחלקה?", a: ["אעזור לו לתקן בנעימות", "אסב את תשומת ליבו לטעות", "אדווח למנהל על הטעות", "לא ענייני, כל אחד אחראי על שלו"] },
+            { q: "הגעת למשמרת והמחלקה הפוכה לגמרי?", a: ["אתחיל לסדר מיד לפי דחיפות", "אשאל את המנהל מאיפה להתחיל", "אסדר רק את האזור שלי", "אחכה שמישהו יגיד לי מה לעשות"] },
+            { q: "לקוח מתלבט זמן רב לגבי קניית מתנה?", a: ["אציע לו אפשרויות ואעזור לו", "אכוון אותו לאזור הכללי", "אגיד שזה עניין של טעם", "אפנה אותו לעובד אחר"] },
+            { q: "מצאת שטר כסף על הרצפה בתוך החנות?", a: ["אמסור מיד למנהל או לקופה", "אשאל לקוחות אם מישהו איבד", "אשים אותו בקופת צדקה", "אשמור אותו בכיס"] },
+            { q: "איזו צורת עבודה אתה הכי מעדיף?", a: ["עבודה עם אחריות שבה אני רץ לבד", "עבודה בצוות עם שיתוף פעולה", "עבודה שאומרים לי בדיוק מה לעשות", "עבודה שקטה במחסן"] },
+            { q: "לקוח דורש הנחה שאי אפשר לתת?", a: ["אסביר בנימוס את מדיניות הרשת", "אבדוק אם יש מבצע חלופי", "אשלח אותו להתווכח עם המנהל", "אגיד פשוט 'אין הנחות'"] },
+            { q: "סימנת מחיר טעות על קבוצת מוצרים?", a: ["אתקן מיד ואדווח למנהל", "אשאל את המנהל מה לעשות", "אקווה שאף אחד לא ישים לב", "אשאיר את זה ככה"] },
+            { q: "המשמרת נגמרה והחנות עמוסה מאוד?", a: ["אשאר עוד כמה דקות לעזור", "אסיים את המשימה ואלך", "אצא מיד - השעה הגיעה", "אלך בלי להגיד כלום"] },
+            { q: "עובד אחר מבקש לעשות משהו לא תקין?", a: ["אסרב בנימוס ואסביר לו", "אדווח על כך למנהל", "אזרום איתו פעם אחת", "אעשה מה שביקש"] },
+            { q: "מה הדבר שהכי חשוב לך בעבודה?", a: ["להתקדם לתפקידי ניהול", "שירות מעולה ללקוח", "סדר וארגון במשימות", "המשכורת והשקט שלי"] }
         ];
 
         const App = () => {
             const [v, setV] = useState('home');
             const [l, setL] = useState('HE');
             const [ans, setAns] = useState(Array(15).fill(null));
-            const [form, setForm] = useState({ n: '', d: '', m: '', y: '' });
+            const [f, setF] = useState({ n: '', d: '', m: '', y: '' });
             const [db, setDb] = useState([]);
 
             useEffect(() => {
-                try {
-                    const saved = localStorage.getItem('MAX_V3');
-                    if (saved) setDb(JSON.parse(saved));
-                } catch(e) { console.error(e); }
+                const saved = localStorage.getItem('MAX_V4');
+                if (saved) setDb(JSON.parse(saved));
             }, []);
 
-            const save = () => {
-                if (!form.n || !form.y || ans.includes(null)) return alert("Please fill all details");
+            const send = () => {
+                if (!f.n || !f.y || ans.includes(null)) return alert("אנא מלא את כל השדות");
                 const score = ans.filter(a => a === 0).length;
                 const prof = score >= 10 ? "יוזמה גבוהה" : score >= 6 ? "ביצועיסט" : "משימתי";
-                const newRec = { ...form, prof, ts: new Date().toLocaleString() };
+                const newRec = { ...f, prof, ts: new Date().toLocaleString() };
                 const up = [...db, newRec];
-                setDb(up); localStorage.setItem('MAX_V3', JSON.stringify(up));
+                setDb(up); localStorage.setItem('MAX_V4', JSON.stringify(up));
                 setV('done');
             };
 
@@ -78,20 +83,19 @@
 
             if (v === 'done') return (
                 <div className="container" dir={t.dir}><div className="glass-card" style={{textAlign:'center'}}>
-                    <h1 style={{fontSize:'4rem'}}>✔</h1>
+                    <h1 style={{fontSize:'4rem', color: 'var(--gold)'}}>✔</h1>
                     <h2>{t.succ}</h2>
-                    <button className="btn-main" style={{marginTop:20}} onClick={()=>setV('home')}>{t.back}</button>
+                    <button className="btn-main" onClick={()=>setV('home')}>{t.back}</button>
                 </div></div>
             );
 
             if (v === 'admin') return (
                 <div className="container" dir="rtl"><div className="glass-card">
-                    <h2>ניהול מועמדים</h2>
+                    <h2>ניהול מועמדים ({db.length})</h2>
                     <button onClick={()=>setV('home')} className="btn-lang" style={{marginBottom:15}}>חזרה</button>
                     {db.map((r, i) => (
-                        <div key={i} className="admin-row">
-                            <span className="tag">{r.prof}</span>
-                            <strong>{r.n}</strong><br/>
+                        <div key={i} style={{background:'rgba(0,0,0,0.4)', padding:15, borderRadius:12, marginBottom:10, borderRight:'4px solid var(--gold)'}}>
+                            <strong>{r.n}</strong> | <span style={{color:'var(--gold)'}}>{r.prof}</span><br/>
                             <small>{r.d}/{r.m}/{r.y} | {r.ts}</small>
                         </div>
                     ))}
@@ -103,8 +107,8 @@
                     <div className="glass-card">
                         <div className="header"><h1>MAX STOCK</h1></div>
                         <div className="lang-bar">
-                            {Object.keys(TXT).map(key => (
-                                <button key={key} className={`btn-lang ${l === key ? 'active' : ''}`} onClick={() => setL(key)}>{key}</button>
+                            {Object.keys(TXT).map(k => (
+                                <button key={k} className={`btn-lang ${l === k ? 'active' : ''}`} onClick={() => setL(k)}>{k}</button>
                             ))}
                         </div>
 
@@ -114,39 +118,36 @@
                             <div>
                                 <div className="input-group">
                                     <label>{t.name}</label>
-                                    <input onChange={e=>setForm({...form, n: e.target.value})} />
+                                    <input onChange={e=>setF({...f, n: e.target.value})} />
                                 </div>
                                 <div className="input-group">
                                     <label>{t.dob}</label>
                                     <div className="dob-grid">
-                                        <input placeholder={t.d} onChange={e=>setForm({...form, d: e.target.value})} />
-                                        <input placeholder={t.m} onChange={e=>setForm({...form, m: e.target.value})} />
-                                        <input placeholder={t.y} onChange={e=>setForm({...form, y: e.target.value})} />
+                                        <input placeholder={t.d} onChange={e=>setF({...f, d: e.target.value})} />
+                                        <input placeholder={t.m} onChange={e=>setF({...f, m: e.target.value})} />
+                                        <input placeholder={t.y} onChange={e=>setF({...f, y: e.target.value})} />
                                     </div>
                                 </div>
-                                {Q_DATA.map((q, i) => (
+                                {Q_LIST.map((q, i) => (
                                     <div key={i} className="question-box">
-                                        <p><strong>{i+1}. {l === 'HE' ? q : `Question ${i+1}`}</strong></p>
+                                        <p><strong>{i+1}. {l === 'HE' ? q.q : `Question ${i+1}`}</strong></p>
                                         <select onChange={e=>{const n=[...ans]; n[i]=parseInt(e.target.value); setAns(n)}}>
                                             <option value="">{t.sel}</option>
-                                            <option value="0">תשובה 1</option>
-                                            <option value="1">תשובה 2</option>
-                                            <option value="2">תשובה 3</option>
-                                            <option value="3">תשובה 4</option>
+                                            {q.a.map((at, ai) => (
+                                                <option key={ai} value={ai}>{l === 'HE' ? at : `Option ${ai+1}`}</option>
+                                            ))}
                                         </select>
                                     </div>
                                 ))}
-                                <button className="btn-main" onClick={save}>{t.sub}</button>
+                                <button className="btn-main" onClick={send}>{t.sub}</button>
                             </div>
                         )}
-                        <div style={{marginTop:30, opacity:0.05, cursor:'pointer', textAlign:'center'}} onClick={()=>{if(prompt('!')==='1234') setV('admin')}}>Admin</div>
+                        <div style={{marginTop:30, opacity:0.02, cursor:'pointer', textAlign:'center'}} onClick={()=>{if(prompt('!')==='1234') setV('admin')}}>Admin</div>
                     </div>
                 </div>
             );
         };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
 </html>
