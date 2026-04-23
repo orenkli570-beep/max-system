@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAX STOCK | מערכת גיוס מלאה</title>
+    <title>MAX STOCK | מערכת גיוס</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -12,27 +12,27 @@
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background: var(--bg); color: #fff; margin: 0; padding: 10px; min-height: 100vh; }
         
-        /* עמדת מזכירה / מועמד */
         .glass-card { background: var(--card); border: 1px solid rgba(201,168,76,0.3); border-radius: 25px; padding: 20px; max-width: 600px; margin: 0 auto; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
-        .header h1 { color: var(--gold); text-align: center; margin: 0; font-size: 2.2rem; }
-        .lang-selector { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: 20px 0; }
-        .btn-lang { background: rgba(255,255,255,0.05); border: 1px solid var(--gold); color: #fff; padding: 10px 5px; border-radius: 12px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+        .header h1 { color: var(--gold); text-align: center; margin-bottom: 20px; font-size: 2.2rem; }
+        
+        .lang-selector { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 25px; }
+        .btn-lang { background: rgba(255,255,255,0.05); border: 1px solid var(--gold); color: #fff; padding: 12px 5px; border-radius: 12px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
         .btn-lang.active { background: var(--gold); color: #000; box-shadow: 0 0 15px var(--gold); }
         
         input, select { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #000; color: #fff; margin-bottom: 12px; font-size: 1rem; }
         .q-card { background: rgba(255,255,255,0.03); padding: 18px; border-radius: 18px; margin-bottom: 15px; border-right: 5px solid var(--gold); }
-        .btn-submit { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 1.3rem; margin-top: 10px; }
+        .btn-submit { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 1.3rem; }
         
-        /* לוח מנהל */
-        .admin-container { max-width: 800px; margin: 0 auto; padding: 10px; }
+        /* לוח מנהל - עיצוב כרטיסים נקי */
+        .admin-container { max-width: 800px; margin: 0 auto; }
         .candidate-card { background: #1e293b; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
         .card-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .status-badge { padding: 8px 15px; border-radius: 12px; font-size: 0.9rem; font-weight: bold; text-align: center; display: flex; flex-direction: column; min-width: 100px; }
         .badge-fast { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
         .badge-solid { background: rgba(34, 197, 94, 0.2); color: var(--success); border: 1px solid var(--success); }
-        .analysis-area { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; border-right: 4px solid var(--gold); font-size: 0.95rem; color: #cbd5e1; }
+        .analysis-area { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; border-right: 4px solid var(--gold); font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
         
-        .btn-admin-trigger { background: transparent; color: var(--gold); border: 1px solid var(--gold); padding: 10px; border-radius: 10px; margin: 40px auto; display: block; opacity: 0.3; cursor: pointer; }
+        .btn-admin-gate { background: transparent; color: var(--gold); border: 1px solid var(--gold); padding: 10px; border-radius: 10px; margin: 40px auto; display: block; opacity: 0.3; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -40,34 +40,34 @@
     <script type="text/babel">
         const { useState } = React;
 
-        const ADMIN_PASSWORD = "MAX2026";
+        // --- הגדרות מערכת ---
+        const MASTER_PASS = "MAX2026"; 
         const DEPARTMENTS = ["פלסטיקה", "חד פעמי", "כלי עבודה", "כלי מטבח", "טקסטיל", "דקורציה", "צעצועים", "ביוטי", "סלולר", "כלי כתיבה", "יצירה", "עונה"];
-        const ROLES = ["סדרן", "אחראי מחלקה", "אחראי משמרת", "עובד כללי", "מחסנאי", "קופאית"];
+        const ROLES = ["סדרן", "אחראי מחלקה", "אחראי משמרת", "מחסנאי", "קופאית"];
 
         const LANGUAGES = {
-            HE: { dir: 'rtl', h1: 'MAX STOCK', fname: 'שם פרטי', lname: 'שם משפחה', y: 'שנת לידה', sel: 'בחר תשובה...', send: 'שלח שאלון למנהל', done: 'הפרטים נשלחו!', msg: 'תודה, המנהל יחזור אליך בקרוב.', btnDone: 'מועמד חדש', admin: 'כניסת מנהל 🔒' },
-            EN: { dir: 'ltr', h1: 'MAX STOCK', fname: 'First Name', lname: 'Last Name', y: 'Birth Year', sel: 'Select...', send: 'Submit Form', done: 'Sent!', msg: 'Thank you.', btnDone: 'New Candidate', admin: 'Admin Login 🔒' },
-            RU: { dir: 'ltr', h1: 'MAX STOCK', fname: 'Имя', lname: 'Фамилия', y: 'Год рождения', sel: 'Выбрать...', send: 'Отправить', done: 'Отправлено!', msg: 'Спасибо.', btnDone: 'Новый кандидат', admin: 'Вход 🔒' },
-            AR: { dir: 'rtl', h1: 'MAX STOCK', fname: 'الاسم الأول', lname: 'اسم العائلة', y: 'سنة الميلاد', sel: 'اختر...', send: 'إرسال', done: 'تم الإرسال!', msg: 'شكراً לך.', btnDone: 'مرשח جديد', admin: 'دخول المدير 🔒' },
-            TH: { dir: 'ltr', h1: 'MAX STOCK', fname: 'ชื่อจริง', lname: 'นามสกุล', y: 'ปีเกิด', sel: 'เลือก...', send: 'ส่งข้อมูล', done: 'ส่งแล้ว!', msg: 'ขอบคุณ.', btnDone: 'ผู้สมัครใหม่', admin: 'ผู้จัดการ 🔒' }
+            HE: { dir: 'rtl', h1: 'MAX STOCK', fname: 'שם פרטי', lname: 'שם משפחה', y: 'שנת לידה', sel: 'בחר תשובה...', send: 'שלח שאלון', done: 'תודה!', msg: 'הפרטים התקבלו.', btnDone: 'מועמד חדש', admin: 'מנהל 🔒' },
+            EN: { dir: 'ltr', h1: 'MAX STOCK', fname: 'First Name', lname: 'Last Name', y: 'Birth Year', sel: 'Select...', send: 'Submit', done: 'Thanks!', msg: 'Received.', btnDone: 'New', admin: 'Admin 🔒' },
+            RU: { dir: 'ltr', h1: 'MAX STOCK', fname: 'Имя', lname: 'Фамилия', y: 'Год рождения', sel: 'Выбрать...', send: 'Отправить', done: 'Спасибо!', msg: 'Получено.', btnDone: 'Новый', admin: 'Admin 🔒' },
+            AR: { dir: 'rtl', h1: 'MAX STOCK', fname: 'الاسم الأول', lname: 'اسم العائلة', y: 'سنة الميلاد', sel: 'اختر...', send: 'إرسال', done: 'شكراً!', msg: 'تم الاستلام.', btnDone: 'חדש', admin: 'دخول 🔒' }
         };
 
         const QUESTIONS = [
-            { id: 1, HE: {q: "לקוח מחפש מוצר שחסר על המדף?", a: ["אבדוק במחסן", "אבדוק במחשב", "אכוון לדומה", "אמשיך בעבודתי"]}, EN: {q: "Customer seeks out-of-stock item?", a: ["Check warehouse", "Check computer", "Suggest similar", "Continue working"]} },
-            { id: 2, HE: {q: "תור ארוך מאוד בקופות ואתה בסידור מדף?", a: ["אגש מיד לעזור", "אחכה שיקראו לי", "אסיים קודם את המדף", "אלך למחסן"]} },
-            { id: 3, HE: {q: "ראית מוצר שבור או נוזל על הרצפה?", a: ["אנקה מיד", "אדווח למנהל", "אקרא לעובד ניקיון", "אעקוף את המפגע"]} },
-            { id: 4, HE: {q: "לקוח מתלונן בקול רם על מחיר גבוה?", a: ["אקשיב בסבלנות", "אפנה אותו למנהל", "אגיד שזה המחיר", "אתעלם"]} },
-            { id: 5, HE: {q: "המנהל נתן לך משימה שאתה פחות אוהב?", a: ["אבצע הכי טוב ומהר", "אבצע ואז אבקש לגוון", "אעשה לאט", "אחפש מישהו שיחליף"]} },
-            { id: 6, HE: {q: "חבר לעבודה טעה בסידור המחלקה?", a: ["אעזור לו לתקן", "אסב את תשומת ליבו", "אדווח למנהל", "לא ענייני"]} },
-            { id: 7, HE: {q: "הגעת למשמרת והמחלקה הפוכה לגמרי?", a: ["אתחיל לסדר מיד", "אשאל מאיפה להתחיל", "אסדר רק את האזור שלי", "אחכה להנחיות"]} },
-            { id: 8, HE: {q: "לקוח מתלבט זמן רב לגבי מוצר?", a: ["אציע עזרה והמלצה", "אכוון לאזור הכללי", "אגיד שזה עניין של טעם", "אפנה לעובד אחר"]} },
-            { id: 9, HE: {q: "מצאת שטר כסף על הרצפה בחנות?", a: ["אמסור למנהל/קופה", "אשאל לקוחות אם איבדו", "אשים בצדקה", "אשמור בכיס"]} },
-            { id: 10, HE: {q: "איזו צורת עבודה אתה מעדיף?", a: ["אחריות עצמאית", "עבודת צוות", "שיגידו לי מה לעשות", "שקט במחסן"]} },
-            { id: 11, HE: {q: "לקוח דורש הנחה שאי אפשר לתת?", a: ["אסביר בנימוס את המדיניות", "אבדוק מבצע חלופי", "אשלח למנהל", "אגיד שאין הנחות"]} },
-            { id: 12, HE: {q: "סימנת מחיר טעות על קבוצת מוצרים?", a: ["אתקן מיד ואדווח", "אשאל מה לעשות", "אקווה שלא ישימו לב", "אשאיר ככה"]} },
-            { id: 13, HE: {q: "המשמרת נגמרה והחנות עמוסה מאוד?", a: ["אשאר עוד כמה דקות", "אסיים משימה ואלך", "אצא מיד", "אלך בלי להגיד"]} },
-            { id: 14, HE: {q: "עובד אחר מבקש לעשות משהו לא תקין?", a: ["אסרב ואסביר", "אדווח למנהל", "אזרום איתו פעם אחת", "אעשה מה שביקש"]} },
-            { id: 15, HE: {q: "מה הדבר שהכי חשוב לך בעבודה?", a: ["שירות מעולה", "קידום לניהול", "סדר וארגון", "המשכורת והשקט"]} }
+            { id: 1, q: "לקוח מחפש מוצר שחסר על המדף?", a: ["אבדוק במחסן", "אבדוק במחשב", "אכוון לדומה", "אמשיך בעבודתי"] },
+            { id: 2, q: "תור ארוך מאוד בקופות ואתה בסידור מדף?", a: ["אגש מיד לעזור", "אחכה שיקראו לי", "אסיים קודם את המדף", "אלך למחסן"] },
+            { id: 3, q: "ראית מוצר שבור או נוזל על הרצפה?", a: ["אנקה מיד", "אדווח למנהל", "אקרא לעובד ניקיון", "אעקוף את המפגע"] },
+            { id: 4, q: "לקוח מתלונן בקול רם על מחיר גבוה?", a: ["אקשיב בסבלנות", "אפנה אותו למנהל", "אגיד שזה המחיר", "אתעלם"] },
+            { id: 5, q: "המנהל נתן לך משימה שאתה פחות אוהב?", a: ["אבצע הכי טוב ומהר", "אבצע ואז אבקש לגוון", "אעשה לאט", "אחפש מישהו שיחליף"] },
+            { id: 6, q: "חבר לעבודה טעה בסידור המחלקה?", a: ["אעזור לו לתקן", "אסב את תשומת ליבו", "אדווח למנהל", "לא ענייני"] },
+            { id: 7, q: "הגעת למשמרת והמחלקה הפוכה לגמרי?", a: ["אתחיל לסדר מיד", "אשאל מאיפה להתחיל", "אסדר רק את האזור שלי", "אחכה להנחיות"] },
+            { id: 8, q: "לקוח מתלבט זמן רב לגבי מוצר?", a: ["אציע עזרה והמלצה", "אכוון לאזור הכללי", "אגיד שזה עניין של טעם", "אפנה לעובד אחר"] },
+            { id: 9, q: "מצאת שטר כסף על הרצפה בחנות?", a: ["אמסור למנהל/קופה", "אשאל לקוחות אם איבדו", "אשים בצדקה", "אשמור בכיס"] },
+            { id: 10, q: "איזו צורת עבודה אתה מעדיף?", a: ["אחריות עצמאית", "עבודת צוות", "שיגידו לי מה לעשות", "שקט במחסן"] },
+            { id: 11, q: "לקוח דורש הנחה שאי אפשר לתת?", a: ["אסביר בנימוס את המדיניות", "אבדוק מבצע חלופי", "אשלח למנהל", "אגיד שאין הנחות"] },
+            { id: 12, q: "סימנת מחיר טעות על קבוצת מוצרים?", a: ["אתקן מיד ואדווח", "אשאל מה לעשות", "אקווה שלא ישימו לב", "אשאיר ככה"] },
+            { id: 13, q: "המשמרת נגמרה והחנות עמוסה מאוד?", a: ["אשאר עוד כמה דקות", "אסיים משימה ואלך", "אצא מיד", "אלך בלי להגיד"] },
+            { id: 14, q: "עובד אחר מבקש לעשות משהו לא תקין?", a: ["אסרב ואסביר", "אדווח למנהל", "אזרום איתו פעם אחת", "אעשה מה שביקש"] },
+            { id: 15, q: "מה הדבר שהכי חשוב לך בעבודה?", a: ["שירות מעולה", "קידום לניהול", "סדר וארגון", "המשכורת והשקט"] }
         ];
 
         const App = () => {
@@ -87,17 +87,19 @@
                     age: new Date().getFullYear() - parseInt(form.y) || "?",
                     time: `${Math.floor(duration/60)}:${(duration%60).toString().padStart(2,'0')}`,
                     status: duration < 180 ? 'fast' : 'solid',
-                    analysis: duration < 180 ? "ניתוח יהודה: המועמד מיהר מאוד (חפיף). יש לבדוק יסודיות בסידור מדפים." : "ניתוח יהודה: מועמד יסודי ושקול. נראה שקרא את השאלות בעיון."
+                    analysis: duration < 180 ? 
+                        "ניתוח יהודה: המועמד ענה במהירות רבה. מומלץ לבדוק יסודיות בסידור ובביצוע משימות שגרתיות." : 
+                        "ניתוח יהודה: מועמד יסודי ושקול. נראה שהשקיע מחשבה בתשובותיו ומבין את חשיבות הסדר."
                 };
                 setCandidates([newCand, ...candidates]);
                 setView('done');
             };
 
-            const adminEntry = () => {
+            const checkAdmin = () => {
                 const pass = prompt("נא להזין סיסמת מנהל:");
-                if(pass === ADMIN_PASSWORD) {
+                if (pass && pass.toUpperCase() === MASTER_PASS) {
                     setView('admin');
-                } else {
+                } else if (pass !== null) {
                     alert("סיסמה שגויה!");
                 }
             };
@@ -106,14 +108,14 @@
                 <div className="admin-container" dir="rtl">
                     <div style={{textAlign:'center', marginBottom:30}}>
                         <h1 style={{color:'var(--gold)'}}>לוח מנהל - MAX</h1>
-                        <button onClick={()=>setView('quiz')} style={{background: 'var(--gold)', border:'none', padding:'10px 20px', borderRadius:12, fontWeight:'bold', cursor:'pointer'}}>חזרה לעמדת המזכירה</button>
+                        <button onClick={()=>setView('quiz')} style={{background:'var(--gold)', border:'none', padding:'10px 20px', borderRadius:10, fontWeight:'bold', cursor:'pointer'}}>חזרה למזכירה</button>
                     </div>
-                    {candidates.length === 0 ? <p style={{textAlign:'center', opacity:0.5}}>אין מועמדים ברשימה</p> : 
+                    {candidates.length === 0 ? <p style={{textAlign:'center', opacity:0.5}}>ממתין למועמדים...</p> : 
                     candidates.map(c => (
                         <div key={c.id} className="candidate-card">
                             <div className="card-row-top">
                                 <div>
-                                    <div style={{fontSize:'1.3rem', fontWeight:'bold'}}>{c.name}</div>
+                                    <div style={{fontSize:'1.4rem', fontWeight:'bold'}}>{c.name}</div>
                                     <div style={{opacity:0.7}}>גיל: {c.age}</div>
                                 </div>
                                 <div className={`status-badge ${c.status === 'fast' ? 'badge-fast' : 'badge-solid'}`}>
@@ -138,7 +140,6 @@
                 <div className="glass-card" style={{textAlign:'center'}} dir={t.dir}>
                     <h1 style={{fontSize:'5rem', color: 'var(--success)'}}>✓</h1>
                     <h2>{t.done}</h2>
-                    <p>{t.msg}</p>
                     <button className="btn-submit" onClick={()=>{setForm({fn:'',ln:'',y:''}); setStartTime(Date.now()); setView('quiz');}}>{t.btnDone}</button>
                 </div>
             );
@@ -157,13 +158,13 @@
                     
                     {QUESTIONS.map((q, i) => (
                         <div key={i} className="q-card">
-                            <p><strong>{q[lang]?.q || q['HE'].q}</strong></p>
-                            <select><option value="">{t.sel}</option>{(q[lang]?.a || q['HE'].a).map((a,idx)=><option key={idx}>{a}</option>)}</select>
+                            <p><strong>{i+1}. {q.q}</strong></p>
+                            <select><option value="">{t.sel}</option>{q.a.map((ans,idx)=><option key={idx}>{ans}</option>)}</select>
                         </div>
                     ))}
                     
                     <button className="btn-submit" onClick={handleSend}>{t.send}</button>
-                    <button className="btn-admin-trigger" onClick={adminEntry}>{t.admin}</button>
+                    <button className="btn-admin-gate" onClick={checkAdmin}>{t.admin}</button>
                 </div>
             );
         };
