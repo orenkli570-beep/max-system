@@ -3,96 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAX STOCK | OREN PROTOCOL PRO</title>
-    
+    <title>MAX STOCK | OREN PROTOCOL</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-
     <style>
         :root { --gold: #c9a84c; --bg: #0f172a; --card: rgba(30, 41, 59, 0.9); }
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background: var(--bg); color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 650px; }
-        .glass-card { background: var(--card); border: 1px solid rgba(201,168,76,0.3); border-radius: 28px; padding: 35px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); text-align: center; }
-        .header h1 { color: var(--gold); font-size: 2.8rem; margin-bottom: 20px; font-weight: 900; }
-        .lang-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 25px; flex-wrap: wrap; }
-        .btn-lang { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        body { background: var(--bg); color: #fff; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 650px; padding-bottom: 50px; }
+        .glass-card { background: var(--card); border: 1px solid rgba(201,168,76,0.3); border-radius: 28px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+        .header h1 { color: var(--gold); text-align: center; font-size: 2.2rem; margin: 10px 0; }
+        .lang-bar { display: flex; justify-content: center; gap: 5px; margin-bottom: 20px; flex-wrap: wrap; }
+        .btn-lang { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
         .btn-lang.active { background: var(--gold); color: #000; }
-        .input-group { margin-bottom: 20px; text-align: right; }
-        label { display: block; margin-bottom: 8px; color: var(--gold); font-weight: 600; }
-        input, select { width: 100%; padding: 15px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: #000; color: #fff; font-size: 1rem; }
-        .dob-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .question-box { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; margin-bottom: 15px; border-right: 4px solid var(--gold); text-align: right; }
-        .btn-main { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; border-radius: 16px; font-weight: 800; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
-        .btn-main:hover { transform: scale(1.02); filter: brightness(1.1); }
-        .admin-row { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: right; border-right: 3px solid var(--gold); }
-        .profile-tag { background: var(--gold); color: #000; padding: 2px 8px; border-radius: 5px; font-size: 12px; float: left; font-weight: bold; }
+        .input-group { margin-bottom: 15px; text-align: right; }
+        label { display: block; margin-bottom: 5px; color: var(--gold); font-weight: 600; }
+        input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: #000; color: #fff; }
+        .dob-grid { display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 8px; }
+        .question-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; margin-bottom: 12px; border-right: 4px solid var(--gold); text-align: right; }
+        .btn-main { width: 100%; padding: 16px; background: var(--gold); color: #000; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 1.1rem; }
+        .admin-row { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 10px; margin-bottom: 8px; text-align: right; border-right: 3px solid var(--gold); position: relative; }
+        .tag { background: var(--gold); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; position: absolute; left: 10px; top: 10px; }
         [dir="ltr"] .question-box { border-right: none; border-left: 4px solid var(--gold); text-align: left; }
         [dir="ltr"] .input-group { text-align: left; }
     </style>
 </head>
 <body>
     <div id="root"></div>
-
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        const TRANSLATIONS = {
-            HE: { dir: 'rtl', start: 'התחל שאלון', name: 'שם המועמד', dob: 'תאריך לידה', day: 'יום', month: 'חודש', year: 'שנה', select: 'בחר אפשרות...', submit: 'שלח שאלון', success: 'השאלון נשלח בהצלחה!', thanks: 'תודה רבה! פנייתך התקבלה במערכת.', back: 'חזרה לדף הבית' },
-            EN: { dir: 'ltr', start: 'Start Quiz', name: 'Full Name', dob: 'Date of Birth', day: 'Day', month: 'Month', year: 'Year', select: 'Choose...', submit: 'Submit', success: 'Submitted Successfully!', thanks: 'Thank you! Your application has been received.', back: 'Back to Home' },
-            RU: { dir: 'ltr', start: 'Начать', name: 'ФИО', dob: 'Дата рождения', day: 'День', month: 'Месяц', year: 'Год', select: 'Выбрать...', submit: 'Отправить', success: 'Успешно отправлено!', thanks: 'Спасибо! Ваша анкета получена.', back: 'На главную' },
-            AR: { dir: 'rtl', start: 'ابدأ الاستبيان', name: 'الاسم الكامل', dob: 'تاريخ الميلاد', day: 'يوم', month: 'شهر', year: 'سنة', select: 'اختر...', submit: 'إرسال', success: 'تم الإرسال بنجاح!', thanks: 'شكراً لك! تم استلام طلبك.', back: 'العودة לרף הבית' },
-            TH: { dir: 'ltr', start: 'เริ่มทำแบบทดสอบ', name: 'ชื่อ-นามสกุล', dob: 'วันเกิด', day: 'วัน', month: 'เดือน', year: 'ปี', select: 'เลือก...', submit: 'ส่งแบบสอบถาม', success: 'ส่งข้อมูลเรียบร้อยแล้ว!', thanks: 'ขอบคุณ! ระบบได้รับใบสมัครของคุณแล้ว', back: 'กลับหน้าหลัก' }
+        const TXT = {
+            HE: { dir: 'rtl', start: 'התחל שאלון', name: 'שם המועמד', dob: 'תאריך לידה', d: 'יום', m: 'חודש', y: 'שנה', sel: 'בחר...', sub: 'שלח שאלון', succ: 'נשלח בהצלחה!', back: 'חזרה' },
+            EN: { dir: 'ltr', start: 'Start', name: 'Name', dob: 'DOB', d: 'Day', m: 'Month', y: 'Year', sel: 'Choose...', sub: 'Submit', succ: 'Success!', back: 'Back' },
+            RU: { dir: 'ltr', start: 'Начать', name: 'ФИО', dob: 'Дата рождения', d: 'День', m: 'Месяץ', y: 'Год', sel: 'Выбрать...', sub: 'Отправить', succ: 'Успешно!', back: 'Назад' },
+            AR: { dir: 'rtl', start: 'ابدأ', name: 'الاسم', dob: 'تاريخ الميلاد', d: 'يום', m: 'شهر', y: 'سنة', sel: 'اختر...', sub: 'إرسال', succ: 'تم بنجاح!', back: 'عودة' },
+            TH: { dir: 'ltr', start: 'เริ่ม', name: 'ชื่อ', dob: 'วันเกิด', d: 'วัน', m: 'เดือน', y: 'ปี', sel: 'เลือก...', sub: 'ส่ง', succ: 'สำเร็จ!', back: 'กลับ' }
         };
 
-        const QUESTIONS = [
-            { id: 1, he: "לקוח מחפש מוצר שחסר על המדף. מה תעשה?", en: "Customer looking for out-of-stock item?", ru: "Клиент ищет товар, которого нет на полке?", ar: "العميل يبحث عن منتج مفقود؟", th: "ลูกค้ามองหาสินค้าที่ไม่มีบนชั้น?", a: ["A1", "A2", "A3", "A4"] },
-            // (לשם הקיצור והמהירות, המבנה תומך ב-15 שאלות מתורגמות)
+        const Q_DATA = [
+            "לקוח מחפש מוצר שחסר על המדף. מה תעשה?", "יש תור ארוך בקופות ואתה בסידור מדף?", "ראית מוצר שבור או נוזל על הרצפה?",
+            "לקוח מתלונן בקול רם על מחיר גבוה?", "המנהל נתן לך משימה שאתה פחות אוהב?", "חבר לעבודה טעה בסידור המחלקה?",
+            "הגעת למשמרת והמחלקה הפוכה לגמרי?", "לקוח מתלבט זמן רב לגבי קניית מתנה?", "מצאת שטר כסף על הרצפה בחנות?",
+            "איזו צורת עבודה אתה הכי מעדיף?", "לקוח דורש הנחה שאי אפשר לתת?", "סימנת מחיר טעות על קבוצת מוצרים?",
+            "המשמרת נגמרה והחנות עמוסה מאוד?", "עובד אחר מבקש לעשות משהו לא תקין?", "מה הדבר שהכי חשוב לך בעבודה?"
         ];
 
         const App = () => {
-            const [view, setView] = useState('home');
-            const [lang, setLang] = useState('HE');
+            const [v, setV] = useState('home');
+            const [l, setL] = useState('HE');
             const [ans, setAns] = useState(Array(15).fill(null));
-            const [data, setData] = useState({ name: '', day: '', month: '', year: '' });
+            const [form, setForm] = useState({ n: '', d: '', m: '', y: '' });
             const [db, setDb] = useState([]);
 
             useEffect(() => {
-                const saved = localStorage.getItem('MAX_FINAL_V1');
-                if (saved) setDb(JSON.parse(saved));
+                try {
+                    const saved = localStorage.getItem('MAX_V3');
+                    if (saved) setDb(JSON.parse(saved));
+                } catch(e) { console.error(e); }
             }, []);
 
-            const handleSave = () => {
-                if (!data.name || !data.year || ans.includes(null)) return alert("Please fill all details");
+            const save = () => {
+                if (!form.n || !form.y || ans.includes(null)) return alert("Please fill all details");
                 const score = ans.filter(a => a === 0).length;
-                const profile = score >= 10 ? "יוזמה גבוהה" : score >= 6 ? "ביצועיסט" : "משימתי";
-                const newRec = { ...data, profile, ts: new Date().toLocaleString() };
-                const updated = [...db, newRec];
-                setDb(updated); localStorage.setItem('MAX_FINAL_V1', JSON.stringify(updated));
-                setView('success');
+                const prof = score >= 10 ? "יוזמה גבוהה" : score >= 6 ? "ביצועיסט" : "משימתי";
+                const newRec = { ...form, prof, ts: new Date().toLocaleString() };
+                const up = [...db, newRec];
+                setDb(up); localStorage.setItem('MAX_V3', JSON.stringify(up));
+                setV('done');
             };
 
-            const t = TRANSLATIONS[lang];
+            const t = TXT[l];
 
-            if (view === 'success') return (
-                <div className="container" dir={t.dir}><div className="glass-card">
-                    <h1 style={{color: 'var(--gold)'}}>✔</h1>
-                    <h2>{t.success}</h2>
-                    <p style={{margin: '20px 0', opacity: 0.8}}>{t.thanks}</p>
-                    <button className="btn-main" onClick={() => { setView('home'); setAns(Array(15).fill(null)); }}>{t.back}</button>
+            if (v === 'done') return (
+                <div className="container" dir={t.dir}><div className="glass-card" style={{textAlign:'center'}}>
+                    <h1 style={{fontSize:'4rem'}}>✔</h1>
+                    <h2>{t.succ}</h2>
+                    <button className="btn-main" style={{marginTop:20}} onClick={()=>setV('home')}>{t.back}</button>
                 </div></div>
             );
 
-            if (view === 'admin') return (
+            if (v === 'admin') return (
                 <div className="container" dir="rtl"><div className="glass-card">
-                    <h1 style={{fontSize:'1.5rem'}}>לוח מנהל</h1>
-                    <button onClick={()=>setView('home')} className="btn-lang" style={{marginBottom:20}}>חזרה</button>
+                    <h2>ניהול מועמדים</h2>
+                    <button onClick={()=>setV('home')} className="btn-lang" style={{marginBottom:15}}>חזרה</button>
                     {db.map((r, i) => (
                         <div key={i} className="admin-row">
-                            <span className="profile-tag">{r.profile}</span>
-                            <strong>{r.name}</strong><br/>
-                            <small>{r.day}/{r.month}/{r.year} | {r.ts}</small>
+                            <span className="tag">{r.prof}</span>
+                            <strong>{r.n}</strong><br/>
+                            <small>{r.d}/{r.m}/{r.y} | {r.ts}</small>
                         </div>
                     ))}
                 </div></div>
@@ -100,35 +100,35 @@
 
             return (
                 <div className="container" dir={t.dir}>
-                    <div className="header"><h1>MAX STOCK</h1></div>
                     <div className="glass-card">
+                        <div className="header"><h1>MAX STOCK</h1></div>
                         <div className="lang-bar">
-                            {Object.keys(TRANSLATIONS).map(l => (
-                                <button key={l} className={`btn-lang ${lang === l ? 'active' : ''}`} onClick={() => setLang(l)}>{l}</button>
+                            {Object.keys(TXT).map(key => (
+                                <button key={key} className={`btn-lang ${l === key ? 'active' : ''}`} onClick={() => setL(key)}>{key}</button>
                             ))}
                         </div>
 
-                        {view === 'home' ? (
-                            <button className="btn-main" onClick={()=>setView('quiz')}>{t.start}</button>
+                        {v === 'home' ? (
+                            <button className="btn-main" onClick={()=>setV('quiz')}>{t.start}</button>
                         ) : (
                             <div>
                                 <div className="input-group">
                                     <label>{t.name}</label>
-                                    <input onChange={e=>setData({...data, name: e.target.value})} />
+                                    <input onChange={e=>setForm({...form, n: e.target.value})} />
                                 </div>
                                 <div className="input-group">
                                     <label>{t.dob}</label>
                                     <div className="dob-grid">
-                                        <input placeholder={t.day} onChange={e=>setData({...data, day: e.target.value})} />
-                                        <input placeholder={t.month} onChange={e=>setData({...data, month: e.target.value})} />
-                                        <input placeholder={t.year} onChange={e=>setData({...data, year: e.target.value})} />
+                                        <input placeholder={t.d} onChange={e=>setForm({...form, d: e.target.value})} />
+                                        <input placeholder={t.m} onChange={e=>setForm({...form, m: e.target.value})} />
+                                        <input placeholder={t.y} onChange={e=>setForm({...form, y: e.target.value})} />
                                     </div>
                                 </div>
-                                {[...Array(15)].map((_, i) => (
+                                {Q_DATA.map((q, i) => (
                                     <div key={i} className="question-box">
-                                        <p><strong>{i+1}. {lang === 'HE' ? 'שאלה לדוגמה...' : 'Question...'}</strong></p>
-                                        <select onChange={e => { const n = [...ans]; n[i] = parseInt(e.target.value); setAns(n); }}>
-                                            <option value="">{t.select}</option>
+                                        <p><strong>{i+1}. {l === 'HE' ? q : `Question ${i+1}`}</strong></p>
+                                        <select onChange={e=>{const n=[...ans]; n[i]=parseInt(e.target.value); setAns(n)}}>
+                                            <option value="">{t.sel}</option>
                                             <option value="0">תשובה 1</option>
                                             <option value="1">תשובה 2</option>
                                             <option value="2">תשובה 3</option>
@@ -136,7 +136,17 @@
                                         </select>
                                     </div>
                                 ))}
-                                <button className="btn-main" onClick={handleSave}>{t.submit}</button>
+                                <button className="btn-main" onClick={save}>{t.sub}</button>
                             </div>
                         )}
-                        <div style={{marginTop:40, opacity:0.05, cursor:'pointer'}} onClick={()=>{if(prompt('!')==='1234') setView('admin')}}>Admin
+                        <div style={{marginTop:30, opacity:0.05, cursor:'pointer', textAlign:'center'}} onClick={()=>{if(prompt('!')==='1234') setV('admin')}}>Admin</div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
