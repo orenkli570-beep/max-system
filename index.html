@@ -3,117 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>יהודה | ניהול סניף MAX STOCK</title>
+    <title>מערכת גיוס - MAX STOCK</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
     <style>
         :root { --gold: #c9a84c; --bg: #0b0f1a; --card: #161c2d; --danger: #ef4444; --success: #22c55e; --info: #3b82f6; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: #e2e8f0; margin: 0; padding: 20px; }
-        .dashboard { max-width: 1400px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); padding-bottom: 20px; margin-bottom: 25px; }
-        .header h1 { color: var(--gold); margin: 0; font-size: 1.8rem; }
-        
-        /* סרגל סינון */
-        .filter-bar { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; border: 1px solid rgba(201,168,76,0.1); }
-        select { background: #000; color: #fff; border: 1px solid var(--gold); padding: 10px; border-radius: 8px; cursor: pointer; }
-
-        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
-        tr.candidate-row { background: var(--card); }
-        td { padding: 20px; vertical-align: top; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: var(--bg); color: #fff; margin: 0; padding: 15px; min-height: 100vh; }
+        .container { max-width: 1000px; margin: 0 auto; padding-bottom: 50px; }
+        .glass-card { background: var(--card); border: 1px solid rgba(201,168,76,0.3); border-radius: 30px; padding: 30px; box-shadow: 0 25px 60px rgba(0,0,0,0.7); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: var(--gold); font-size: 2.8rem; margin: 0; letter-spacing: 2px; }
+        .btn-gold { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 1.4rem; margin-top: 25px; transition: 0.3s; }
+        .btn-gold:hover { background: #e2c275; transform: translateY(-2px); }
+        .btn-admin-nav { background: transparent; color: var(--gold); border: 2px solid var(--gold); padding: 15px; border-radius: 15px; cursor: pointer; width: 100%; margin-top: 40px; font-weight: bold; font-size: 1.1rem; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 12px; margin-top: 30px; }
+        tr.row-bg { background: rgba(255,255,255,0.03); }
+        td { padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); vertical-align: top; }
         td:first-child { border-radius: 0 15px 15px 0; }
         td:last-child { border-radius: 15px 0 0 15px; }
-
-        .time-badge { padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; }
-        .fast { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid var(--danger); }
-        .solid { background: rgba(34,197,94,0.15); color: var(--success); border: 1px solid var(--success); }
-
-        .interaction-box { background: rgba(59, 130, 246, 0.05); padding: 12px; border-radius: 10px; border-right: 3px solid var(--info); font-size: 0.9rem; line-height: 1.5; }
-        .tag { display: inline-block; padding: 3px 8px; border-radius: 5px; font-size: 0.7rem; margin: 3px; background: rgba(201,168,76,0.1); color: var(--gold); border: 1px solid var(--gold); }
+        .badge-fast { background: rgba(239,68,68,0.2); color: var(--danger); border: 1px solid var(--danger); padding: 5px 10px; border-radius: 8px; font-weight: bold; }
+        .badge-solid { background: rgba(34,197,94,0.2); color: var(--success); border: 1px solid var(--success); padding: 5px 10px; border-radius: 8px; font-weight: bold; }
+        input, select { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #000; color: #fff; font-size: 1rem; margin-top: 8px; }
+        .q-card { background: rgba(255,255,255,0.02); padding: 20px; border-radius: 20px; margin-bottom: 15px; border-right: 5px solid var(--gold); }
+        .interaction-box { background: rgba(59, 130, 246, 0.08); padding: 15px; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2); font-size: 0.95rem; }
     </style>
 </head>
 <body>
     <div id="root"></div>
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
 
-        const DEPARTMENTS = ["כל המחלקות", "צעצועים", "יצירה", "חשמל", "בית ונוי", "כלי בית", "חד פעמי", "טקסטיל", "ניקיון", "קוסמטיקה", "משרדי", "מזון", "גינון", "פנאי"];
-        const ROLES = ["קופאי", "סדרן מחלקה", "מחסנאי", "אחראי משמרת", "מנהל מחלקה", "נציג שירות", "מלגזן", "עובד דלפק", "סדרן קופות", "אחראי החזרות", "בודק ביטחון", "מנהל סניף", "סגן מנהל", "עובד כללי", "ניקיון ואחזקה"];
+        const ADMIN_PASSWORD = "MAX2026";
+        const DEPARTMENTS = ["פלסטיקה", "חד פעמי", "כלי עבודה", "כלי מטבח", "כלי זכוכית", "טקסטיל", "דקורציה", "צעצועים", "ביוטי", "סלולר", "כלי כתיבה", "יצירה", "עונה", "הלבשה תחתונה, חיות מחמד וכלי רכב"];
+        const ROLES = ["סדרן", "אחראי מחלקה", "אחראי משמרת", "עובד כללי", "מחסנאי", "מנהל מחסן", "בודק סחורה", "קופאית ראשית", "קופאית", "סגן מנהל", "אחראי משמרת"];
 
-        const CANDIDATES = [
-            { id: 1, name: "משה כהן", age: 22, dept: "צעצועים", role: "סדרן מחלקה", time: "1:35", status: "fast", analysis: "רמה גבוהה של חפיפה. המועמד דילג על שאלות מהותיות.", social: "יחסים עם המנהל: ינסה להתחמק ממטלות משעממות. יחסים עם הצוות: עלול להעמיס עבודה על אחרים." },
-            { id: 2, name: "אילנה לוי", age: 35, dept: "בית ונוי", role: "מנהלת מחלקה", time: "4:20", status: "solid", analysis: "ניתוח זהוב: יסודיות יוצאת דופן, הבנה מעמיקה של סדר וניקיון.", social: "יחסים עם המנהל: יד ימינו של המנהל, תקשורת מעולה. יחסים עם הצוות: מנהיגה טבעית, תומכת בעובדים חלשים." },
-            { id: 3, name: "דניאל אביב", age: 20, dept: "חשמל", role: "קופאי", time: "3:05", status: "solid", analysis: "מועמד יציב ומשימתי. פועל לפי הספר.", social: "יחסים עם המנהל: ציות מלא. יחסים עם הצוות: עובד בשקט, לא מייצר חיכוכים חברתיים." }
+        const QUESTIONS = [
+            { id: 1, q: "לקוח מחפש מוצר שחסר על המדף. מה תעשה?", a: ["אבדוק במחסן ואביא לו אישית", "אבדוק במחשב אם קיים במלאי", "אכוון למוצר דומה", "אמשיך בעבודתי"] },
+            { id: 2, q: "תור ארוך מאוד בקופות ואתה בסידור מדף?", a: ["אגש מיד לעזור בקופה", "אחכה שיקראו לי", "אמשיך לסדר עד שאסיים", "אלך למחסן"] },
+            { id: 3, q: "ראית מוצר שבור או נוזל על הרצפה במעבר?", a: ["אנקה מיד ואדאג לבטיחות", "אדווח למנהל המשמרת", "אקרא לעובד ניקיון", "אעקוף את המפגע"] },
+            { id: 4, q: "לקוח מתלונן בקול רם על מחיר גבוה?", a: ["אקשיב בסבלנות ואסביר בנועם", "אפנה אותו למנהל הסניף", "אגיד שזה המחיר וזהו", "אתעלם ואעבור מחלקה"] },
+            { id: 5, q: "המנהל נתן לך משימה שאתה פחות אוהב?", a: ["אבצע אותה הכי טוב ומהר", "אבצע ואז אבקש לגוון", "אעשה לאט כדי שלא יבקשו שוב", "אחפש עובד שיחליף אותי"] },
+            { id: 6, q: "חבר לעבודה טעה בסידור המחלקה?", a: ["אעזור לו לתקן בנעימות", "אסב את תשומת ליבו לטעות", "אדווח למנהל", "לא ענייני, כל אחד לעצמו"] },
+            { id: 7, q: "הגעת למשמרת והמחלקה הפוכה לגמרי?", a: ["אתחיל לסדר מיד לפי דחיפות", "אשאל את המנהל מאיפה להתחיל", "אסדר רק את האזור שלי", "אחכה שמישהו יגיד לי מה לעשות"] },
+            { id: 8, q: "לקוח מתלבט זמן רב לגבי קניית מוצר?", a: ["אציע לו אפשרויות ואעזור לו", "אכוון אותו לאזור הכללי", "אגיד שזה עניין של טעם", "אפנה אותו לעובד אחר"] },
+            { id: 9, q: "מצאת שטר כסף על הרצפה בחנות?", a: ["אמסור מיד למנהל או לקופה", "אשאל לקוחות אם איבדו", "אשים בקופת צדקה", "אשמור אותו בכיס"] },
+            { id: 10, q: "איזו צורת עבודה אתה הכי מעדיף?", a: ["עבודה עם אחריות שבה אני רץ לבד", "עבודה בצוות ושיתוף פעולה", "עבודה שאומרים לי מה לעשות", "עבודה שקטה במחסן"] },
+            { id: 11, q: "לקוח דורש הנחה שאי אפשר לתת?", a: ["אסביר בנימוס את המדיניות", "אבדוק אם יש מבצע חלופי", "אשלח אותו למנהל", "אגיד 'אין הנחות'"] },
+            { id: 12, q: "סימנת מחיר טעות על קבוצת מוצרים?", a: ["אתקן מיד ואדווח למנהל", "אשאל את המנהל מה לעשות", "אקווה שאף אחד לא ישים לב", "אשאיר את זה ככה"] },
+            { id: 13, q: "המשמרת נגמרה והחנות עמוסה מאוד?", a: ["אשאר עוד כמה דקות לעזור", "אסיים את המשימה ואלך", "אצא מיד - השעה הגיעה", "אלך בלי להגיד כלום"] },
+            { id: 14, q: "עובד אחר מבקש לעשות משהו לא תקין?", a: ["אסרב בנימוס ואסביר לו", "אדווח על כך למנהל", "אזרום איתו פעם אחת", "אעשה מה שביקש"] },
+            { id: 15, q: "מה הדבר שהכי חשוב לך בעבודה?", a: ["שירות מעולה ללקוח", "להתקדם לתפקידי ניהול", "סדר וארגון במשימות", "המשכורת והשקט שלי"] }
         ];
 
         const App = () => {
-            const [selectedDept, setSelectedDept] = useState("כל המחלקות");
+            const [view, setView] = useState('candidate'); 
+            const [startTime, setStartTime] = useState(null);
+            const [candidates, setCandidates] = useState([
+                { name: "משה כהן", time: "1:45", dept: "כלי עבודה", role: "סדרן", analysis: "חשד לחפיפה גבוה. מועמד המעדיף לקצר תהליכים.", social: "מול המנהל: זקוק לפיקוח צמוד. מול הצוות: עלול להעמיס על עמיתיו.", status: "fast" },
+                { name: "רחל לוי", time: "3:55", dept: "טקסטיל", role: "אחראית מחלקה", analysis: "ניתוח יסודי: רמה גבוהה של רצינות והבנה שירותית.", social: "מול המנהל: נאמנה ומסודרת. מול הצוות: מסייעת ותורמת לאווירה.", status: "solid" }
+            ]);
+
+            useEffect(() => { if(view === 'candidate') setStartTime(Date.now()); }, [view]);
+
+            const enterAdmin = () => {
+                const pass = prompt("הכנס סיסמת מנהל:");
+                if (pass === ADMIN_PASSWORD) setView('admin');
+                else alert("סיסמה שגויה!");
+            };
+
+            if (view === 'done') return (
+                <div className="container" style={{textAlign:'center', marginTop:'100px'}}>
+                    <div className="glass-card">
+                        <h1 style={{fontSize:'6rem', color: 'var(--success)'}}>✔</h1>
+                        <h2 style={{color: 'var(--gold)'}}>השאלון נשלח בהצלחה!</h2>
+                        <button className="btn-gold" onClick={() => window.location.reload()}>חזרה להתחלה</button>
+                    </div>
+                </div>
+            );
+
+            if (view === 'admin') return (
+                <div className="container" style={{maxWidth:'1200px'}}>
+                    <div className="header"><h1>מרכז בקרה מנהל</h1></div>
+                    <div className="glass-card">
+                        <button onClick={() => setView('candidate')} style={{color: 'var(--gold)', background:'none', border:'none', cursor:'pointer', fontSize:'1.1rem'}}>→ חזרה לעמדת מועמד</button>
+                        <table>
+                            <thead>
+                                <tr style={{opacity:0.6}}><th>מועמד</th><th>שיבוץ מבוקש</th><th>מדד חפיפה</th><th>ניתוח אינטראקציה</th></tr>
+                            </thead>
+                            <tbody>
+                                {candidates.map((c, i) => (
+                                    <tr key={i} className="row-bg">
+                                        <td><strong>{c.name}</strong></td>
+                                        <td><div style={{color:'var(--gold)'}}>{c.dept}</div><div>{c.role}</div></td>
+                                        <td><span className={c.status === 'fast' ? 'badge-fast' : 'badge-solid'}>{c.time} {c.status === 'fast' ? 'חפיף' : 'יסודי'}</span></td>
+                                        <td>
+                                            <div className="interaction-box">
+                                                <strong>פסיכולוגיה:</strong> {c.analysis}<br/>
+                                                <div style={{marginTop:'8px'}}><strong>דינמיקה בסניף:</strong> {c.social}</div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
 
             return (
-                <div className="dashboard">
-                    <div className="header">
-                        <h1>פרוטוקול יהודה | מרכז בקרה וניהול</h1>
-                        <div style={{color: 'var(--gold)'}}>MAX STOCK - לוח מנהל פעיל</div>
-                    </div>
-
-                    <div className="filter-bar">
-                        <div style={{display:'flex', flexDirection:'column'}}>
-                            <label style={{fontSize:'0.8rem', marginBottom:'5px'}}>סינון לפי מחלקה:</label>
-                            <select onChange={(e) => setSelectedDept(e.target.value)}>
-                                {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
-                            </select>
+                <div className="container">
+                    <div className="glass-card">
+                        <div className="header"><h1>MAX STOCK</h1><p>מערכת גיוס מועמדים</p></div>
+                        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'15px', marginBottom:'20px'}}>
+                            <div><label>שם פרטי</label><input /></div>
+                            <div><label>שם משפחה</label><input /></div>
                         </div>
-                        <div style={{display:'flex', flexDirection:'column'}}>
-                            <label style={{fontSize:'0.8rem', marginBottom:'5px'}}>חיפוש לפי תפקיד:</label>
-                            <select>
-                                <option>כל התפקידים</option>
-                                {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
-                            </select>
+                        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'15px', marginBottom:'30px'}}>
+                            <div><label>מחלקה</label>
+                                <select><option>בחר מחלקה...</option>{DEPARTMENTS.map(d => <option key={d}>{d}</option>)}</select>
+                            </div>
+                            <div><label>תפקיד</label>
+                                <select><option>בחר תפקיד...</option>{ROLES.map(r => <option key={r}>{r}</option>)}</select>
+                            </div>
                         </div>
+                        {QUESTIONS.map((q, i) => (
+                            <div key={i} className="q-card">
+                                <p><strong>{i+1}. {q.q}</strong></p>
+                                <select><option value="">בחר תשובה...</option>{q.a.map(ans => <option key={ans}>{ans}</option>)}</select>
+                            </div>
+                        ))}
+                        <button className="btn-gold" onClick={() => setView('done')}>שלח שאלון</button>
+                        <button className="btn-admin-nav" onClick={enterAdmin}>כניסת מנהל 🔒</button>
                     </div>
-
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>מועמד</th>
-                                <th>שיבוץ מבוקש</th>
-                                <th>מדד "חפיף"</th>
-                                <th>ניתוח אינטראקציה חברתית (יהודה)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {CANDIDATES.filter(c => selectedDept === "כל המחלקות" || c.dept === selectedDept).map(c => (
-                                <tr key={c.id} className="candidate-row">
-                                    <td>
-                                        <strong>{c.name}</strong><br/>
-                                        <span style={{fontSize:'0.8rem'}}>גיל: {c.age}</span><br/>
-                                        <span className="tag">אמינות גבוהה</span>
-                                    </td>
-                                    <td>
-                                        <div style={{color:'var(--gold)', fontWeight:'bold'}}>{c.dept}</div>
-                                        <div style={{fontSize:'0.9rem'}}>{c.role}</div>
-                                    </td>
-                                    <td>
-                                        <div className={`time-badge ${c.status === 'fast' ? 'fast' : 'solid'}`}>
-                                            {c.time} {c.status === 'fast' ? 'חפיפה!' : 'יסודי'}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div className="interaction-box">
-                                            <strong>ניתוח פסיכולוגי:</strong> {c.analysis}<br/>
-                                            <hr style={{opacity:0.1, margin:'10px 0'}} />
-                                            <strong>דינמיקה בסניף:</strong> {c.social}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
                 </div>
             );
         };
-
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
