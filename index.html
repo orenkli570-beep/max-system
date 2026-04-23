@@ -3,140 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAX STOCK | OREN PROTOCOL FULL DEPT</title>
+    <title>MAX STOCK | עמדת גיוס</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
     <style>
-        :root { --gold: #c9a84c; --bg: #0f172a; --card: rgba(30, 41, 59, 0.95); }
+        :root { --gold: #c9a84c; --bg: #0f172a; --card: rgba(30, 41, 59, 0.98); }
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background: var(--bg); color: #fff; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 900px; padding-bottom: 50px; }
-        .glass-card { background: var(--card); border: 1px solid rgba(201,168,76,0.3); border-radius: 28px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
-        .header h1 { color: var(--gold); text-align: center; font-size: 2rem; margin: 10px 0; }
-        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; }
-        .admin-table th, .admin-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: right; }
-        .badge { padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 0.75rem; color: #000; background: var(--gold); }
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .question-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-right: 4px solid var(--gold); }
-        input, select { width: 100%; padding: 12px; border-radius: 10px; background: #000; color: #fff; border: 1px solid rgba(255,255,255,0.2); }
-        .btn-main { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; border-radius: 16px; font-weight: 800; cursor: pointer; font-size: 1.2rem; }
+        body { background: var(--bg); color: #fff; margin: 0; padding: 15px; display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 800px; padding-bottom: 50px; }
+        .glass-card { background: var(--card); border: 1px solid rgba(201,168,76,0.3); border-radius: 30px; padding: 30px; box-shadow: 0 25px 60px rgba(0,0,0,0.7); position: relative; }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { color: var(--gold); font-size: 2.5rem; margin: 0; letter-spacing: 2px; }
+        .lang-selector { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 30px; }
+        .btn-lang { background: rgba(255,255,255,0.05); border: 1px solid rgba(201,168,76,0.3); color: #fff; padding: 10px 5px; border-radius: 12px; cursor: pointer; transition: 0.3s; font-size: 0.85rem; }
+        .btn-lang.active { background: var(--gold); color: #000; font-weight: bold; }
+        .form-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        label { color: var(--gold); display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #000; color: #fff; font-size: 1rem; }
+        .dob-grid { display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; }
+        .q-card { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 18px; margin-bottom: 15px; border-inline-start: 4px solid var(--gold); text-align: inherit; }
+        .btn-submit { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 1.3rem; margin-top: 20px; }
+        .btn-admin { background: transparent; color: var(--gold); border: 1px solid var(--gold); padding: 10px 20px; border-radius: 12px; cursor: pointer; margin-top: 40px; opacity: 0.5; transition: 0.3s; }
+        .btn-admin:hover { opacity: 1; background: rgba(201,168,76,0.1); }
+        .finish-screen { text-align: center; padding: 40px 10px; }
     </style>
 </head>
 <body>
     <div id="root"></div>
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState } = React;
 
-        const DEPTS = ["צעצועים", "בית ונוי", "מטבח", "יצירה", "חשמל", "טקסטיל", "ניקיון", "קוסמטיקה", "גינה", "חד פעמי", "חזרה לביה\"ס", "ריהוט", "מחסן"];
-        const ROLES = ["קופאי/ת", "סדרן/ית", "מחסנאי/ת", "מנהל/ת מחלקה", "סגן/ית מנהל", "מנהל/ת סניף", "אחראי/ת משמרת", "שירות לקוחות", "עובד/ת כללי", "ניקיון", "אבטחה", "מוביל/ה", "מלקט/ת", "בודק/ת חשבוניות", "אחראי/ת החזרות"];
+        const LANGUAGES = {
+            HE: { dir: 'rtl', h1: 'MAX STOCK', h2: 'פרוטוקול גיוס', fname: 'שם פרטי', lname: 'שם משפחה', dob: 'תאריך לידה', d: 'יום', m: 'חודש', y: 'שנה', sel: 'בחר תשובה...', send: 'שלח שאלון למנהל', done: 'תודה רבה!', msg: 'תודה על הרצון להצטרף למשפחת MAX. המנהלים שלנו כבר קיבלו את הפרטים שלך, ואנחנו מחכים להזדמנות ליצור יחד משהו גדול!', btnDone: 'חזרה להתחלה', admin: 'כניסת מנהל 🔒' },
+            EN: { dir: 'ltr', h1: 'MAX STOCK', h2: 'Recruitment Protocol', fname: 'First Name', lname: 'Last Name', dob: 'Birth Date', d: 'Day', m: 'Month', y: 'Year', sel: 'Select...', send: 'Submit to Manager', done: 'Thank you!', msg: 'Thank you for your interest in joining the MAX family. Our managers have received your details, and we look forward to creating something great together!', btnDone: 'Back to Start', admin: 'Manager Login 🔒' },
+            RU: { dir: 'ltr', h1: 'MAX STOCK', h2: 'Протокол найма', fname: 'Имя', lname: 'Фамилия', dob: 'Дата рождения', d: 'День', m: 'Месяц', y: 'Год', sel: 'Выбрать...', send: 'Отправить', done: 'Спасибо!', msg: 'Благодарим за интерес к семье MAX. Наши менеджеры получили ваши данные, и мы с нетерпением ждем возможности создать что-то великое вместе!', btnDone: 'В начало', admin: 'Вход для менеджера 🔒' },
+            AR: { dir: 'rtl', h1: 'MAX STOCK', h2: 'بروتوكول التوظيف', fname: 'الاسم الأول', lname: 'اسم العائلة', dob: 'تاريخ الميلاد', d: 'يوم', m: 'شهر', y: 'سنة', sel: 'اختر إجابة...', send: 'إرسال للمدير', done: 'شكراً جزيلاً!', msg: 'شكراً לרצון להצטרף למשפחת MAX. המנהלים שלנו כבר קיבלו את הפרטים שלך, ואנחנו מחכים להזדמנות ליצור יחד משהו גדול!', btnDone: 'العودة للبداية', admin: 'دخول المدير 🔒' },
+            TH: { dir: 'ltr', h1: 'MAX STOCK', h2: 'ขั้นตอนการรับสมัคร', fname: 'ชื่อจริง', lname: 'นามสกุล', dob: 'วันเกิด', d: 'วัน', m: 'เดือน', y: 'ปี', sel: 'เลือกคำตอบ...', send: 'ส่งข้อมูล', done: 'ขอบคุณมาก!', msg: 'ขอขอบคุณที่สนใจเข้าร่วมครอบครัว MAX ผู้จัดการของเราได้รับรายละเอียดของคุณแล้ว และเราหวังเป็นอย่างยิ่งว่าจะได้สร้างสรรค์สิ่งที่ยิ่งใหญ่ร่วมกัน!', btnDone: 'กลับไปที่จุดเริ่มต้น', admin: 'เข้าสู่ระบบผู้จัดการ 🔒' }
+        };
 
-        const Q_LIST = [
-            { q: "לקוח מחפש מוצר שחסר על המדף. מה תעשה?", a: ["אבדוק במחסן ואביא לו אישית", "אבדוק במחשב אם קיים במלאי", "אגיד שחסר ואכוון למוצר דומה", "אמשיך בעבודתי הרגילה"] },
-            { q: "יש תור ארוך מאוד בקופות ואתה בסידור מדף?", a: ["אגש מיד לעזור בקופה בלי שיקראו לי", "אחכה שיקראו לי לעזור", "אמשיך לסדר עד שאסיים", "אלך למחסן כדי לא להפריע"] },
-            { q: "ראית מוצר שבור או נוזל על הרצפה במעבר?", a: ["אנקה מיד ואדאג לבטיחות", "אדווח למנהל המשמרת", "אקרא לעובד ניקיון", "אעקוף את המפגע"] },
-            { q: "לקוח מתלונן בקול רם על מחיר גבוה?", a: ["אקשיב בסבלנות ואסביר בנועם", "אפנה אותו למנהל הסניף", "אגיד שזה המחיר ואין מה לעשות", "אתעלם ואעבור מחלקה"] },
-            { q: "המנהל נתן לך משימה שאתה פחות אוהב?", a: ["אבצע אותה הכי טוב ומהר", "אבצע ואז אבקש לגוון", "אעשה לאט כדי שלא יבקשו שוב", "אנסה למצוא עובד שיחליף אותי"] },
-            { q: "חבר לעבודה טעה בסידור המחלקה?", a: ["אעזור לו לתקן בנעימות", "אסב את תשומת ליבו לטעות", "אדווח למנהל על הטעות", "לא ענייני, כל אחד אחראי על שלו"] },
-            { q: "הגעת למשמרת והמחלקה הפוכה לגמרי?", a: ["אתחיל לסדר מיד לפי דחיפות", "אשאל את המנהל מאיפה להתחיל", "אסדר רק את האזור שלי", "אחכה שמישהו יגיד לי מה לעשות"] },
-            { q: "לקוח מתלבט זמן רב לגבי קניית מתנה?", a: ["אציע לו אפשרויות ואעזור לו", "אכוון אותו לאזור הכללי", "אגיד שזה עניין של טעם", "אפנה אותו לעובד אחר"] },
-            { q: "מצאת שטר כסף על הרצפה בתוך החנות?", a: ["אמסור מיד למנהל או לקופה", "אשאל לקוחות אם מישהו איבד", "אשים אותו בקופת צדקה", "אשמור אותו בכיס"] },
-            { q: "איזו צורת עבודה אתה הכי מעדיף?", a: ["עבודה עם אחריות שבה אני רץ לבד", "עבודה בצוות עם שיתוף פעולה", "עבודה שאומרים לי בדיוק מה לעשות", "עבודה שקטה במחסן"] },
-            { q: "לקוח דורש הנחה שאי אפשר לתת?", a: ["אסביר בנימוס את מדיניות הרשת", "אבדוק אם יש מבצע חלופי", "אשלח אותו להתווכח עם המנהל", "אגיד פשוט 'אין הנחות'"] },
-            { q: "סימנת מחיר טעות על קבוצת מוצרים?", a: ["אתקן מיד ואדווח למנהל", "אשאל את המנהל מה לעשות", "אקווה שאף אחד לא ישים לב", "אשאיר את זה ככה"] },
-            { q: "המשמרת נגמרה והחנות עמוסה מאוד?", a: ["אשאר עוד כמה דקות לעזור", "אסיים את המשימה ואלך", "אצא מיד - השעה הגיעה", "אלך בלי להגיד כלום"] },
-            { q: "עובד אחר מבקש לעשות משהו לא תקין?", a: ["אסרב בנימוס ואסביר לו", "אדווח על כך למנהל", "אזרום איתו פעם אחת", "אעשה מה שביקש"] },
-            { q: "מה הדבר שהכי חשוב לך בעבודה?", a: ["להתקדם לתפקידי ניהול", "שירות מעולה ללקוח", "סדר וארגון במשימות", "המשכורת והשקט שלי"] }
+        const QUESTIONS = [
+            { id: 1, HE: {q: "לקוח מחפש מוצר שחסר על המדף. מה תעשה?", a: ["אבדוק במחסן ואביא לו אישית", "אבדוק במחשב אם קיים במלאי", "אכוון למוצר דומה", "אמשיך בעבודתי"]}, EN: {q: "Customer seeks out-of-stock item. Action?", a: ["Check warehouse personally", "Check stock on computer", "Suggest similar item", "Continue working"]} },
+            { id: 2, HE: {q: "תור ארוך מאוד בקופות ואתה בסידור מדף?", a: ["אגש מיד לעזור בקופה", "אחכה שיקראו לי", "אמשיך לסדר עד שאסיים", "אלך למחסן"]}, EN: {q: "Long line at checkout while you're stocking?", a: ["Immediately go help at checkout", "Wait to be called", "Finish stocking first", "Go to warehouse"]} },
+            { id: 3, HE: {q: "ראית מוצר שבור או נוזל על הרצפה במעבר?", a: ["אנקה מיד ואדאג לבטיחות", "אדווח למנהל המשמרת", "אקרא לעובד ניקיון", "אעקוף את המפגע"]}, EN: {q: "Spilled liquid or broken item in aisle?", a: ["Clean immediately for safety", "Report to shift manager", "Call cleaning staff", "Walk around it"]} },
+            { id: 4, HE: {q: "לקוח מתלונן בקול רם על מחיר גבוה?", a: ["אקשיב בסבלנות ואסביר בנועם", "אפנה אותו למנהל הסניף", "אגיד שזה המחיר וזהו", "אתעלם ואעבור מחלקה"]}, EN: {q: "Customer complains loudly about price?", a: ["Listen patiently and explain", "Refer to branch manager", "Say 'this is the price'", "Ignore and move away"]} },
+            { id: 5, HE: {q: "המנהל נתן לך משימה שאתה פחות אוהב?", a: ["אבצע אותה הכי טוב ומהר", "אבצע ואז אבקש לגוון", "אעשה לאט כדי שלא יבקשו שוב", "אחפש עובד שיחליף אותי"]}, EN: {q: "Manager gives you a task you dislike?", a: ["Do it best and fast", "Do it then ask for variety", "Do it slowly", "Find someone to swap"]} },
+            { id: 6, HE: {q: "חבר לעבודה טעה בסידור המחלקה?", a: ["אעזור לו לתקן בנעימות", "אסב את תשומת ליבו לטעות", "אדווח למנהל", "לא ענייני, כל אחד לעצמו"]}, EN: {q: "Co-worker made a stocking mistake?", a: ["Help them fix it nicely", "Point out the mistake", "Report to manager", "Not my business"]} },
+            { id: 7, HE: {q: "הגעת למשמרת והמחלקה הפוכה לגמרי?", a: ["אתחיל לסדר מיד לפי דחיפות", "אשאל את המנהל מאיפה להתחיל", "אסדר רק את האזור שלי", "אחכה שמישהו יגיד לי מה לעשות"]}, EN: {q: "Your department is messy when you arrive?", a: ["Start organizing by priority", "Ask manager where to start", "Fix only my specific area", "Wait for instructions"]} },
+            { id: 8, HE: {q: "לקוח מתלבט זמן רב לגבי קניית מוצר?", a: ["אציע לו אפשרויות ואעזור לו", "אכוון אותו לאזור הכללי", "אגיד שזה עניין של טעם", "אפנה אותו לעובד אחר"]}, EN: {q: "Customer is hesitating for a long time?", a: ["Offer options and assist", "Point to general area", "Say 'it's a matter of taste'", "Refer to someone else"]} },
+            { id: 9, HE: {q: "מצאת שטר כסף על הרצפה בחנות?", a: ["אמסור מיד למנהל או לקופה", "אשאל לקוחות אם איבדו", "אשים בקופת צדקה", "אשמור אותו בכיס"]}, EN: {q: "Found money on the store floor?", a: ["Give to manager/checkout", "Ask customers if they lost it", "Put in charity box", "Keep it in pocket"]} },
+            { id: 10, HE: {q: "איזו צורת עבודה אתה הכי מעדיף?", a: ["עבודה עם אחריות שבה אני רץ לבד", "עבודה בצוות ושיתוף פעולה", "עבודה שאומרים לי מה לעשות", "עבודה שקטה במחסן"]}, EN: {q: "What work style do you prefer?", a: ["Independent responsibility", "Teamwork and cooperation", "Being told exactly what to do", "Quiet warehouse work"]} },
+            { id: 11, HE: {q: "לקוח דורש הנחה שאי אפשר לתת?", a: ["אסביר בנימוס את המדיניות", "אבדוק אם יש מבצע חלופי", "אשלח אותו למנהל", "אגיד 'אין הנחות'"]}, EN: {q: "Customer demands impossible discount?", a: ["Politely explain policy", "Check for alternative deals", "Send to manager", "Say 'no discounts'"]} },
+            { id: 12, HE: {q: "סימנת מחיר טעות על קבוצת מוצרים?", a: ["אתקן מיד ואדווח למנהל", "אשאל את המנהל מה לעשות", "אקווה שאף אחד לא ישים לב", "אשאיר את זה ככה"]}, EN: {q: "You mispriced a group of items?", a: ["Fix immediately and report", "Ask manager for advice", "Hope no one notices", "Leave it as is"]} },
+            { id: 13, HE: {q: "המשמרת נגמרה והחנות עמוסה מאוד?", a: ["אשאר עוד כמה דקות לעזור", "אסיים את המשימה ואלך", "אצא מיד - השעה הגיעה", "אלך בלי להגיד כלום"]}, EN: {q: "Shift ended but store is very busy?", a: ["Stay a few minutes to help", "Finish task then leave", "Leave immediately", "Leave without saying a word"]} },
+            { id: 14, HE: {q: "עובד אחר מבקש לעשות משהו לא תקין?", a: ["אסרב בנימוס ואסביר לו", "אדווח על כך למנהל", "אזרום איתו פעם אחת", "אעשה מה שביקש"]}, EN: {q: "Worker asks you to do something wrong?", a: ["Refuse and explain why", "Report to manager", "Go along with it once", "Do what they asked"]} },
+            { id: 15, HE: {q: "מה הדבר שהכי חשוב לך בעבודה?", a: ["שירות מעולה ללקוח", "להתקדם לתפקידי ניהול", "סדר וארגון במשימות", "המשכורת והשקט שלי"]}, EN: {q: "What is most important to you at work?", a: ["Excellent customer service", "Growth into management", "Order and organization", "Salary and quiet"]} }
         ];
 
         const App = () => {
-            const [v, setV] = useState('home');
+            const [lang, setLang] = useState('HE');
+            const [view, setView] = useState('quiz');
+            const [form, setForm] = useState({ fn: '', ln: '', d: '', m: '', y: '' });
             const [ans, setAns] = useState(Array(15).fill(null));
-            const [f, setF] = useState({ n: '', d: '', m: '', y: '', dept: '', role: '' });
-            const [db, setDb] = useState([]);
 
-            useEffect(() => {
-                const s = localStorage.getItem('MAX_DB_FINAL_V1');
-                if (s) setDb(JSON.parse(s));
-            }, []);
+            const t = LANGUAGES[lang];
 
-            const save = () => {
-                if (!f.n || !f.dept || !f.role || ans.includes(null)) return alert("נא למלא את כל השדות ולענות על כל השאלות");
-                const score = ans.filter(a => a === 0).length;
-                const prof = score >= 10 ? "יוזמה גבוהה" : score >= 6 ? "ביצועיסט" : "משימתי";
-                const up = [...db, { ...f, score, prof, ts: new Date().toLocaleString() }];
-                setDb(up); localStorage.setItem('MAX_DB_FINAL_V1', JSON.stringify(up));
-                setV('done');
+            const send = () => {
+                if(!form.fn || !form.ln || !form.y || ans.includes(null)) {
+                    alert(lang === 'HE' ? 'נא למלא את כל הפרטים ולענות על כל השאלות' : 'Please fill all fields');
+                    return;
+                }
+                setView('done');
             };
 
-            if (v === 'admin') return (
-                <div className="container" dir="rtl"><div className="glass-card">
-                    <h2 style={{color:'var(--gold)'}}>לוח מנהל - סינון ושיבוץ</h2>
-                    <button onClick={()=>setV('home')} className="btn-main" style={{width:'auto', padding:'8px 20px', marginBottom:20}}>חזרה</button>
-                    <table className="admin-table">
-                        <thead>
-                            <tr>
-                                <th>מועמד</th>
-                                <th>מחלקה</th>
-                                <th>תפקיד</th>
-                                <th>פרופיל</th>
-                                <th>ציון</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {db.map((r, i) => (
-                                <tr key={i}>
-                                    <td><strong>{r.n}</strong><br/><small>{r.y}</small></td>
-                                    <td>{r.dept}</td>
-                                    <td>{r.role}</td>
-                                    <td><span className="badge">{r.prof}</span></td>
-                                    <td>{r.score}/15</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            const adminLogin = () => {
+                const pass = prompt(lang === 'HE' ? 'הכנס סיסמת מנהל:' : 'Enter Admin Password:');
+                if (pass === '1234') {
+                    alert(lang === 'HE' ? 'מעביר לממשק מנהל...' : 'Redirecting to Manager view...');
+                    // כאן בהמשך נחבר את המעבר לאתר המנהל השני
+                } else {
+                    alert(lang === 'HE' ? 'סיסמה שגויה' : 'Wrong password');
+                }
+            };
+
+            if (view === 'done') return (
+                <div className="container" dir={t.dir}><div className="glass-card finish-screen">
+                    <h1 style={{fontSize:'5rem'}}>✔</h1>
+                    <h1 style={{color:'var(--gold)'}}>{t.done}</h1>
+                    <p style={{fontSize:'1.2rem', margin:'20px 0'}}>{t.msg}</p>
+                    <button className="btn-submit" onClick={()=>window.location.reload()}>{t.btnDone}</button>
                 </div></div>
             );
 
             return (
-                <div className="container" dir="rtl">
+                <div className="container" dir={t.dir}>
                     <div className="glass-card">
-                        <div className="header"><h1>MAX STOCK</h1></div>
-                        {v === 'home' ? (
-                            <div style={{textAlign:'center'}}>
-                                <button className="btn-main" onClick={()=>setV('quiz')}>התחל שאלון גיוס</button>
-                                <p style={{marginTop:30, opacity:0.3, cursor:'pointer'}} onClick={()=>{if(prompt('סיסמה:')==='1234') setV('admin')}}>כניסת מנהל 🔒</p>
+                        <div className="header"><h1>{t.h1}</h1><h2>{t.h2}</h2></div>
+                        <div className="lang-selector">
+                            {Object.keys(LANGUAGES).map(k => (
+                                <button key={k} className={`btn-lang ${lang === k ? 'active' : ''}`} onClick={() => setLang(k)}>{k}</button>
+                            ))}
+                        </div>
+                        <div className="form-section">
+                            <div><label>{t.fname}</label><input onChange={e=>setForm({...form, fn:e.target.value})} /></div>
+                            <div><label>{t.lname}</label><input onChange={e=>setForm({...form, ln:e.target.value})} /></div>
+                        </div>
+                        <div style={{marginBottom:25}}>
+                            <label>{t.dob}</label>
+                            <div className="dob-grid">
+                                <input placeholder={t.d} onChange={e=>setForm({...form, d:e.target.value})} />
+                                <input placeholder={t.m} onChange={e=>setForm({...form, m:e.target.value})} />
+                                <input placeholder={t.y} onChange={e=>setForm({...form, y:e.target.value})} />
                             </div>
-                        ) : v === 'done' ? (
-                            <div style={{textAlign:'center'}}><h1>✔</h1><h2>השאלון נשלח!</h2><button className="btn-main" onClick={()=>setV('home')}>חזרה</button></div>
-                        ) : (
-                            <div>
-                                <div className="input-grid">
-                                    <input placeholder="שם מלא" onChange={e=>setF({...f, n: e.target.value})} />
-                                    <input placeholder="שנת לידה" onChange={e=>setF({...f, y: e.target.value})} />
-                                </div>
-                                <div className="input-grid">
-                                    <select onChange={e=>setF({...f, dept: e.target.value})}>
-                                        <option value="">בחר מחלקה מועדפת...</option>
-                                        {DEPTS.map(d => <option key={d} value={d}>{d}</option>)}
-                                    </select>
-                                    <select onChange={e=>setF({...f, role: e.target.value})}>
-                                        <option value="">בחר תפקיד מבוקש...</option>
-                                        {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
-                                    </select>
-                                </div>
-                                {Q_LIST.map((q, i) => (
-                                    <div key={i} className="question-box">
-                                        <p><strong>{i+1}. {q.q}</strong></p>
-                                        <select onChange={e=>{const n=[...ans]; n[i]=parseInt(e.target.value); setAns(n)}}>
-                                            <option value="">בחר תשובה...</option>
-                                            {q.a.map((at, ai) => <option key={ai} value={ai}>{at}</option>)}
-                                        </select>
-                                    </div>
-                                ))}
-                                <button className="btn-main" onClick={save}>שלח שאלון</button>
+                        </div>
+                        {QUESTIONS.map((q, i) => (
+                            <div key={i} className="q-card">
+                                <p><strong>{i+1}. {q[lang]?.q || q['EN'].q}</strong></p>
+                                <select onChange={e => {
+                                    const a = [...ans]; a[i] = e.target.value; setAns(a);
+                                }}>
+                                    <option value="">{t.sel}</option>
+                                    {(q[lang]?.a || q['EN'].a).map((txt, idx) => <option key={idx} value={idx}>{txt}</option>)}
+                                </select>
                             </div>
-                        )}
+                        ))}
+                        <button className="btn-submit" onClick={send}>{t.send}</button>
+                        
+                        <div style={{textAlign: 'center'}}>
+                            <button className="btn-admin" onClick={adminLogin}>{t.admin}</button>
+                        </div>
                     </div>
                 </div>
             );
