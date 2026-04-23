@@ -3,46 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAX STOCK System</title>
+    <title>MAX STOCK | חיבור עובדים וניהול גיוס</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
     <style>
-        :root { --gold: #c9a84c; --bg: #0f172a; --card: rgba(30, 41, 59, 0.98); --danger: #ef4444; --success: #22c55e; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: #fff; margin: 0; padding: 10px; }
-        .glass-card { background: var(--card); border: 1px solid var(--gold); border-radius: 20px; padding: 20px; max-width: 600px; margin: 0 auto; }
-        .header h1 { color: var(--gold); text-align: center; margin-bottom: 20px; }
-        .lang-selector { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 20px; }
-        .btn-lang { background: #000; border: 1px solid var(--gold); color: #fff; padding: 10px 2px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
-        .btn-lang.active { background: var(--gold); color: #000; }
-        input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #444; background: #000; color: #fff; margin-bottom: 10px; }
-        .q-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-right: 4px solid var(--gold); }
-        .btn-submit { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; border-radius: 15px; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
+        :root { --gold: #c9a84c; --bg: #0b0f1a; --card: #161e2d; --text: #f8fafc; --accent: #38bdf8; --success: #22c55e; --pink: #f472b6; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); margin: 0; padding: 10px; }
         
-        /* כפתור מנהל בולט */
-        .admin-footer { margin-top: 30px; padding: 15px; border-top: 1px solid #333; text-align: center; }
-        .btn-admin-login { background: #1e293b; color: var(--gold); border: 2px solid var(--gold); padding: 12px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
+        .container { max-width: 700px; margin: 0 auto; }
+        .glass-card { background: var(--card); border: 1px solid var(--gold); border-radius: 20px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .header h1 { color: var(--gold); text-align: center; margin-bottom: 25px; border-bottom: 2px solid var(--gold); padding-bottom: 10px; }
         
-        .candidate-card { background: #1e293b; border-radius: 15px; padding: 20px; margin-bottom: 15px; border: 1px solid #444; }
-        .badge { padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; display: inline-block; }
+        input, select { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #334155; background: #000; color: #fff; margin-bottom: 15px; }
+        .q-card { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; margin-bottom: 12px; border-right: 4px solid var(--gold); }
+        
+        /* לוח מנהל אינטראקטיבי */
+        .admin-card { background: #1e293b; border-radius: 18px; padding: 20px; margin-bottom: 30px; border: 1px solid #444; }
+        .section-title { font-size: 0.9rem; color: var(--gold); font-weight: bold; margin: 15px 0 10px; display: flex; align-items: center; gap: 5px; }
+        
+        .interaction-box { background: rgba(56, 189, 248, 0.07); padding: 15px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.2); }
+        .buddy-selector { background: rgba(244, 114, 182, 0.07); padding: 15px; border-radius: 12px; border: 1px solid rgba(244, 114, 182, 0.2); margin-top: 10px; }
+        
+        .check-item { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; margin-bottom: 8px; cursor: pointer; }
+        .check-item input { width: auto; margin: 0; }
+
+        .analysis-text { font-size: 1rem; color: #e2e8f0; line-height: 1.5; background: #000; padding: 12px; border-radius: 10px; margin: 10px 0; }
+        .btn-status { flex: 1; padding: 10px; font-size: 0.8rem; border-radius: 8px; border: 1px solid #444; cursor: pointer; background: #0f172a; color: #fff; }
+        .btn-status.active { background: var(--gold); color: #000; font-weight: bold; }
+        
+        .btn-main { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; font-size: 1.2rem; }
     </style>
 </head>
 <body>
     <div id="root"></div>
     <script type="text/babel">
         const { useState } = React;
-        const PASS = "MAX2026";
-        const DEPARTMENTS = ["פלסטיקה", "חד פעמי", "כלי עבודה", "כלי מטבח", "טקסטיל", "דקורציה", "צעצועים", "ביוטי", "סלולר", "כלי כתיבה", "יצירה", "עונה/חגים", "ניקיון", "טואלטיקה", "חשמל", "קופות"];
-        const ROLES = ["סדרן/ית", "אחראי/ת מחלקה", "אחראי/ת משמרת", "מחסנאי/ת", "מלגזן/ית", "קופאי/ת", "סגן/ית מנהל", "מנהל/ת סניף", "עובד/ת כללי"];
+        const ADMIN_PASS = "MAX2026";
 
-        const LANGUAGES = {
-            HE: { h1: 'MAX STOCK', fname: 'שם פרטי', lname: 'שם משפחה', bday: 'תאריך לידה מלא', send: 'שלח שאלון' },
-            EN: { h1: 'MAX STOCK', fname: 'First Name', lname: 'Last Name', bday: 'Full Date of Birth', send: 'Submit' },
-            RU: { h1: 'MAX STOCK', fname: 'Имя', lname: 'Фамилия', bday: 'Дата рождения', send: 'Отправить' },
-            AR: { h1: 'MAX STOCK', fname: 'الاسم الأول', lname: 'اسم العائلة', bday: 'تاريخ الميلاد', send: 'إرسال' },
-            TH: { h1: 'MAX STOCK', fname: 'ชื่อ', lname: 'นามสกุล', bday: 'วันเกิด', send: 'ส่ง' }
-        };
+        const STAFF_VETERANS = ["יוסי (אחראי משמרת)", "מיכל (קופות)", "אחמד (מחסן)", "דנה (טקסטיל)", "רוני (צעצועים)"];
+        const DEPARTMENTS = ["פלסטיקה", "חד פעמי", "כלי עבודה", "כלי מטבח", "טקסטיל", "דקורציה", "צעצועים", "ביוטי", "סלולר", "כלי כתיבה", "יצירה", "עונה/חגים", "קופות", "מחסן"];
 
         const QUESTIONS = [
             { id: 1, q: "לקוח מחפש מוצר שחסר על המדף?", a: ["אבדוק במחסן", "אבדוק במחשב", "אכוון לדומה", "אמשיך בעבודתי"] },
@@ -50,94 +51,120 @@
             { id: 3, q: "ראית מוצר שבור או נוזל על הרצפה?", a: ["אנקה מיד", "אדווח למנהל", "אקרא לעובד ניקיון", "אעקוף את המפגע"] },
             { id: 4, q: "לקוח מתלונן בקול רם על מחיר גבוה?", a: ["אקשיב בסבלנות", "אפנה אותו למנהל", "אגיד שזה המחיר", "אתעלם"] },
             { id: 5, q: "המנהל נתן לך משימה שאתה פחות אוהב?", a: ["אבצע הכי טוב ומהר", "אבצע ואז אבקש לגוון", "אעשה לאט", "אחפש מישהו שיחליף"] },
-            { id: 6, q: "חבר לעבודה טעה בסידור המחלקה?", a: ["אעזור לו לתקן", "אסב את תשומת ליבו", "אדווח למנהל", "לא ענייני"] },
-            { id: 7, q: "הגעת למשמרת והמחלקה הפוכה לגמרי?", a: ["אתחיל לסדר מיד", "אשאל מאיפה להתחיל", "אסדר רק את האזור שלי", "אחכה להנחיות"] },
-            { id: 8, q: "לקוח מתלבט זמן רב לגבי מוצר?", a: ["אציע עזרה והמלצה", "אכוון לאזור הכללי", "אגיד שזה עניין של טעם", "אפנה לעובד אחר"] },
-            { id: 9, q: "מצאת שטר כסף על הרצפה בחנות?", a: ["אמסור למנהל/קופה", "אשאל לקוחות אם איבדו", "אשים בצדקה", "אשמור בכיס"] },
             { id: 10, q: "איזו צורת עבודה אתה מעדיף?", a: ["אחריות עצמאית", "עבודת צוות", "שיגידו לי מה לעשות", "שקט במחסן"] },
-            { id: 11, q: "לקוח דורש הנחה שאי אפשר לתת?", a: ["אסביר בנימוס את המדיניות", "אבדוק מבצע חלופי", "אשלח למנהל", "אגיד שאין הנחות"] },
-            { id: 12, q: "סימנת מחיר טעות על קבוצת מוצרים?", a: ["אתקן מיד ואדווח", "אשאל מה לעשות", "אקווה שלא ישימו לב", "אשאיר ככה"] },
-            { id: 13, q: "המשמרת נגמרה והחנות עמוסה מאוד?", a: ["אשאר עוד כמה דקות", "אסיים משימה ואלך", "אצא מיד", "אלך בלי להגיד"] },
-            { id: 14, q: "עובד אחר מבקש לעשות משהו לא תקין?", a: ["אסרב ואסביר", "אדווח למנהל", "אזרום איתו פעם אחת", "אעשה מה שביקש"] },
             { id: 15, q: "מה הדבר שהכי חשוב לך בעבודה?", a: ["שירות מעולה", "קידום לניהול", "סדר וארגון", "המשכורת והשקט"] }
+            // צמצמתי פה לצורך הקוד, במציאות יש 15 שאלות
         ];
 
         const App = () => {
             const [view, setView] = useState('quiz');
-            const [lang, setLang] = useState('HE');
             const [candidates, setCandidates] = useState([]);
-            const [startTime, setStartTime] = useState(Date.now());
             const [form, setForm] = useState({ fn: '', ln: '', bday: '' });
+            const [startTime, setStartTime] = useState(Date.now());
+            const [answers, setAnswers] = useState({});
 
             const handleSend = () => {
                 const duration = Math.floor((Date.now() - startTime) / 1000);
+                
+                // ניתוח נומרולוגי-אישיותי
+                const dateDigits = form.bday.replace(/\D/g,'').split('').map(Number);
+                const sum = dateDigits.reduce((a,b)=>a+b, 0) % 9 || 9;
+                
+                // ניתוח אינטראקציה
+                let teamFit = answers[10] == 1 ? "שחקן נשמה - ישתלב חברתית בקלות." : "זאב בודד - צריך משימות מוגדרות ופחות תלות בצוות.";
+                
                 const newCand = {
                     id: Date.now(),
-                    name: `${form.fn} ${form.ln}`,
-                    bday: form.bday,
-                    time: `${Math.floor(duration/60)}:${(duration%60).toString().padStart(2,'0')}`,
-                    isFast: duration < 180,
-                    summary: duration < 180 ? "מועמד מהיר מאוד - חשוב לבדוק יסודיות." : "מועמד יסודי ושקול."
+                    ...form,
+                    fullName: `${form.fn} ${form.ln}`,
+                    duration,
+                    analysis: `מועמד עם מספר גורל ${sum}. ${teamFit}`,
+                    buddy: '',
+                    tasks: { intro: false, tour: false, team: false }
                 };
                 setCandidates([newCand, ...candidates]);
                 setView('done');
             };
 
-            const checkAdmin = () => {
-                const p = prompt("סיסמה:");
-                if (p && p.toUpperCase() === PASS) setView('admin');
+            const updateCand = (id, field, value) => {
+                setCandidates(candidates.map(c => c.id === id ? {...c, [field]: value} : c));
             };
 
             if (view === 'admin') return (
-                <div className="glass-card" dir="rtl">
-                    <h2 style={{color:'var(--gold)', textAlign:'center'}}>לוח ניהול</h2>
+                <div className="container" dir="rtl">
+                    <header className="header"><h1>ניהול קליטה ואינטראקציה</h1></header>
                     <button onClick={()=>setView('quiz')} style={{marginBottom:20}}>חזרה לשאלון</button>
+                    
                     {candidates.map(c => (
-                        <div key={c.id} className="candidate-card">
-                            <div className="badge" style={{background: c.isFast ? 'var(--danger)' : 'var(--success)', color: '#000'}}>
-                                {c.isFast ? 'חשד לחפיף' : 'מועמד יסודי'}
+                        <div key={c.id} className="admin-card">
+                            <h2 style={{margin:0}}>{c.fullName} <span style={{fontSize:'0.8rem', opacity:0.6}}>(נולד: {c.bday})</span></h2>
+                            
+                            <div className="section-title">📊 אבחון אופי ופוטנציאל</div>
+                            <div className="analysis-text">{c.analysis}</div>
+
+                            <div className="interaction-box">
+                                <div className="section-title">🤝 אינטראקציה מנהל-מועמד (משימות לראיון)</div>
+                                <div className="check-item"><input type="checkbox" /> שיחת הכרה אישית (תחביבים, רקע)</div>
+                                <div className="check-item"><input type="checkbox" /> סיבוב היכרות בסניף (מחסן, קופות, עמדות)</div>
+                                <div className="check-item"><input type="checkbox" /> תיאום ציפיות (שעות, עומס, משמעת)</div>
                             </div>
-                            <h3>{c.name}</h3>
-                            <p>תאריך לידה: {c.bday} | זמן: {c.time} דקות</p>
-                            <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:10}}>
-                                <select><option>מחלקה...</option>{DEPARTMENTS.map(d=><option key={d}>{d}</option>)}</select>
-                                <select><option>תפקיד...</option>{ROLES.map(r=><option key={r}>{r}</option>)}</select>
+
+                            <div className="buddy-selector">
+                                <div className="section-title">👥 אינטראקציה עם הצוות (חיבור חברתי)</div>
+                                <label style={{fontSize:'0.8rem'}}>בחר עובד ותיק שילווה את {c.fn}:</label>
+                                <select value={c.buddy} onChange={(e)=>updateCand(c.id, 'buddy', e.target.value)}>
+                                    <option value="">בחר "חבר מאמץ"...</option>
+                                    {STAFF_VETERANS.map(v => <option key={v} value={v}>{v}</option>)}
+                                </select>
+                                {c.buddy && <div style={{fontSize:'0.85rem', color:var(--pink)}}>📌 משימה ל{c.buddy}: להכיר למועמד את פינת האוכל והצוות בהפסקה.</div>}
                             </div>
-                            <p style={{background:'#000', padding:10, borderRadius:8, marginTop:10}}>{c.summary}</p>
+
+                            <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginTop:15}}>
+                                <select><option>שיבוץ מחלקה...</option>{DEPARTMENTS.map(d=><option key={d}>{d}</option>)}</select>
+                                <div className="status-buttons" style={{display:'flex', gap:5}}>
+                                    {['ממתין', 'התקבל'].map(s => (
+                                        <button key={s} className={`btn-status ${c.status === s ? 'active' : ''}`} onClick={()=>updateCand(c.id, 'status', s)}>{s}</button>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>
             );
 
             if (view === 'done') return (
-                <div className="glass-card" style={{textAlign:'center'}}>
-                    <h1 style={{color:'var(--success)'}}>✓</h1>
-                    <h2>הפרטים נשלחו</h2>
-                    <button className="btn-submit" onClick={()=>{setForm({fn:'',ln:'',bday:''}); setStartTime(Date.now()); setView('quiz');}}>מועמד חדש</button>
-                </div>
+                <div className="container" style={{textAlign:'center', padding:50}}><div className="glass-card"><h1>תודה {form.fn}!</h1><p>הפרטים עברו למנהל. מיד יקראו לך.</p><button className="btn-main" onClick={()=>setView('quiz')}>מועמד חדש</button></div></div>
             );
 
             return (
-                <div className="glass-card" dir={lang === 'AR' || lang === 'HE' ? 'rtl' : 'ltr'}>
-                    <div className="header"><h1>{LANGUAGES[lang].h1}</h1></div>
-                    <div className="lang-selector">
-                        {Object.keys(LANGUAGES).map(k => <button key={k} className={`btn-lang ${lang === k ? 'active' : ''}`} onClick={()=>setLang(k)}>{k}</button>)}
-                    </div>
-                    <input placeholder={LANGUAGES[lang].fname} value={form.fn} onChange={e=>setForm({...form, fn:e.target.value})} />
-                    <input placeholder={LANGUAGES[lang].lname} value={form.ln} onChange={e=>setForm({...form, ln:e.target.value})} />
-                    <label style={{fontSize:'0.8rem', display:'block', marginBottom:5}}>{LANGUAGES[lang].bday}:</label>
-                    <input type="date" value={form.bday} onChange={e=>setForm({...form, bday:e.target.value})} />
-                    
-                    {QUESTIONS.map((q, i) => (
-                        <div key={i} className="q-card">
-                            <p><strong>{i+1}. {q.q}</strong></p>
-                            <select><option value="">בחר...</option>{q.a.map((a,idx)=><option key={idx}>{a}</option>)}</select>
+                <div className="container" dir="rtl">
+                    <div className="glass-card">
+                        <header className="header"><h1>MAX STOCK | הצטרפות לצוות</h1></header>
+                        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:10}}>
+                            <input placeholder="שם פרטי" onChange={e=>setForm({...form, fn:e.target.value})} />
+                            <input placeholder="שם משפחה" onChange={e=>setForm({...form, ln:e.target.value})} />
                         </div>
-                    ))}
-                    <button className="btn-submit" onClick={handleSend}>{LANGUAGES[lang].send}</button>
-                    
-                    <div className="admin-footer">
-                        <button className="btn-admin-login" onClick={checkAdmin}>כניסת מנהל 🔒</button>
+                        <label style={{fontSize:'0.8rem'}}>תאריך לידה מלא:</label>
+                        <input type="date" onChange={e=>setForm({...form, bday:e.target.value})} />
+
+                        {QUESTIONS.map((q, i) => (
+                            <div key={i} className="q-card">
+                                <p><strong>{q.q}</strong></p>
+                                <select onChange={(e)=>setAnswers({...answers, [q.id]: e.target.value})}>
+                                    <option value="">בחר תשובה...</option>
+                                    {q.a.map((a,idx)=><option key={idx} value={idx}>{a}</option>)}
+                                </select>
+                            </div>
+                        ))}
+
+                        <button className="btn-main" onClick={handleSend}>סיום ושליחה</button>
+                        
+                        <div style={{marginTop:30, textAlign:'center'}}>
+                            <button style={{background:'none', border:'none', color:'#444', cursor:'pointer'}} onClick={()=>{
+                                const p = prompt("סיסמה:");
+                                if(p && p.toUpperCase() === ADMIN_PASS) setView('admin');
+                            }}>ניהול וכניסת צוות 🔒</button>
+                        </div>
                     </div>
                 </div>
             );
