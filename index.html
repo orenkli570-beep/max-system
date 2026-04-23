@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
     <style>
         :root { --gold: #c9a84c; --bg: #0b0f1a; --card: #161e2d; --text: #f8fafc; --accent: #38bdf8; --success: #22c55e; --danger: #ef4444; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
         body { background: var(--bg); color: var(--text); margin: 0; padding: 10px; line-height: 1.4; }
         .container { max-width: 600px; margin: 0 auto; }
         .glass-card { background: var(--card); border: 1px solid var(--gold); border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -20,9 +20,24 @@
         input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #000; color: #fff; margin-bottom: 10px; font-size: 1rem; }
         .q-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px; border-right: 4px solid var(--gold); }
         .btn-main { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        
+        /* עיצוב משופר לצד מנהל */
         .admin-card { background: #1e293b; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #444; }
-        .analysis-item { background: rgba(0,0,0,0.2); padding: 8px; border-radius: 5px; margin-top: 5px; font-size: 0.9rem; border-left: 3px solid var(--accent); }
-        .badge { background: var(--danger); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; }
+        .analysis-item { background: rgba(0,0,0,0.2); padding: 8px; border-radius: 5px; margin-top: 5px; font-size: 0.9rem; border-right: 3px solid var(--accent); }
+        .badge { background: var(--danger); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; float: left; }
+        
+        /* כפתור כניסת מנהל משופר */
+        .admin-trigger { 
+            margin-top: 40px; 
+            padding: 10px; 
+            text-align: center; 
+            border: 1px dashed rgba(201, 168, 76, 0.3); 
+            color: rgba(255,255,255,0.2); 
+            cursor: pointer; 
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+        .admin-trigger:active { background: rgba(255,255,255,0.05); }
     </style>
 </head>
 <body>
@@ -31,108 +46,24 @@
         const { useState } = React;
         const ADMIN_PASS = "MAX2026";
 
-        const TRANSLATIONS = {
-            HE: {
-                title: "שאלון מועמד MAX", fname: "שם פרטי", lname: "שם משפחה", bday: "תאריך לידה", send: "שלח שאלון", select: "בחר תשובה...",
-                qs: [
-                    { q: "1. לקוח מחפש מוצר שחסר על המדף?", a: ["אבדוק במחסן", "אבדוק במחשב", "אכוון לדומה", "אמשיך בעבודתי"] },
-                    { q: "2. תור ארוך מאוד בקופות ואתה בסידור מדף?", a: ["אגש מיד לעזור", "אחכה שיקראו לי", "אסיים קודם את המדף", "אלך למחסן"] },
-                    { q: "3. ראית מוצר שבור או נוזל על הרצפה?", a: ["אנקה מיד", "אדווח למנהל", "אקרא לעובד ניקיון", "אעקוף את המפגע"] },
-                    { q: "4. לקוח מתלונן בקול רם על מחיר גבוה?", a: ["אקשיב בסבלנות", "אפנה אותו למנהל", "אגיד שזה המחיר", "אתעלם"] },
-                    { q: "5. המנהל נתן לך משימה שאתה פחות אוהב?", a: ["אבצע הכי טוב ומהר", "אבצע ואז אבקש לגוון", "אעשה לאט", "אחפש מישהו שיחליף"] },
-                    { q: "6. חבר לעבודה טעה בסידור המחלקה?", a: ["אעזור לו לתקן", "אסב את תשומת ליבו", "אדווח למנהל", "לא ענייני"] },
-                    { q: "7. הגעת למשמרת והמחלקה הפוכה לגמרי?", a: ["אתחיל לסדר מיד", "אשאל מאיפה להתחיל", "אסדר רק את האזור שלי", "אחכה להנחיות"] },
-                    { q: "8. לקוח מתלבט זמן רב לגבי מוצר?", a: ["אציע עזרה והמלצה", "אכוון לאזור הכללי", "אגיד שזה עניין של טעם", "אפנה לעובד אחר"] },
-                    { q: "9. מצאת שטר כסף על הרצפה בחנות?", a: ["אמסור למנהל/קופה", "אשאל לקוחות אם איבדו", "אשים בצדקה", "אשמור בכיס"] },
-                    { q: "10. איזו צורת עבודה אתה מעדיף?", a: ["אחריות עצמאית", "עבודת צוות", "שיגידו לי מה לעשות", "שקט במחסן"] },
-                    { q: "11. לקוח דורש הנחה שאי אפשר לתת?", a: ["אסביר בנימוס את המדיניות", "אבדוק מבצע חלופי", "אשלח למנהל", "אגיד שאין הנחות"] },
-                    { q: "12. סימנת מחיר טעות על קבוצת מוצרים?", a: ["אתקן מיד ואדווח", "אשאל מה לעשות", "אקווה שלא ישימו לב", "אשאיר ככה"] },
-                    { q: "13. המשמרת נגמרה והחנות עמוסה מאוד?", a: ["אשאר עוד כמה דקות", "אסיים משימה ואלך", "אצא מיד", "אלך בלי להגיד"] },
-                    { q: "14. עובד אחר מבקש לעשות משהו לא תקין?", a: ["אסרב ואסביר", "אדווח למנהל", "אזרום איתו פעם אחת", "אעשה מה שביקש"] },
-                    { q: "15. מה הדבר שהכי חשוב לך בעבודה?", a: ["שירות מעולה", "קידום לניהול", "סדר וארגון", "המשכורת והשקט"] }
-                ]
-            },
-            EN: {
-                title: "MAX Candidate Form", fname: "First Name", lname: "Last Name", bday: "Date of Birth", send: "Submit", select: "Select...",
-                qs: [
-                    { q: "1. Item missing from shelf?", a: ["Check warehouse", "Check computer", "Suggest alternative", "Continue working"] },
-                    { q: "2. Long lines at checkout?", a: ["Go help immediately", "Wait to be called", "Finish shelf first", "Go to warehouse"] },
-                    { q: "3. Broken/leaking product?", a: ["Clean immediately", "Report to manager", "Call cleaner", "Ignore"] },
-                    { q: "4. Customer complaining about prices?", a: ["Listen patiently", "Send to manager", "State fixed price", "Ignore"] },
-                    { q: "5. Task you dislike?", a: ["Do it fast/best", "Do then ask change", "Work slowly", "Find swap"] },
-                    { q: "6. Co-worker mistake?", a: ["Help them fix", "Tell them privately", "Report to manager", "Not my business"] },
-                    { q: "7. Messy department?", a: ["Start tidying", "Ask where to start", "Tidy my area", "Wait for orders"] },
-                    { q: "8. Hesitating customer?", a: ["Offer help", "Point to area", "Say it's taste", "Refer to others"] },
-                    { q: "9. Money on floor?", a: ["Give to manager", "Ask customers", "Donate", "Keep"] },
-                    { q: "10. Work style?", a: ["Independent", "Teamwork", "Follow orders", "Quiet/Warehouse"] },
-                    { q: "11. Impossible discount?", a: ["Explain policy", "Check alternative", "Send to manager", "Say no"] },
-                    { q: "12. Price error?", a: ["Fix and report", "Ask what to do", "Hope no notice", "Leave it"] },
-                    { q: "13. Busy at shift end?", a: ["Stay few mins", "Finish task then go", "Leave immediately", "Slip away"] },
-                    { q: "14. Rule breaking request?", a: ["Refuse/Explain", "Report to manager", "Follow once", "Do it"] },
-                    { q: "15. Most important?", a: ["Service", "Promotion", "Order", "Salary"] }
-                ]
-            },
-            RU: {
-                title: "Анкета MAX", fname: "Имя", lname: "Фамилия", bday: "Дата рождения", send: "Отправить", select: "Выберите...",
-                qs: [
-                    { q: "1. Товар отсутствует?", a: ["Склад", "Компьютер", "Аналог", "Работаю дальше"] },
-                    { q: "2. Очередь на кассе?", a: ["Помогу сразу", "Жду вызова", "Сначала полка", "Склад"] },
-                    { q: "3. Разбитый товар?", a: ["Уберу сразу", "Менеджеру", "Уборка", "Мимо"] },
-                    { q: "4. Жалоба на цену?", a: ["Слушаю", "К менеджеру", "Это цена", "Игнор"] },
-                    { q: "5. Скучное задание?", a: ["Быстро сделаю", "Сделаю и спрошу", "Медленно", "Замена"] },
-                    { q: "6. Ошибка коллеги?", a: ["Помогу исправить", "Скажу ему", "Менеджеру", "Не мое дело"] },
-                    { q: "7. Беспорядок?", a: ["Начну убирать", "Спрошу план", "Свою зону", "Жду"] },
-                    { q: "8. Сомнения клиента?", a: ["Помогу", "Покажу отдел", "Дело вкуса", "Другой работник"] },
-                    { q: "9. Нашли деньги?", a: ["Менеджеру", "Спрошу людей", "Благотворительность", "Себе"] },
-                    { q: "10. Стиль работы?", a: ["Сам", "Команда", "По инструкции", "Тишина"] },
-                    { q: "11. Просят скидку?", a: ["Правила", "Акция", "Менеджеру", "Нет"] },
-                    { q: "12. Ошибка в цене?", a: ["Исправлю", "Спрошу", "Надеюсь", "Оставлю"] },
-                    { q: "13. Конец смены?", a: ["Останусь", "Закончу и уйду", "Сразу", "Тихо уйду"] },
-                    { q: "14. Нарушить правила?", a: ["Отказ", "Менеджеру", "Один раз", "Сделаю"] },
-                    { q: "15. Что важно?", a: ["Сервис", "Карьера", "Порядок", "Деньги"] }
-                ]
-            },
-            AR: {
-                title: "استبيان ماكس", fname: "الاسم", lname: "العائلة", bday: "تاريخ الميلاد", send: "إرسال", select: "اختر...",
-                qs: [
-                    { q: "1. منتج مفقود؟", a: ["المخزن", "الحاسوب", "بديل", "أكمل عملي"] },
-                    { q: "2. طابور طويل؟", a: ["أساعد فوراً", "أنتظر نداء", "أنهي الرف", "المخزن"] },
-                    { q: "3. منتج مكسور؟", a: ["أنظف فوراً", "المدير", "التنظيف", "أتجاهل"] },
-                    { q: "4. شكوى السعر؟", a: ["أستمع", "المدير", "هذا السعر", "تجاهل"] },
-                    { q: "5. مهمة مملة؟", a: ["أنجزها", "أنجز وأطلب", "ببطء", "بديل"] },
-                    { q: "6. خطأ زميل؟", a: ["أساعد", "أنبهه", "المدير", "لا يهمني"] },
-                    { q: "7. فوضى؟", a: ["أرتب فوراً", "أسأل", "منطقتي", "أنتظر"] },
-                    { q: "8. زبون متردد؟", a: ["أساعد", "أوجهه", "ذوق", "موظف آخر"] },
-                    { q: "9. وجدت مالاً؟", a: ["المدير", "أسأل الناس", "صدقة", "لي"] },
-                    { q: "10. أسلوب عمل؟", a: ["وحدي", "فريق", "تعليمات", "هدوء"] },
-                    { q: "11. طلب خصم؟", a: ["أشرح", "بديل", "المدير", "لا"] },
-                    { q: "12. خطأ سعر؟", a: ["أصلح", "أسأل", "أمل", "أترك"] },
-                    { q: "13. نهاية الدوام؟", a: ["أبقى قليلاً", "أنهي وأرحل", "فوراً", "بصمت"] },
-                    { q: "14. مخالفة؟", a: ["أرفض", "المدير", "مرة واحدة", "أفعل"] },
-                    { q: "15. الأهم؟", a: ["خدمة", "ترقية", "نظام", "راتب"] }
-                ]
-            },
-            TH: {
-                title: "แบบฟอร์ม MAX", fname: "ชื่อ", lname: "นามสกุล", bday: "วันเกิด", send: "ส่ง", select: "เลือก...",
-                qs: [
-                    { q: "1. ของหมดชั้น?", a: ["เช็คสต็อก", "เช็คคอม", "แนะนำอื่น", "ทำต่อ"] },
-                    { q: "2. คิวยาว?", a: ["ช่วยทันที", "รอเรียก", "ทำชั้นเสร็จ", "เข้าคลัง"] },
-                    { q: "3. ของแตก?", a: ["เช็ดทันที", "บอกหัวหน้า", "เรียกแม่บ้าน", "เดินผ่าน"] },
-                    { q: "4. บ่นราคาแพง?", a: ["ฟัง", "หาหัวหน้า", "ราคาคงที่", "ไม่สน"] },
-                    { q: "5. งานที่เบื่อ?", a: ["รีบทำ", "ทำแล้วขอย้าย", "ทำช้าๆ", "หาคนแทน"] },
-                    { q: "6. เพื่อนทำผิด?", a: ["ช่วยแก้", "บอกเขา", "บอกหัวหน้า", "ไม่สน"] },
-                    { q: "7. ร้านรก?", a: ["จัดทันที", "ถามเริ่มไหน", "จัดโซนตัวเอง", "รอสั่ง"] },
-                    { q: "8. ลูกค้าลังเล?", a: ["ช่วย", "ชี้เป้า", "แล้วแต่ชอบ", "ส่งต่อ"] },
-                    { q: "9. เจอเงิน?", a: ["ส่งหัวหน้า", "ถามลูกค้า", "บริจาค", "เก็บไว้"] },
-                    { q: "10. สไตล์งาน?", a: ["เดี่ยว", "ทีม", "ตามสั่ง", "เงียบๆ"] },
-                    { q: "11. ขอส่วนลด?", a: ["อธิบาย", "หาโปร", "หาหัวหน้า", "ไม่ให้"] },
-                    { q: "12. ราคาผิด?", a: ["แก้ทันที", "ถาม", "ภาวนา", "ปล่อยไว้"] },
-                    { q: "13. หมดกะแต่ยุ่ง?", a: ["อยู่ต่อ", "จบงานแล้วไป", "ไปเลย", "แอบไป"] },
-                    { q: "14. ทำผิดกฎ?", a: ["ปฏิเสธ", "บอกหัวหน้า", "ครั้งเดียว", "ทำตาม"] },
-                    { q: "15. สำคัญสุด?", a: ["บริการ", "ก้าวหน้า", "ระเบียบ", "เงิน"] }
-                ]
-            }
-        };
+        // רשימת שאלות בעברית (הבסיס לניתוח)
+        const QUESTIONS_HE = [
+            { q: "1. לקוח מחפש מוצר שחסר על המדף?", a: ["אבדוק במחסן", "אבדוק במחשב", "אכוון לדומה", "אמשיך בעבודתי"] },
+            { q: "2. תור ארוך מאוד בקופות ואתה בסידור מדף?", a: ["אגש מיד לעזור", "אחכה שיקראו לי", "אסיים קודם את המדף", "אלך למחסן"] },
+            { q: "3. ראית מוצר שבור או נוזל על הרצפה?", a: ["אנקה מיד", "אדווח למנהל", "אקרא לעובד ניקיון", "אעקוף את המפגע"] },
+            { q: "4. לקוח מתלונן בקול רם על מחיר גבוה?", a: ["אקשיב בסבלנות", "אפנה אותו למנהל", "אגיד שזה המחיר", "אתעלם"] },
+            { q: "5. המנהל נתן לך משימה שאתה פחות אוהב?", a: ["אבצע הכי טוב ומהר", "אבצע ואז אבקש לגוון", "אעשה לאט", "אחפש מישהו שיחליף"] },
+            { q: "6. חבר לעבודה טעה בסידור המחלקה?", a: ["אעזור לו לתקן", "אסב את תשומת ליבו", "אדווח למנהל", "לא ענייני"] },
+            { q: "7. הגעת למשמרת והמחלקה הפוכה לגמרי?", a: ["אתחיל לסדר מיד", "אשאל מאיפה להתחיל", "אסדר רק את האזור שלי", "אחכה להנחיות"] },
+            { q: "8. לקוח מתלבט זמן רב לגבי מוצר?", a: ["אציע עזרה והמלצה", "אכוון לאזור הכללי", "אגיד שזה עניין של טעם", "אפנה לעובד אחר"] },
+            { q: "9. מצאת שטר כסף על הרצפה בחנות?", a: ["אמסור למנהל/קופה", "אשאל לקוחות אם איבדו", "אשים בצדקה", "אשמור בכיס"] },
+            { q: "10. איזו צורת עבודה אתה מעדיף?", a: ["אחריות עצמאית", "עבודת צוות", "שיגידו לי מה לעשות", "שקט במחסן"] },
+            { q: "11. לקוח דורש הנחה שאי אפשר לתת?", a: ["אסביר בנימוס את המדיניות", "אבדוק מבצע חלופי", "אשלח למנהל", "אגיד שאין הנחות"] },
+            { q: "12. סימנת מחיר טעות על קבוצת מוצרים?", a: ["אתקן מיד ואדווח", "אשאל מה לעשות", "אקווה שלא ישימו לב", "אשאיר ככה"] },
+            { q: "13. המשמרת נגמרה והחנות עמוסה מאוד?", a: ["אשאר עוד כמה דקות", "אסיים משימה ואלך", "אצא מיד", "אלך בלי להגיד"] },
+            { q: "14. עובד אחר מבקש לעשות משהו לא תקין?", a: ["אסרב ואסביר", "אדווח למנהל", "אזרום איתו פעם אחת", "אעשה מה שביקש"] },
+            { q: "15. מה הדבר שהכי חשוב לך בעבודה?", a: ["שירות מעולה", "קידום לניהול", "סדר וארגון", "המשכורת והשקט"] }
+        ];
 
         const App = () => {
             const [lang, setLang] = useState('HE');
@@ -143,10 +74,10 @@
             const [startTime, setStartTime] = useState(Date.now());
 
             const runAnalysis = (ans, bday, dur) => {
-                let res = { team: "רגיל", boss: "ביצועיסט", num: "-", warn: dur < 100 };
+                let res = { team: "ניטרלי", boss: "ביצועיסט", num: "-", warn: dur < 90 };
                 if (ans[5] == 0 && ans[9] == 1) res.team = "דבק חברתי - בונה צוות";
-                else if (ans[9] == 0) res.team = "זאב בודד - לעבודה לבד";
-                if (ans[4] == 0) res.boss = "ראש גדול - לויאלי";
+                else if (ans[9] == 0) res.team = "זאב בודד - לעבודה עצמאית";
+                if (ans[4] == 0) res.boss = "ראש גדול - לויאלי מאוד";
                 if (bday) {
                     const n = bday.replace(/\D/g,'').split('').reduce((a,b)=>a+parseInt(b),0) % 9 || 9;
                     const m = {1:"מנהיג",2:"תומך",3:"תקשורתי",4:"פרקטי",5:"זריז",6:"אחראי",7:"יסודי",8:"ניהולי",9:"עוזר"};
@@ -156,61 +87,81 @@
             };
 
             const handleSend = () => {
-                if (!form.fn) return alert("שם חסר");
+                if (!form.fn || !form.ln) { alert("חובה למלא שם פרטי ומשפחה"); return; }
                 const dur = Math.floor((Date.now() - startTime)/1000);
                 const analysis = runAnalysis(answers, form.bday, dur);
                 setCandidates([{id: Date.now(), ...form, analysis, lang, dur}, ...candidates]);
                 setView('done');
             };
 
+            const openAdmin = () => {
+                const pass = prompt("הזן סיסמת מנהל:");
+                if (pass === ADMIN_PASS) {
+                    setView('admin');
+                } else if (pass !== null) {
+                    alert("סיסמה שגויה");
+                }
+            };
+
             if (view === 'admin') return (
                 <div className="container" dir="rtl">
-                    <h2>ניהול מועמדים</h2>
-                    <button className="lang-btn" onClick={()=>setView('quiz')}>חזרה</button>
-                    {candidates.map(c => (
-                        <div key={c.id} className="admin-card">
-                            <strong>{c.fn} {c.ln} ({c.lang})</strong> {c.analysis.warn && <span className="badge">מהיר!</span>}
-                            <div className="analysis-item"><b>צוות:</b> {c.analysis.team}</div>
-                            <div className="analysis-item"><b>מנהל:</b> {c.analysis.boss}</div>
-                            <div className="analysis-item"><b>נומרולוגיה:</b> {c.analysis.num}</div>
-                        </div>
-                    ))}
+                    <div className="header"><h2>ניהול מועמדים (MAX)</h2></div>
+                    <button className="lang-btn" style={{marginBottom:20, width:'100%'}} onClick={()=>setView('quiz')}>חזרה לשאלון</button>
+                    {candidates.length === 0 ? <p style={{textAlign:'center'}}>טרם מולאו שאלונים.</p> : 
+                        candidates.map(c => (
+                            <div key={c.id} className="admin-card">
+                                <strong>{c.fn} {c.ln}</strong> <span style={{fontSize:'0.8rem'}}>({c.lang})</span>
+                                {c.analysis.warn && <span className="badge">מילוי מהיר!</span>}
+                                <div className="analysis-item"><b>יחס לצוות:</b> {c.analysis.team}</div>
+                                <div className="analysis-item"><b>יחס למנהל:</b> {c.analysis.boss}</div>
+                                <div className="analysis-item"><b>נומרולוגיה:</b> {c.analysis.num}</div>
+                                <div className="analysis-item"><b>גיל/יומולדת:</b> {c.bday || "לא הוזן"}</div>
+                            </div>
+                        ))
+                    }
                 </div>
             );
 
             if (view === 'done') return (
                 <div className="container" style={{textAlign:'center', padding:50}}>
-                    <div className="glass-card"><h1>✓</h1><h2>נשלח בהצלחה</h2><button className="btn-main" onClick={()=>{setForm({fn:'',ln:'',bday:''}); setView('quiz'); setStartTime(Date.now());}}>מועמד חדש</button></div>
+                    <div className="glass-card">
+                        <h1 style={{color:'var(--success)', fontSize:'4rem'}}>✓</h1>
+                        <h2>השאלון נשלח!</h2>
+                        <p>תודה רבה. נא להחזיר את המכשיר למנהל.</p>
+                        <button className="btn-main" onClick={()=>{setForm({fn:'',ln:'',bday:''}); setAnswers({}); setView('quiz'); setStartTime(Date.now());}}>מועמד חדש</button>
+                    </div>
                 </div>
             );
 
-            const isRTL = lang === 'HE' || lang === 'AR';
-            const t = TRANSLATIONS[lang] || TRANSLATIONS.HE;
-
             return (
-                <div className="container" dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className="container" dir={lang === 'HE' || lang === 'AR' ? 'rtl' : 'ltr'}>
                     <div className="glass-card">
                         <div className="lang-bar">
-                            {Object.keys(TRANSLATIONS).map(l => (
+                            {['HE','EN','RU','AR','TH'].map(l => (
                                 <button key={l} className={`lang-btn ${lang===l?'active':''}`} onClick={()=>setLang(l)}>{l}</button>
                             ))}
                         </div>
-                        <div className="header"><h1>{t.title}</h1></div>
-                        <input placeholder={t.fname} onChange={e=>setForm({...form, fn: e.target.value})} />
-                        <input placeholder={t.lname} onChange={e=>setForm({...form, ln: e.target.value})} />
-                        <label style={{fontSize:'0.8rem'}}>{t.bday}:</label>
-                        <input type="date" onChange={e=>setForm({...form, bday: e.target.value})} />
-                        {t.qs.map((q, i) => (
+                        <div className="header"><h1>שאלון מועמד - MAX</h1></div>
+                        <input placeholder="שם פרטי" value={form.fn} onChange={e=>setForm({...form, fn: e.target.value})} />
+                        <input placeholder="שם משפחה" value={form.ln} onChange={e=>setForm({...form, ln: e.target.value})} />
+                        <label style={{fontSize:'0.8rem', display:'block', marginBottom:5}}>תאריך לידה:</label>
+                        <input type="date" value={form.bday} onChange={e=>setForm({...form, bday: e.target.value})} />
+                        
+                        {QUESTIONS_HE.map((q, i) => (
                             <div key={i} className="q-card">
                                 <p><strong>{q.q}</strong></p>
                                 <select onChange={e=>setAnswers({...answers, [i]: e.target.value})}>
-                                    <option value="">{t.select}</option>
+                                    <option value="">בחר תשובה...</option>
                                     {q.a.map((ans, idx) => <option key={idx} value={idx}>{ans}</option>)}
                                 </select>
                             </div>
                         ))}
-                        <button className="btn-main" onClick={handleSend}>{t.send}</button>
-                        <div style={{marginTop:30, textAlign:'center', opacity:0.2}} onClick={()=>{if(prompt("Pass:")===ADMIN_PASS) setView('admin')}}>Admin</div>
+                        
+                        <button className="btn-main" onClick={handleSend}>שלח שאלון</button>
+                        
+                        <div className="admin-trigger" onClick={openAdmin}>
+                            כניסת מנהל (ADMIN)
+                        </div>
                     </div>
                 </div>
             );
