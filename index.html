@@ -20,24 +20,10 @@
         input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #000; color: #fff; margin-bottom: 10px; font-size: 1rem; }
         .q-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px; border-right: 4px solid var(--gold); }
         .btn-main { width: 100%; padding: 18px; background: var(--gold); color: #000; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
-        
-        /* עיצוב משופר לצד מנהל */
         .admin-card { background: #1e293b; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #444; }
         .analysis-item { background: rgba(0,0,0,0.2); padding: 8px; border-radius: 5px; margin-top: 5px; font-size: 0.9rem; border-right: 3px solid var(--accent); }
         .badge { background: var(--danger); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; float: left; }
-        
-        /* כפתור כניסת מנהל משופר */
-        .admin-trigger { 
-            margin-top: 40px; 
-            padding: 10px; 
-            text-align: center; 
-            border: 1px dashed rgba(201, 168, 76, 0.3); 
-            color: rgba(255,255,255,0.2); 
-            cursor: pointer; 
-            border-radius: 10px;
-            font-size: 0.8rem;
-        }
-        .admin-trigger:active { background: rgba(255,255,255,0.05); }
+        .admin-trigger { margin-top: 40px; padding: 15px; text-align: center; border: 1px dashed var(--gold); color: var(--gold); cursor: pointer; border-radius: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -46,7 +32,6 @@
         const { useState } = React;
         const ADMIN_PASS = "MAX2026";
 
-        // רשימת שאלות בעברית (הבסיס לניתוח)
         const QUESTIONS_HE = [
             { q: "1. לקוח מחפש מוצר שחסר על המדף?", a: ["אבדוק במחסן", "אבדוק במחשב", "אכוון לדומה", "אמשיך בעבודתי"] },
             { q: "2. תור ארוך מאוד בקופות ואתה בסידור מדף?", a: ["אגש מיד לעזור", "אחכה שיקראו לי", "אסיים קודם את המדף", "אלך למחסן"] },
@@ -87,7 +72,7 @@
             };
 
             const handleSend = () => {
-                if (!form.fn || !form.ln) { alert("חובה למלא שם פרטי ומשפחה"); return; }
+                if (!form.fn) { alert("אנא מלא שם"); return; }
                 const dur = Math.floor((Date.now() - startTime)/1000);
                 const analysis = runAnalysis(answers, form.bday, dur);
                 setCandidates([{id: Date.now(), ...form, analysis, lang, dur}, ...candidates]);
@@ -95,19 +80,19 @@
             };
 
             const openAdmin = () => {
-                const pass = prompt("הזן סיסמת מנהל:");
-                if (pass === ADMIN_PASS) {
+                const pass = prompt("הזן סיסמת מנהל (MAX2026):");
+                if (pass && pass.trim().toUpperCase() === "MAX2026") {
                     setView('admin');
                 } else if (pass !== null) {
-                    alert("סיסמה שגויה");
+                    alert("סיסמה שגויה! וודא שכתבת MAX2026");
                 }
             };
 
             if (view === 'admin') return (
                 <div className="container" dir="rtl">
                     <div className="header"><h2>ניהול מועמדים (MAX)</h2></div>
-                    <button className="lang-btn" style={{marginBottom:20, width:'100%'}} onClick={()=>setView('quiz')}>חזרה לשאלון</button>
-                    {candidates.length === 0 ? <p style={{textAlign:'center'}}>טרם מולאו שאלונים.</p> : 
+                    <button className="btn-main" style={{marginBottom:20}} onClick={()=>setView('quiz')}>חזרה לשאלון</button>
+                    {candidates.length === 0 ? <p style={{textAlign:'center'}}>טרם נאספו מועמדים.</p> : 
                         candidates.map(c => (
                             <div key={c.id} className="admin-card">
                                 <strong>{c.fn} {c.ln}</strong> <span style={{fontSize:'0.8rem'}}>({c.lang})</span>
@@ -115,7 +100,7 @@
                                 <div className="analysis-item"><b>יחס לצוות:</b> {c.analysis.team}</div>
                                 <div className="analysis-item"><b>יחס למנהל:</b> {c.analysis.boss}</div>
                                 <div className="analysis-item"><b>נומרולוגיה:</b> {c.analysis.num}</div>
-                                <div className="analysis-item"><b>גיל/יומולדת:</b> {c.bday || "לא הוזן"}</div>
+                                <div className="analysis-item"><b>יומולדת:</b> {c.bday || "לא הוזן"}</div>
                             </div>
                         ))
                     }
@@ -127,7 +112,6 @@
                     <div className="glass-card">
                         <h1 style={{color:'var(--success)', fontSize:'4rem'}}>✓</h1>
                         <h2>השאלון נשלח!</h2>
-                        <p>תודה רבה. נא להחזיר את המכשיר למנהל.</p>
                         <button className="btn-main" onClick={()=>{setForm({fn:'',ln:'',bday:''}); setAnswers({}); setView('quiz'); setStartTime(Date.now());}}>מועמד חדש</button>
                     </div>
                 </div>
@@ -144,9 +128,7 @@
                         <div className="header"><h1>שאלון מועמד - MAX</h1></div>
                         <input placeholder="שם פרטי" value={form.fn} onChange={e=>setForm({...form, fn: e.target.value})} />
                         <input placeholder="שם משפחה" value={form.ln} onChange={e=>setForm({...form, ln: e.target.value})} />
-                        <label style={{fontSize:'0.8rem', display:'block', marginBottom:5}}>תאריך לידה:</label>
                         <input type="date" value={form.bday} onChange={e=>setForm({...form, bday: e.target.value})} />
-                        
                         {QUESTIONS_HE.map((q, i) => (
                             <div key={i} className="q-card">
                                 <p><strong>{q.q}</strong></p>
@@ -156,12 +138,8 @@
                                 </select>
                             </div>
                         ))}
-                        
                         <button className="btn-main" onClick={handleSend}>שלח שאלון</button>
-                        
-                        <div className="admin-trigger" onClick={openAdmin}>
-                            כניסת מנהל (ADMIN)
-                        </div>
+                        <div className="admin-trigger" onClick={openAdmin}>כניסת מנהל (ADMIN)</div>
                     </div>
                 </div>
             );
