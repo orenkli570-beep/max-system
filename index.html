@@ -3,40 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MAX - HR SMART SYSTEM 2026</title>
+    <title>MAX STOCK - HR SYSTEM 2026</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
     <style>
-        :root { --gold: #c9a84c; --bg: #0b0f1a; --card: #161e2d; --text: #ecf0f1; --accent: #3498db; --success: #27ae60; --danger: #e74c3c; }
+        :root { --gold: #c9a84c; --bg: #0b0f1a; --card: #161e2d; --text: #ecf0f1; --success: #27ae60; --danger: #e74c3c; }
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
-        .container { max-width: 800px; margin: 0 auto; padding-bottom: 60px; }
-        .glass-card { background: var(--card); border: 1px solid var(--gold); border-radius: 24px; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
+        .container { max-width: 800px; margin: 0 auto; padding-bottom: 50px; }
+        .glass-card { background: var(--card); border: 2px solid var(--gold); border-radius: 20px; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
         .lang-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
-        .lang-btn { background: rgba(0,0,0,0.3); border: 1px solid var(--gold); color: white; padding: 10px 18px; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        .lang-btn { background: rgba(0,0,0,0.3); border: 1px solid var(--gold); color: white; padding: 10px 18px; border-radius: 12px; cursor: pointer; }
         .lang-btn.active { background: var(--gold); color: black; font-weight: bold; }
         input, select { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #2c3e50; background: #000; color: #fff; margin-bottom: 15px; font-size: 1rem; }
-        .q-card { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 18px; margin-bottom: 15px; border-right: 5px solid var(--gold); }
-        .btn-main { width: 100%; padding: 20px; background: var(--gold); color: black; border: none; border-radius: 15px; font-weight: 900; cursor: pointer; font-size: 1.2rem; text-transform: uppercase; }
-        .admin-card { background: #1c2636; border: 1px solid #34495e; border-radius: 20px; padding: 25px; margin-bottom: 25px; position: relative; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 20px 0; }
-        .stat-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #2c3e50; }
-        .stat-box label { display: block; font-size: 0.75rem; color: var(--gold); margin-bottom: 5px; }
-        .score-bar { background: #000; height: 10px; border-radius: 5px; margin-top: 10px; overflow: hidden; }
-        .score-fill { height: 100%; background: var(--gold); transition: 0.5s; }
+        .q-card { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-right: 4px solid var(--gold); }
+        .btn-main { width: 100%; padding: 20px; background: var(--gold); color: black; border: none; border-radius: 15px; font-weight: 900; cursor: pointer; font-size: 1.2rem; }
         
-        /* תיקון כפתור מנהל - עכשיו הוא גלוי וברור */
-        .admin-trigger-fixed { 
-            margin-top: 50px; 
-            padding: 20px; 
-            text-align: center; 
-            border: 2px solid var(--gold); 
-            color: var(--gold); 
-            cursor: pointer; 
-            border-radius: 15px; 
-            font-weight: bold;
-            background: rgba(201, 168, 76, 0.1);
+        /* צד מנהל - מלל מורחב */
+        .admin-card { background: #1c2636; border: 1px solid #34495e; border-radius: 15px; padding: 20px; margin-bottom: 20px; border-right: 6px solid var(--gold); }
+        .report-section { margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .report-item { margin-bottom: 12px; line-height: 1.6; }
+        .report-label { color: var(--gold); font-weight: bold; display: block; margin-bottom: 3px; font-size: 0.9rem; }
+        .report-text { color: #fff; font-size: 1rem; }
+        .warning-box { color: var(--danger); font-weight: bold; border: 1px solid var(--danger); padding: 8px; border-radius: 8px; margin-top: 10px; background: rgba(231, 76, 60, 0.1); }
+        
+        .admin-trigger-box { 
+            margin-top: 40px; padding: 20px; text-align: center; border: 2px solid var(--gold); 
+            color: var(--gold); cursor: pointer; border-radius: 15px; font-weight: bold; background: rgba(201,168,76,0.1); 
         }
     </style>
 </head>
@@ -46,7 +40,10 @@
         const { useState } = React;
         const ADMIN_PASS = "MAX2026";
 
+        // רשימות מלאות של MAX STOCK
         const DEPARTMENTS = ["צעצועים", "כלי בית", "טקסטיל", "ניקיון", "חד פעמי", "יצירה", "חשמל", "גינון", "קמפינג", "ריהוט", "משרד", "ביוטי", "ממתקים"];
+        const ROLES = ["קופאי/ת", "סדרן/ית", "מחסנאי/ת", "סגן/ית מנהל", "אחראי/ת משמרת", "נציג/ת שירות", "מלקט/ת", "בודק/ת חשבוניות", "אחראי/ת החזרות", "סדרן/ית עגלה", "מנהל/ת מחלקה", "אחראי/ת סטוק", "דיילת מכירות", "מוביל/ה", "עובד/ת כללי"];
+
         const QUESTIONS = [
             { q: "1. לקוח מחפש מוצר שחסר על המדף?", a: ["אבדוק במחסן", "אבדוק במחשב", "אכוון לדומה", "אמשיך בעבודתי"] },
             { q: "2. תור ארוך מאוד בקופות ואתה בסידור מדף?", a: ["אגש מיד לעזור", "אחכה שיקראו לי", "אסיים קודם את המדף", "אלך למחסן"] },
@@ -73,38 +70,80 @@
             const [answers, setAnswers] = useState({});
             const [startTime, setStartTime] = useState(Date.now());
 
-            const analyze = (ans, bday, dur) => {
-                let s = { service: 50, loyalty: 50, order: 50 };
-                if (ans[1] == 0) s.service += 20;
-                if (ans[4] == 0) s.loyalty += 25;
-                if (ans[6] == 0) s.order += 20;
-                let role = s.service > 65 ? "קופאי/נציג שירות" : "סדרן/מחסנאי";
-                if (s.loyalty > 70) role = "פוטנציאל לניהול (אחמ\"ש)";
-                return { s, role, warn: dur < 100 };
+            const runAnalysis = (ans, bday, dur) => {
+                let report = {
+                    social: "מראה נכונות לעבודה בצוות.",
+                    authority: "מקבל מרות ומבצע הנחיות.",
+                    integrity: "רמת אמינות תקינה.",
+                    role: ROLES[14], // ברירת מחדל: עובד כללי
+                    dept: DEPARTMENTS[0], // ברירת מחדל
+                    num: "בבדיקה",
+                    warning: dur < 100 ? "נורת אזהרה: מילוי מהיר מדי (ייתכן חוסר רצינות)." : null
+                };
+
+                // לוגיקת בחירת תפקיד ומחלקה מתוך המאגר המלא
+                if (ans[14] == 1) { 
+                    report.role = ROLES[3]; // סגן מנהל
+                    report.dept = "כלל מחלקות הסטוק";
+                } else if (ans[1] == 0 || ans[10] == 0) {
+                    report.role = ROLES[0]; // קופאי
+                    report.dept = DEPARTMENTS[11]; // ביוטי
+                } else if (ans[9] == 3) {
+                    report.role = ROLES[2]; // מחסנאי
+                    report.dept = DEPARTMENTS[4]; // חד פעמי (מחסן)
+                } else if (ans[2] == 0) {
+                    report.role = ROLES[1]; // סדרן
+                    report.dept = DEPARTMENTS[1]; // כלי בית
+                }
+
+                // ניתוח מילולי
+                if (ans[4] == 0) report.authority = "לויאליות גבוהה מאוד למערכת, מבצע גם משימות קשות בשמחה.";
+                if (ans[8] == 0 && ans[13] == 0) report.integrity = "יושרה גבוהה במיוחד, מקפיד על טוהר המידות וכספי העסק.";
+                if (ans[9] == 1) report.social = "שחקן צוות קלאסי, תורם לאווירה חיובית במחלקה.";
+
+                // נומרולוגיה
+                if (bday) {
+                    const n = bday.replace(/\D/g,'').split('').reduce((a,b)=>a+parseInt(b),0) % 9 || 9;
+                    const m = {1:"מנהיגות", 2:"עבודת צוות", 3:"תקשורת", 4:"יסודיות", 5:"זריזות", 6:"אחריות", 7:"ניתוח", 8:"ניהול", 9:"שירותיות"};
+                    report.num = m[n];
+                }
+                return report;
             };
 
             const handleSend = () => {
-                if (!form.fn) return alert("מלא שם");
+                if (!form.fn) return alert("חובה למלא שם");
                 const dur = Math.floor((Date.now() - startTime)/1000);
-                setCandidates([{id: Date.now(), ...form, analysis: analyze(answers, form.bday, dur), lang, dur}, ...candidates]);
+                setCandidates([{id: Date.now(), ...form, analysis: runAnalysis(answers, form.bday, dur), lang, dur}, ...candidates]);
                 setView('done');
-            };
-
-            const openAdmin = () => {
-                const pass = prompt("סיסמת מנהל (MAX2026):");
-                if (pass && pass.trim().toUpperCase() === ADMIN_PASS) setView('admin');
             };
 
             if (view === 'admin') return (
                 <div className="container" dir="rtl">
-                    <button className="btn-main" onClick={()=>setView('quiz')}>חזרה לשאלון</button>
+                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20}}>
+                        <h2>ניהול מועמדים - MAX STOCK</h2>
+                        <button className="lang-btn" onClick={()=>setView('quiz')}>חזרה למזכירה</button>
+                    </div>
                     {candidates.map(c => (
                         <div key={c.id} className="admin-card">
-                            <h3>{c.fn} {c.ln}</h3>
-                            <div className="grid-3">
-                                <div className="stat-box"><label>תפקיד מומלץ</label><span>{c.analysis.role}</span></div>
-                                <div className="stat-box"><label>זמן מילוי</label><span>{c.dur} שניות</span></div>
-                                <div className="stat-box"><label>שפה</label><span>{c.lang}</span></div>
+                            <h3 style={{margin:0, color:'var(--gold)'}}>{c.fn} {c.ln}</h3>
+                            <div className="report-section">
+                                <div className="report-item">
+                                    <span className="report-label">אבחון התנהגותי:</span>
+                                    <span className="report-text">{c.analysis.social} {c.analysis.authority}</span>
+                                </div>
+                                <div className="report-item">
+                                    <span className="report-label">אמינות ויושרה:</span>
+                                    <span className="report-text">{c.analysis.integrity}</span>
+                                </div>
+                                <div className="report-item">
+                                    <span className="report-label">נטייה טבעית (נומרולוגיה):</span>
+                                    <span className="report-text">{c.analysis.num}</span>
+                                </div>
+                                <div style={{marginTop:15, padding:12, background:'rgba(39, 174, 96, 0.1)', borderRadius:10, border:'1px solid var(--success)'}}>
+                                    <span className="report-label" style={{color:'#2ecc71'}}>שיבוץ אופטימלי:</span>
+                                    <span className="report-text"><strong>תפקיד:</strong> {c.analysis.role} | <strong>מחלקה:</strong> {c.analysis.dept}</span>
+                                </div>
+                                {c.analysis.warning && <div className="warning-box">{c.analysis.warning}</div>}
                             </div>
                         </div>
                     ))}
@@ -113,7 +152,7 @@
 
             if (view === 'done') return (
                 <div className="container" style={{textAlign:'center', paddingTop:100}}>
-                    <div className="glass-card"><h1>✓</h1><h2>נשלח בהצלחה</h2><button className="btn-main" onClick={()=>{setView('quiz'); setForm({fn:'',ln:'',bday:''}); setStartTime(Date.now());}}>מועמד חדש</button></div>
+                    <div className="glass-card"><h1>✓</h1><h2>השאלון הושלם בהצלחה</h2><button className="btn-main" onClick={()=>{setView('quiz'); setForm({fn:'',ln:'',bday:''}); setAnswers({}); setStartTime(Date.now());}}>מועמד חדש</button></div>
                 </div>
             );
 
@@ -135,8 +174,8 @@
                                 </select>
                             </div>
                         ))}
-                        <button className="btn-main" onClick={handleSend}>שלח שאלון</button>
-                        <div className="admin-trigger-fixed" onClick={openAdmin}>כניסת מנהל (ADMIN)</div>
+                        <button className="btn-main" onClick={handleSend}>סיום ושליחה</button>
+                        <div className="admin-trigger-box" onClick={()=>{if(prompt("סיסמה:")===ADMIN_PASS) setView('admin')}}>כניסת מנהל (ADMIN)</div>
                     </div>
                 </div>
             );
