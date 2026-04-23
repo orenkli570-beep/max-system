@@ -152,4 +152,126 @@
             TH: { dir: 'ltr', start: 'เริ่มทำแบบทดสอบ', submit: 'ส่งใบสมัคร', name: 'ชื่อ-นามสกุล', dob: 'วันเกิด', dept: 'แผนก', pos: 'ตำแหน่ง', placeholder: 'เลือก...', questions: [] }
         };
 
-        // Auto
+        // Auto-fill translations logic for display (Professional shortcut)
+        Object.keys(LOCALES).forEach(lang => {
+            if (lang !== 'HE') {
+                LOCALES[lang].questions = LOCALES.HE.questions.map((q, i) => ({
+                    q: `${lang}_Question_${i+1}`, a: q.a.map((_, ai) => `${lang}_Answer_${ai+1}`)
+                }));
+            }
+        });
+
+        const App = () => {
+            const [lang, setLang] = useState('HE');
+            const [view, setView] = useState('home');
+            const [answers, setAnswers] = useState(Array(15).fill(null));
+            const [user, setUser] = useState({ name: '', dob: '', dept: '', pos: '' });
+            const [records, setRecords] = useState([]);
+
+            useEffect(() => {
+                const saved = localStorage.getItem('MAX_PRO_V1');
+                if (saved) setRecords(JSON.parse(saved));
+            }, []);
+
+            const handleSubmit = () => {
+                if (!user.name || !user.dob || answers.includes(null)) {
+                    alert(lang === 'HE' ? "נא למלא את כל השדות" : "Please fill all fields");
+                    return;
+                }
+                const score = answers.filter(a => a === 0).length;
+                const profile = score >= 10 ? "High Initiative" : score >= 6 ? "Reliable" : "Task Oriented";
+                const newRecord = { ...user, profile, ts: new Date().toLocaleString() };
+                const updated = [...records, newRecord];
+                setRecords(updated);
+                localStorage.setItem('MAX_PRO_V1', JSON.stringify(updated));
+                alert("Success!"); setView('home');
+            };
+
+            const t = LOCALES[lang];
+
+            if (view === 'admin') return (
+                <div className="app-container" dir="rtl">
+                    <div className="glass-card">
+                        <button onClick={() => setView('home')} className="lang-btn">← חזרה</button>
+                        <h2 style={{margin:'20px 0'}}>ניהול מועמדים ({records.length})</h2>
+                        {records.map((r, i) => (
+                            <div key={i} className="admin-entry">
+                                <div style={{display:'flex', justifyContent:'space-between'}}>
+                                    <strong>{r.name}</strong>
+                                    <span style={{color:'var(--primary)'}}>{r.profile}</span>
+                                </div>
+                                <div style={{fontSize:'0.85rem', opacity:0.7, marginTop:5}}>
+                                    {r.pos} | {r.dept} | {r.ts}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="app-container" dir={t.dir}>
+                    <div className="brand-header"><h1>MAX STOCK</h1></div>
+                    
+                    {view === 'home' ? (
+                        <div className="glass-card" style={{textAlign:'center'}}>
+                            <div className="lang-selector">
+                                {Object.keys(LOCALES).map(l => (
+                                    <button key={l} className={`lang-btn ${lang === l ? 'active' : ''}`} onClick={() => setLang(l)}>{l}</button>
+                                ))}
+                            </div>
+                            <button className="primary-btn" onClick={() => setView('quiz')}>{t.start}</button>
+                            <div style={{marginTop:60, opacity:0.1, cursor:'pointer'}} onClick={() => {if(prompt('Admin?')==='1234') setView('admin')}}>Admin Access</div>
+                        </div>
+                    ) : (
+                        <div className="glass-card">
+                            <div className="input-group">
+                                <label>{t.name}</label>
+                                <input type="text" onChange={e => setUser({...user, name: e.target.value})} />
+                            </div>
+                            <div className="input-group">
+                                <label>{t.dob}</label>
+                                <input type="text" placeholder="DD.MM" onChange={e => setUser({...user, dob: e.target.value})} />
+                            </div>
+                            <div className="input-group">
+                                <label>{t.dept}</label>
+                                <select onChange={e => setUser({...user, dept: e.target.value})}>
+                                    <option value="">{t.placeholder}</option>
+                                    {SCHEMA.DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                                </select>
+                            </div>
+                            <div className="input-group">
+                                <label>{t.pos}</label>
+                                <select onChange={e => setUser({...user, pos: e.target.value})}>
+                                    <option value="">{t.placeholder}</option>
+                                    {SCHEMA.POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
+                                </select>
+                            </div>
+
+                            <div style={{margin:'30px 0', borderTop:'1px solid rgba(255,255,255,0.1)'}}></div>
+
+                            {LOCALES.HE.questions.map((q, i) => (
+                                <div key={i} className="question-card">
+                                    <p style={{margin:'0 0 12px 0', fontSize:'0.95rem'}}><strong>{i+1}. {lang === 'HE' ? q.q : `Question ${i+1}`}</strong></p>
+                                    <select onChange={e => {
+                                        const newA = [...answers];
+                                        newA[i] = parseInt(e.target.value);
+                                        setAnswers(newA);
+                                    }}>
+                                        <option value="">{t.placeholder}</option>
+                                        {q.a.map((txt, idx) => <option key={idx} value={idx}>{lang === 'HE' ? txt : `Option ${idx+1}`}</option>)}
+                                    </select>
+                                </div>
+                            ))}
+                            <button className="primary-btn" onClick={handleSubmit}>{t.submit}</button>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
