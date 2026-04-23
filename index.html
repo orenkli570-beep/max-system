@@ -3,32 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MAX STOCK | Multi-Language HR</title>
+    <title>MAX STOCK | 15 Questions Multi-Language</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
     <style>
-        :root { --gold: #c9a84c; --bg: #0b0f1a; --card: #161e2d; --text: #f8fafc; --accent: #38bdf8; --success: #22c55e; }
+        :root { --gold: #c9a84c; --bg: #0b0f1a; --card: #161e2d; --text: #f8fafc; --accent: #38bdf8; }
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background: var(--bg); color: var(--text); margin: 0; padding: 10px; }
         .container { max-width: 650px; margin: 0 auto; }
         .glass-card { background: var(--card); border: 1px solid var(--gold); border-radius: 20px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        
-        /* Language Selector Styles */
         .lang-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-        .lang-btn { background: #000; border: 1px solid var(--gold); color: #fff; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: 0.3s; }
+        .lang-btn { background: #000; border: 1px solid var(--gold); color: #fff; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
         .lang-btn.active { background: var(--gold); color: #000; font-weight: bold; }
-        
         .header { text-align: center; border-bottom: 2px solid var(--gold); margin-bottom: 25px; padding-bottom: 10px; }
         input, select { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #334155; background: #000; color: #fff; margin-bottom: 15px; font-size: 1rem; }
         .q-card { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; margin-bottom: 15px; border-right: 4px solid var(--gold); }
         .btn-main { width: 100%; padding: 20px; background: var(--gold); color: #000; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; font-size: 1.2rem; }
-        
         .admin-card { background: #1e293b; border-radius: 18px; padding: 20px; margin-bottom: 25px; border: 1px solid #444; }
-        .status-buttons { display: flex; gap: 5px; margin-top: 15px; }
-        .btn-status { flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #444; background: #0f172a; color: #fff; cursor: pointer; }
-        .btn-status.active { background: var(--gold); color: #000; }
-        .footer-link { text-align: center; margin-top: 30px; }
     </style>
 </head>
 <body>
@@ -39,53 +31,103 @@
 
         const TRANSLATIONS = {
             HE: {
-                title: "שאלון מועמד", fname: "שם פרטי", lname: "שם משפחה", bday: "תאריך לידה", send: "סיום ושליחה", select: "בחר תשובה...",
+                title: "שאלון מועמד - MAX", fname: "שם פרטי", lname: "שם משפחה", bday: "תאריך לידה", send: "סיום ושליחה", select: "בחר תשובה...",
                 questions: [
-                    { q: "לקוח מחפש מוצר שחסר על המדף?", a: ["אבדוק במחסן", "אבדוק במחשב", "אכוון לדומה", "אמשיך בעבודתי"] },
-                    { q: "תור ארוך מאוד בקופות?", a: ["אגש מיד לעזור", "אחכה שיקראו לי", "אסיים קודם מדף", "אלך למחסן"] },
-                    { q: "ראית מוצר שבור או נוזל?", a: ["אנקה מיד", "אדווח למנהל", "אקרא לניקיון", "אעקוף"] },
-                    { q: "איזו צורת עבודה אתה מעדיף?", a: ["אחריות עצמאית", "עבודת צוות", "שיגידו לי מה לעשות", "שקט במחסן"] },
-                    { q: "מה הכי חשוב לך בעבודה?", a: ["שירות מעולה", "קידום לניהול", "סדר וארגון", "המשכורת והשקט"] }
+                    { q: "1. לקוח מחפש מוצר שחסר על המדף?", a: ["אבדוק במחסן", "אבדוק במחשב", "אכוון לדומה", "אמשיך בעבודתי"] },
+                    { q: "2. תור ארוך מאוד בקופות ואתה בסידור מדף?", a: ["אגש מיד לעזור", "אחכה שיקראו לי", "אסיים קודם את המדף", "אלך למחסן"] },
+                    { q: "3. ראית מוצר שבור או נוזל על הרצפה?", a: ["אנקה מיד", "אדווח למנהל", "אקרא לעובד ניקיון", "אעקוף את המפגע"] },
+                    { q: "4. לקוח מתלונן בקול רם על מחיר גבוה?", a: ["אקשיב בסבלנות", "אפנה אותו למנהל", "אגיד שזה המחיר", "אתעלם"] },
+                    { q: "5. המנהל נתן לך משימה שאתה פחות אוהב?", a: ["אבצע הכי טוב ומהר", "אבצע ואז אבקש לגוון", "אעשה לאט", "אחפש מישהו שיחליף"] },
+                    { q: "6. חבר לעבודה טעה בסידור המחלקה?", a: ["אעזור לו לתקן", "אסב את תשומת ליבו", "אדווח למנהל", "לא ענייני"] },
+                    { q: "7. הגעת למשמרת והמחלקה הפוכה לגמרי?", a: ["אתחיל לסדר מיד", "אשאל מאיפה להתחיל", "אסדר רק את האזור שלי", "אחכה להנחיות"] },
+                    { q: "8. לקוח מתלבט זמן רב לגבי מוצר?", a: ["אציע עזרה והמלצה", "אכוון לאזור הכללי", "אגיד שזה עניין של טעם", "אפנה לעובד אחר"] },
+                    { q: "9. מצאת שטר כסף על הרצפה בחנות?", a: ["אמסור למנהל/קופה", "אשאל לקוחות אם איבדו", "אשים בצדקה", "אשמור בכיס"] },
+                    { q: "10. איזו צורת עבודה אתה מעדיף?", a: ["אחריות עצמאית", "עבודת צוות", "שיגידו לי מה לעשות", "שקט במחסן"] },
+                    { q: "11. לקוח דורש הנחה שאי אפשר לתת?", a: ["אסביר בנימוס את המדיניות", "אבדוק מבצע חלופי", "אשלח למנהל", "אגיד שאין הנחות"] },
+                    { q: "12. סימנת מחיר טעות על קבוצת מוצרים?", a: ["אתקן מיד ואדווח", "אשאל מה לעשות", "אקווה שלא ישימו לב", "אשאיר ככה"] },
+                    { q: "13. המשמרת נגמרה והחנות עמוסה מאוד?", a: ["אשאר עוד כמה דקות", "אסיים משימה ואלך", "אצא מיד", "אלך בלי להגיד"] },
+                    { q: "14. עובד אחר מבקש לעשות משהו לא תקין?", a: ["אסרב ואסביר", "אדווח למנהל", "אזרום איתו פעם אחת", "אעשה מה שביקש"] },
+                    { q: "15. מה הדבר שהכי חשוב לך בעבודה?", a: ["שירות מעולה", "קידום לניהול", "סדר וארגון", "המשכורת והשקט"] }
                 ]
             },
             EN: {
                 title: "Candidate Questionnaire", fname: "First Name", lname: "Last Name", bday: "Date of Birth", send: "Submit", select: "Choose...",
                 questions: [
-                    { q: "Customer looking for a missing item?", a: ["Check warehouse", "Check computer", "Suggest alternative", "Continue working"] },
-                    { q: "Long lines at checkout?", a: ["Go help immediately", "Wait to be called", "Finish my shelf first", "Go to warehouse"] },
-                    { q: "Found a broken/leaking product?", a: ["Clean it immediately", "Report to manager", "Call cleaning staff", "Ignore it"] },
-                    { q: "Preferred work style?", a: ["Independent responsibility", "Teamwork", "Follow instructions", "Quiet warehouse"] },
-                    { q: "Most important at work?", a: ["Great service", "Career growth", "Order and organization", "Salary and peace"] }
+                    { q: "1. Customer looking for a missing item?", a: ["Check warehouse", "Check computer", "Suggest alternative", "Continue working"] },
+                    { q: "2. Long lines at checkout while restocking?", a: ["Go help immediately", "Wait to be called", "Finish my shelf first", "Go to warehouse"] },
+                    { q: "3. Found a broken/leaking product?", a: ["Clean it immediately", "Report to manager", "Call cleaning staff", "Ignore it"] },
+                    { q: "4. Customer complaining about high prices?", a: ["Listen patiently", "Refer to manager", "Say that's the price", "Ignore"] },
+                    { q: "5. Manager gave you a task you dislike?", a: ["Do it best and fast", "Do it then ask for variety", "Do it slowly", "Find a replacement"] },
+                    { q: "6. Co-worker made a mistake in restocking?", a: ["Help them fix it", "Point it out to them", "Report to manager", "Not my business"] },
+                    { q: "7. Arrived and the department is a mess?", a: ["Start tidying immediately", "Ask where to start", "Tidy only my area", "Wait for instructions"] },
+                    { q: "8. Customer hesitating for a long time?", a: ["Offer help/recommendation", "Point to general area", "Say it's a matter of taste", "Refer to another employee"] },
+                    { q: "9. Found a bill on the store floor?", a: ["Give to manager/cashier", "Ask customers", "Put in charity", "Keep it"] },
+                    { q: "10. Preferred work style?", a: ["Independent responsibility", "Teamwork", "Follow instructions", "Quiet warehouse"] },
+                    { q: "11. Customer demands impossible discount?", a: ["Explain policy politely", "Check alternative deals", "Send to manager", "Say no discounts"] },
+                    { q: "12. Marked wrong price on items?", a: ["Fix immediately and report", "Ask what to do", "Hope no one notices", "Leave it"] },
+                    { q: "13. Shift ended but store is very busy?", a: ["Stay a few more minutes", "Finish task then leave", "Leave immediately", "Leave without saying"] },
+                    { q: "14. Co-worker asks to do something improper?", a: ["Refuse and explain", "Report to manager", "Go along once", "Do what they asked"] },
+                    { q: "15. Most important thing at work?", a: ["Great service", "Career growth", "Order and organization", "Salary and peace"] }
                 ]
             },
             RU: {
                 title: "Анкета кандидата", fname: "Имя", lname: "Фамилия", bday: "Дата рождения", send: "Отправить", select: "Выберите...",
                 questions: [
-                    { q: "Клиент ищет товар, которого нет?", a: ["Проверю склад", "Проверю в базе", "Предложу аналог", "Продолжу работу"] },
-                    { q: "Длинная очередь на кассе?", a: ["Помогу сразу", "Подожду вызова", "Закончу полку", "Уйду на склад"] },
-                    { q: "Увидели разбитый товар?", a: ["Уберу сразу", "Сообщу менеджеру", "Вызову уборку", "Пройду мимо"] },
-                    { q: "Предпочитаемый стиль?", a: ["Самостоятельность", "Работа в команде", "Четкие указания", "Тишина на складе"] },
-                    { q: "Что важнее всего?", a: ["Сервис", "Карьерный рост", "Порядок", "Зарплата и покой"] }
+                    { q: "1. Клиент ищет товар, которого нет на полке?", a: ["Проверю склад", "Проверю в базе", "Предложу аналог", "Продолжу работу"] },
+                    { q: "2. Длинная очередь, а вы расставляете товар?", a: ["Сразу помогу", "Подожду вызова", "Сначала закончу полку", "Уйду на склад"] },
+                    { q: "3. Увидели разбитый или разлитый товар?", a: ["Уберу сразу", "Сообщу менеджеру", "Вызову уборщика", "Пройду мимо"] },
+                    { q: "4. Клиент жалуется на высокую цену?", a: ["Выслушаю терпеливо", "Направлю к менеджеру", "Скажу, что это цена", "Игнорирую"] },
+                    { q: "5. Менеджер дал неприятное задание?", a: ["Сделаю хорошо и быстро", "Сделаю и попрошу другое", "Буду делать медленно", "Найду замену"] },
+                    { q: "6. Коллега ошибся в расстановке?", a: ["Помогу исправить", "Укажу на ошибку", "Сообщу менеджеру", "Не мое дело"] },
+                    { q: "7. Пришли в отдел, а там беспорядок?", a: ["Сразу начну убирать", "Спрошу, с чего начать", "Уберу только свою зону", "Жду указаний"] },
+                    { q: "8. Клиент долго сомневается?", a: ["Предложу помощь", "Укажу на отдел", "Скажу, что это дело вкуса", "Направлю к другому"] },
+                    { q: "9. Нашли деньги на полу?", a: ["Отдам менеджеру/кассе", "Спрошу клиентов", "Положу в пожертвования", "Оставлю себе"] },
+                    { q: "10. Какой стиль работы предпочитаете?", a: ["Самостоятельность", "Работа в команде", "Жду указаний", "Тишина на складе"] },
+                    { q: "11. Клиент требует невозможную скидку?", a: ["Вежливо объясню правила", "Предложу акции", "Направлю к менеджеру", "Скажу скидок нет"] },
+                    { q: "12. Ошиблись с ценой на товарах?", a: ["Сразу исправлю и сообщу", "Спрошу что делать", "Надеюсь не заметят", "Оставлю так"] },
+                    { q: "13. Смена окончена, но в магазине полно людей?", a: ["Останусь на пару минут", "Закончу и уйду", "Сразу уйду", "Уйду не прощаясь"] },
+                    { q: "14. Коллега просит сделать что-то неверно?", a: ["Откажусь и объясню", "Сообщу менеджеру", "Сделаю один раз", "Сделаю что просил"] },
+                    { q: "15. Что для вас самое важное?", a: ["Сервис", "Карьерный рост", "Порядок", "Зарплата и покой"] }
                 ]
             },
             AR: {
-                title: "استبيان الموظف", fname: "الاسم الشخصي", lname: "اسم العائلة", bday: "تاريخ الميلاد", send: "إرسال", select: "اختر...",
+                title: "استبيان الموظف - ماكس", fname: "الاسم الشخصي", lname: "اسم العائلة", bday: "تاريخ الميلاد", send: "إرسال", select: "اختر...",
                 questions: [
-                    { q: "زبون يبحث عن منتج مفقود؟", a: ["سأفحص المخزن", "سأفحص الحاسوب", "سأقترح بديل", "سأكمل عملي"] },
-                    { q: "طابور طويل عند الخروج؟", a: ["سأساعد فوراً", "سأنتظر النداء", "سأنهي الرف أولاً", "سأذهب للمخزن"] },
-                    { q: "رأيت منتج مكسور أو تسريب؟", a: ["سأنظف فوراً", "سأبلغ المدير", "سأنادي التنظيف", "سأتجاهل"] },
-                    { q: "أسلوب العمل المفضل؟", a: ["مسؤولية مستقلة", "عمل جماعي", "تلقي الأوامر", "هدوء المخزن"] },
-                    { q: "الأهم بالنسبة لك؟", a: ["خدمة ممتازة", "ترقية إدارية", "ترتيب ونظام", "الراتب والهدوء"] }
+                    { q: "1. زبون يبحث عن منتج مفقود من الرف؟", a: ["سأفحص المخزن", "سأفحص الحاسوب", "سأقترح بديل", "سأكمل عملي"] },
+                    { q: "2. طابور طويل وأنت ترتب الرفوف؟", a: ["سأساعد فوراً", "سأنتظر النداء", "سأنهي الرف أولاً", "سأذهب للمخزن"] },
+                    { q: "3. رأيت منتج مكسور أو تسريب على الأرض؟", a: ["سأنظف فوراً", "سأبلغ المدير", "سأنادي التنظيف", "سأتجاهل"] },
+                    { q: "4. زبون يشتكي بصوت عالٍ من السعر؟", a: ["سأستمع بصبر", "سأوجهه للمدير", "سأقول هذا هو السعر", "سأتجاهل"] },
+                    { q: "5. المدير أعطاك مهمة لا تحبها؟", a: ["سأنفذها بأفضل شكل", "سأنفذ ثم أطلب التغيير", "سأعمل ببطء", "سأبحث عن بديل"] },
+                    { q: "6. زميل أخطأ في ترتيب القسم؟", a: ["سأساعده في التصحيح", "سأنبهه للخطأ", "سأبلغ المدير", "ليس من شأني"] },
+                    { q: "7. وصلت للعمل والقسم في فوضى؟", a: ["سأبدأ بالترتيب فوراً", "سأسأل من أين أبدأ", "سأرتب منطقتي فقط", "سأنتظر التعليمات"] },
+                    { q: "8. زبون متردد لفترة طويلة؟", a: ["سأعرض المساعدة", "سأوجهه للقسم العام", "سأقول هذا ذوق شخصي", "سأوجهه لموظف آخر"] },
+                    { q: "9. وجدت ورقة نقدية على الأرض؟", a: ["سأسلمها للمدير", "سأسأل الزبائن", "سأضعها في الصدقة", "سأبقيها في جيبي"] },
+                    { q: "10. أي أسلوب عمل تفضل؟", a: ["مسؤولية مستقلة", "عمل جماعي", "تلقي الأوامر", "هدوء المخزن"] },
+                    { q: "11. زبون يطلب خصم مستحيل؟", a: ["سأشرح السياسة بلباقة", "سأبحث عن عرض بديل", "سأرسله للمدير", "سأقول لا توجد خصومات"] },
+                    { q: "12. وضعت سعر خاطئ على المنتجات؟", a: ["سأصحح وأبلغ فوراً", "سأسأل ماذا أفعل", "سأمل ألا يلاحظ أحد", "سأتركها كما هي"] },
+                    { q: "13. انتهت النوبة والمتجر مزدحم جداً؟", a: ["سأبقى بضع دقائق", "سأنهي المهمة وأرحل", "سأرحل فوراً", "سأرحل دون قول شيء"] },
+                    { q: "14. زميل يطلب منك فعل شيء غير صحيح؟", a: ["سأرفض وأشرح", "سأبلغ المدير", "سأوافق مرة واحدة", "سأفعل ما طلبه"] },
+                    { q: "15. ما هو أهم شيء بالنسبة لك؟", a: ["خدمة ممتازة", "ترقية إدارية", "ترتيب ونظام", "الراتب والهدوء"] }
                 ]
             },
             TH: {
-                title: "แบบสอบถามผู้สมัคร", fname: "ชื่อ", lname: "นามสกุล", bday: "วันเกิด", send: "ส่งข้อมูล", select: "เลือกตอบ...",
+                title: "แบบสอบถามผู้สมัคร MAX", fname: "ชื่อ", lname: "นามสกุล", bday: "วันเกิด", send: "ส่งข้อมูล", select: "เลือกตอบ...",
                 questions: [
-                    { q: "ลูกค้าหาสินค้าไม่เจอ?", a: ["เช็คสต็อก", "เช็คคอมพิวเตอร์", "แนะนำอย่างอื่น", "ทำงานต่อ"] },
-                    { q: "คิวยาวที่แคชเชียร์?", a: ["ช่วยทันที", "รอเรียก", "จัดของต่อ", "ไปหลังร้าน"] },
-                    { q: "เจอของแตกหรือรั่ว?", a: ["ทำความสะอาดทันที", "บอกผู้จัดการ", "เรียกแม่บ้าน", "เดินผ่าน"] },
-                    { q: "รูปแบบงานที่ชอบ?", a: ["ทำเองคนเดียว", "ทำเป็นทีม", "รอสั่งงาน", "ทำเงียบๆ ในคลัง"] },
-                    { q: "สิ่งสำคัญที่สุด?", a: ["บริการลูกค้า", "ความก้าวหน้า", "ความเป็นระเบียบ", "เงินเดือนและความสงบ"] }
+                    { q: "1. ลูกค้าหาสินค้าบนชั้นไม่เจอ?", a: ["เช็คในคลัง", "เช็คในคอมพิวเตอร์", "แนะนำสินค้าอื่น", "ทำงานต่อไป"] },
+                    { q: "2. คิวยาวที่แคชเชียร์ขณะจัดของ?", a: ["ไปช่วยทันที", "รอเรียก", "จัดของให้เสร็จก่อน", "ไปหลังร้าน"] },
+                    { q: "3. เจอสินค้าแตกหรือรั่วบนพื้น?", a: ["ทำความสะอาดทันที", "บอกผู้จัดการ", "เรียกแม่บ้าน", "เดินผ่านไป"] },
+                    { q: "4. ลูกค้าบ่นเรื่องราคาสูง?", a: ["ฟังอย่างอดทน", "แจ้งผู้จัดการ", "บอกว่าเป็นราคานี้", "ไม่สนใจ"] },
+                    { q: "5. ผู้จัดการสั่งงานที่คุณไม่ชอบ?", a: ["ทำให้ดีและเร็วที่สุด", "ทำแล้วค่อยขอย้าย", "ทำช้าๆ", "หาคนเปลี่ยน"] },
+                    { q: "6. เพื่อนร่วมงานจัดของผิด?", a: ["ช่วยแก้ไข", "บอกให้เขารู้", "แจ้งผู้จัดการ", "ไม่ใช่เรื่องของฉัน"] },
+                    { q: "7. มาถึงแล้วแผนกวุ่นวายมาก?", a: ["เริ่มจัดทันที", "ถามว่าเริ่มตรงไหน", "จัดเฉพาะโซนตัวเอง", "รอคำสั่ง"] },
+                    { q: "8. ลูกค้าลังเลอยู่นาน?", a: ["เสนอความช่วยเหลือ", "ชี้ไปที่โซนสินค้า", "บอกว่าเป็นเรื่องรสนิยม", "ให้พนักงานคนอื่นช่วย"] },
+                    { q: "9. เจอเงินตกอยู่ที่พื้น?", a: ["ส่งให้ผู้จัดการ", "ถามลูกค้าแถวนั้น", "ใส่ตู้บริจาค", "เก็บไว้เอง"] },
+                    { q: "10. ชอบทำงานแบบไหน?", a: ["ทำเองรับผิดชอบเอง", "ทำเป็นทีม", "รอสั่งงาน", "ทำเงียบๆ ในคลัง"] },
+                    { q: "11. ลูกค้าขอส่วนลดที่ให้ไม่ได้?", a: ["อธิบายสุภาพ", "เสนอโปรโมชั่นอื่น", "ให้พบผู้จัดการ", "บอกว่าไม่มีส่วนลด"] },
+                    { q: "12. ติดราคาผิดหลายชิ้น?", a: ["รีบแก้และแจ้งหัวหน้า", "ถามว่าต้องทำไง", "หวังว่าจะไม่มีใครเห็น", "ปล่อยไว้แบบนั้น"] },
+                    { q: "13. หมดกะแต่ร้านคนเยอะมาก?", a: ["อยู่ต่ออีกนิด", "ทำงานให้เสร็จแล้วไป", "ไปทันที", "ไปเลยไม่บอกใคร"] },
+                    { q: "14. เพื่อนร่วมงานขอให้ทำสิ่งไม่ถูกต้อง?", a: ["ปฏิเสธและอธิบาย", "แจ้งผู้จัดการ", "ยอมทำครั้งเดียว", "ทำตามที่ขอ"] },
+                    { q: "15. สิ่งที่สำคัญที่สุดในงาน?", a: ["บริการลูกค้า", "ความก้าวหน้า", "ความเป็นระเบียบ", "เงินเดือนและความสงบ"] }
                 ]
             }
         };
@@ -98,13 +140,7 @@
             const [answers, setAnswers] = useState({});
 
             const handleSend = () => {
-                const newCand = {
-                    id: Date.now(),
-                    ...form,
-                    name: `${form.fn} ${form.ln}`,
-                    lang: lang,
-                    status: 'חדש'
-                };
+                const newCand = { id: Date.now(), ...form, name: `${form.fn} ${form.ln}`, lang, status: 'חדש' };
                 setCandidates([newCand, ...candidates]);
                 setView('done');
             };
@@ -113,17 +149,12 @@
 
             if (view === 'admin') return (
                 <div className="container" dir="rtl">
-                    <header className="header"><h1>לוח מנהל (עברית בלבד)</h1></header>
+                    <header className="header"><h1>לוח מנהל</h1></header>
                     <button className="lang-btn" onClick={()=>setView('quiz')}>חזרה לשאלון</button>
                     {candidates.map(c => (
                         <div key={c.id} className="admin-card">
-                            <h3>{c.name} (שפת מילוי: {c.lang})</h3>
-                            <p>תאריך לידה: {c.bday}</p>
-                            <div className="status-buttons">
-                                {['חדש', 'זומן', 'התקבל'].map(s => (
-                                    <button key={s} className={`btn-status ${c.status === s ? 'active' : ''}`} onClick={()=>setCandidates(candidates.map(can=>can.id===c.id?{...can, status:s}:can))}>{s}</button>
-                                ))}
-                            </div>
+                            <h3>{c.name} ({c.lang})</h3>
+                            <p>תאריך לידה: {c.bday} | סטטוס: {c.status}</p>
                         </div>
                     ))}
                 </div>
@@ -131,7 +162,7 @@
 
             if (view === 'done') return (
                 <div className="container" style={{textAlign:'center', paddingTop:100}}>
-                    <div className="glass-card"><h1>✓</h1><h2>תודה, הפרטים נשלחו!</h2><button className="btn-main" onClick={()=>setView('quiz')}>מועמד חדש</button></div>
+                    <div className="glass-card"><h1>✓</h1><h2>נשלח בהצלחה!</h2><button className="btn-main" onClick={()=>setView('quiz')}>מועמד חדש</button></div>
                 </div>
             );
 
@@ -144,10 +175,10 @@
                             ))}
                         </div>
                         <header className="header"><h1>{TRANSLATIONS[lang].title}</h1></header>
-                        <input placeholder={TRANSLATIONS[lang].fname} onChange={e=>setForm({...form, fn:e.target.value})} />
-                        <input placeholder={TRANSLATIONS[lang].lname} onChange={e=>setForm({...form, ln:e.target.value})} />
+                        <input placeholder={TRANSLATIONS[lang].fname} value={form.fn} onChange={e=>setForm({...form, fn:e.target.value})} />
+                        <input placeholder={TRANSLATIONS[lang].lname} value={form.ln} onChange={e=>setForm({...form, ln:e.target.value})} />
                         <label style={{fontSize:'0.8rem'}}>{TRANSLATIONS[lang].bday}:</label>
-                        <input type="date" onChange={e=>setForm({...form, bday:e.target.value})} />
+                        <input type="date" value={form.bday} onChange={e=>setForm({...form, bday:e.target.value})} />
 
                         {TRANSLATIONS[lang].questions.map((q, i) => (
                             <div key={i} className="q-card">
@@ -159,10 +190,9 @@
                             </div>
                         ))}
                         <button className="btn-main" onClick={handleSend}>{TRANSLATIONS[lang].send}</button>
-                        <div className="footer-link">
+                        <div className="footer-link" style={{marginTop:20, textAlign:'center'}}>
                             <button style={{background:'none', border:'none', color:'#444', cursor:'pointer'}} onClick={()=>{
-                                const p = prompt("Password:");
-                                if(p === ADMIN_PASS) setView('admin');
+                                if(prompt("Pass:") === ADMIN_PASS) setView('admin');
                             }}>Admin Login</button>
                         </div>
                     </div>
