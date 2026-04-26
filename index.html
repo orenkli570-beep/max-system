@@ -1,105 +1,769 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAX HR 2026</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-    <style>
-        :root { --gold: #c9a84c; --bg: #0b0f1a; --card: #161e2d; --text: #ecf0f1; --success: #2ecc71; }
-        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .glass-card { background: var(--card); border: 2px solid var(--gold); border-radius: 20px; padding: 20px; }
-        .btn-main { width: 100%; padding: 15px; background: var(--gold); border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .admin-card { background: #1c2636; border-right: 5px solid var(--gold); padding: 15px; margin-top: 15px; border-radius: 10px; }
-        .label { color: var(--gold); font-size: 0.85rem; font-weight: bold; display: block; margin-top: 10px; }
-        .text { font-size: 1rem; color: #fff; }
-        .admin-trigger { margin-top: 40px; padding: 15px; border: 1px dashed var(--gold); text-align: center; cursor: pointer; color: var(--gold); border-radius: 10px; }
-        /* תצוגת בדיקת מערכת למנהל */
-        .system-check { font-size: 0.7rem; opacity: 0.5; margin-top: 20px; border-top: 1px solid #34495e; padding-top: 10px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAX - גיוס והתאמת עובדים</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f0e8; min-height: 100vh; }
+
+  #site-header {
+    background: #1a1a2e; border-bottom: 4px solid #c9a84c;
+    text-align: center; padding: 14px 16px;
+    position: sticky; top: 0; z-index: 999;
+    box-shadow: 0 3px 20px rgba(0,0,0,.6);
+  }
+  #site-header .h-max { font-size: 32px; font-weight: 900; color: #c9a84c; letter-spacing: 8px; line-height: 1; text-shadow: 0 0 24px rgba(201,168,76,.5); }
+  #site-header .h-tag { font-size: 13px; color: #e8c97a; font-weight: 700; letter-spacing: 2px; margin-top: 3px; }
+  #site-header .h-sub { font-size: 14px; color: #a0b0c0; font-weight: 600; margin-top: 4px; }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  #home-screen { min-height: calc(100vh - 90px); display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a1a2e, #0f3460); }
+  .home-inner { text-align: center; padding: 28px 20px; }
+  .home-inner p { color: #6b7aaa; margin-bottom: 36px; font-size: 16px; }
+  .home-btns { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .home-btn { width: 175px; padding: 24px 14px; border-radius: 20px; cursor: pointer; text-align: center; border: none; }
+  .home-btn-gold { background: linear-gradient(135deg, #c9a84c, #e8c97a); color: #1a1a2e; box-shadow: 0 8px 28px rgba(201,168,76,.35); }
+  .home-btn-dark { background: #16213e; color: #a0b0d0; border: 2px solid #2e4a6a !important; }
+  .home-btn .btn-icon { font-size: 38px; margin-bottom: 8px; }
+  .home-btn .btn-label { font-size: 17px; font-weight: 800; }
+  .home-btn .btn-sub { font-size: 12px; margin-top: 5px; opacity: .8; }
+
+  #candidate-screen { background: linear-gradient(160deg, #fdf8ee, #f0e8d5); min-height: calc(100vh - 90px); }
+  .cand-inner { max-width: 540px; margin: 0 auto; padding: 24px 16px; }
+  .lang-bar { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; }
+  .lang-btn { padding: 7px 16px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600; border: 2px solid #ddd; background: #fff; color: #555; }
+  .lang-btn.active { border-color: #c9a84c; background: #c9a84c; color: #fff; }
+  .card { background: #fff; border-radius: 20px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,.08); }
+  .card label { display: block; font-weight: 600; color: #6b5c3e; margin-bottom: 8px; font-size: 15px; }
+  .card input, .card select { width: 100%; padding: 12px; border: 2px solid #e0d5c0; border-radius: 12px; font-size: 16px; outline: none; margin-bottom: 18px; color: #333; font-family: inherit; }
+  .btn-gold { width: 100%; padding: 14px; background: linear-gradient(135deg, #c9a84c, #e8c97a); border: none; border-radius: 12px; color: #fff; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .err { color: #d9534f; font-weight: 600; margin-bottom: 14px; font-size: 14px; }
+  .prog-bar-wrap { margin-bottom: 20px; }
+  .prog-nums { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; color: #999; font-weight: 600; }
+  .prog-track { height: 6px; background: #f0e8d5; border-radius: 99px; }
+  .prog-fill { height: 100%; background: linear-gradient(90deg, #c9a84c, #e8c97a); border-radius: 99px; transition: width .4s; }
+  .q-text { font-size: 17px; font-weight: 700; color: #4a3520; line-height: 1.6; margin-bottom: 20px; min-height: 56px; }
+  .ans-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .ans-btn { padding: 13px 16px; border: 2px solid #e0d5c0; border-radius: 12px; text-align: right; font-size: 14px; color: #4a3520; font-weight: 400; cursor: pointer; background: #fff; font-family: inherit; width: 100%; }
+  .ans-btn.selected { border-color: #c9a84c; background: #fffbf0; color: #8a6a00; font-weight: 700; }
+  .done-wrap { display: flex; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 40px; }
+  .done-wrap .done-icon { font-size: 72px; margin-bottom: 16px; }
+  .done-wrap h2 { color: #4a3520; font-size: 20px; }
+
+  #manager-screen { background: #1a1a2e; min-height: calc(100vh - 90px); }
+  .mgr-inner { max-width: 780px; margin: 0 auto; padding: 20px 16px; }
+  .login-wrap { display: flex; align-items: center; justify-content: center; min-height: 70vh; }
+  .login-box { background: #16213e; padding: 40px; border-radius: 24px; width: 90%; max-width: 340px; text-align: center; }
+  .login-box h2 { color: #e8c97a; margin-bottom: 24px; font-size: 20px; }
+  .login-box input { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #0f3460; color: #fff; font-size: 18px; text-align: center; outline: none; margin-bottom: 12px; font-family: inherit; }
+  .stats { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .stat-card { flex: 1; min-width: 100px; background: #16213e; border-radius: 14px; padding: 16px 18px; text-align: center; }
+  .stat-card .stat-val { font-size: 28px; font-weight: 800; }
+  .stat-card .stat-lbl { color: #6b7aaa; font-size: 13px; margin-top: 4px; }
+
+  /* Manager action buttons */
+  .mgr-actions { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+  .mgr-action-btn { flex: 1; min-width: 130px; padding: 12px 10px; border-radius: 12px; border: none; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 700; text-align: center; }
+  .btn-match { background: linear-gradient(135deg, #7c5cbf, #a07de0); color: #fff; }
+  .btn-delete { background: linear-gradient(135deg, #8b2020, #c0392b); color: #fff; }
+
+  .section-title { font-size: 17px; font-weight: 800; padding-bottom: 10px; margin-bottom: 14px; border-bottom: 2px solid #2a2a4a; }
+  .title-pending { color: #e8c97a; }
+  .title-assigned { color: #4caf7f; margin-top: 28px; }
+  .cand-row { background: #16213e; border-radius: 14px; padding: 14px 18px; margin-bottom: 10px; cursor: pointer; border: 2px solid #1e2d50; display: flex; align-items: center; gap: 14px; }
+  .cand-row:hover { border-color: #c9a84c; }
+  .cand-avatar { width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, #c9a84c, #e8c97a); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .cand-info { flex: 1; min-width: 0; }
+  .cand-info p { color: #e0e0f0; font-weight: 700; margin: 0; font-size: 15px; }
+  .cand-info small { color: #6b7aaa; font-size: 12px; }
+  .tag-gold { background: rgba(201,168,76,.2); color: #e8c97a; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+  .tag-green { background: #0d4f2e; color: #4caf7f; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+  .table-wrap { background: #16213e; border-radius: 16px; overflow: hidden; }
+  .tbl { width: 100%; border-collapse: collapse; min-width: 340px; }
+  .tbl th { padding: 12px 14px; color: #e8c97a; text-align: right; font-size: 13px; background: #0f3460; }
+  .tbl td { padding: 12px 14px; color: #e0e0f0; border-bottom: 1px solid #0f3460; font-size: 14px; }
+  .tbl tr:nth-child(even) td { background: #131d33; }
+  .tbl tr { cursor: pointer; }
+  .tbl td.muted { color: #a0b0d0; }
+  .detail-card { background: #16213e; border-radius: 20px; padding: 24px; box-shadow: 0 4px 24px rgba(0,0,0,.4); }
+  .detail-head { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+  .detail-avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #c9a84c, #e8c97a); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .detail-name { color: #e8c97a; font-size: 20px; font-weight: 800; }
+  .detail-dob { color: #6b7aaa; font-size: 13px; margin-top: 2px; }
+  .detail-section { margin-bottom: 16px; background: #0f1a2e; border-radius: 14px; padding: 18px; border-right: 4px solid; }
+  .detail-section h3 { font-size: 15px; margin-bottom: 10px; }
+  .detail-section p { color: #d0d0e8; line-height: 1.8; }
+  .tags { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .tag-sm { padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .tag-dark { background: rgba(255,255,255,.06); color: #a0b0c0; }
+  .assign-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .assign-row > div { flex: 1; min-width: 140px; }
+  .assign-row label { display: block; color: #a0b0c0; margin-bottom: 6px; font-size: 13px; }
+  .assign-row select { width: 100%; padding: 10px; border-radius: 10px; border: none; background: #0f3460; color: #fff; font-size: 14px; outline: none; font-family: inherit; }
+  .back-btn { background: transparent; border: 2px solid #2e4a6a; border-radius: 10px; color: #a0b0c0; padding: 8px 18px; cursor: pointer; margin-bottom: 20px; font-size: 14px; font-family: inherit; }
+  .save-msg { color: #4caf7f; font-weight: 700; margin-bottom: 10px; }
+  .empty-state { text-align: center; padding: 60px 20px; color: #4a4a6a; }
+  .empty-state .empty-icon { font-size: 44px; margin-bottom: 12px; }
+
+  /* Delete confirm */
+  .confirm-box { background: #2a0a0a; border: 2px solid #c0392b; border-radius: 14px; padding: 16px; margin-bottom: 16px; text-align: center; }
+  .confirm-box p { color: #ffaaaa; margin-bottom: 12px; font-weight: 600; }
+  .confirm-btns { display: flex; gap: 10px; justify-content: center; }
+  .btn-confirm-del { padding: 10px 24px; background: #c0392b; border: none; border-radius: 10px; color: #fff; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 14px; }
+  .btn-cancel { padding: 10px 24px; background: #2e4a6a; border: none; border-radius: 10px; color: #a0b0c0; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 14px; }
+
+  /* Match screen */
+  .match-card { background: #16213e; border-radius: 20px; padding: 24px; margin-bottom: 16px; }
+  .match-card h3 { color: #a07de0; margin-bottom: 16px; font-size: 16px; }
+  .match-select-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .match-select-row > div { flex: 1; min-width: 140px; }
+  .match-select-row label { display: block; color: #a0b0c0; margin-bottom: 6px; font-size: 13px; }
+  .match-select-row select { width: 100%; padding: 10px; border-radius: 10px; border: none; background: #0f3460; color: #fff; font-size: 14px; outline: none; font-family: inherit; }
+  .btn-purple { width: 100%; padding: 13px; background: linear-gradient(135deg, #7c5cbf, #a07de0); border: none; border-radius: 12px; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 4px; }
+  .match-result { background: #0f1a2e; border-radius: 14px; padding: 20px; margin-top: 16px; border-right: 4px solid #a07de0; }
+  .match-result h4 { color: #a07de0; margin-bottom: 12px; font-size: 15px; }
+  .match-result p { color: #d0d0e8; line-height: 1.8; margin-bottom: 10px; }
+  .match-score { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .match-score-bar { flex: 1; height: 10px; background: #1a1a2e; border-radius: 99px; overflow: hidden; }
+  .match-score-fill { height: 100%; border-radius: 99px; transition: width .6s; }
+  .match-score-label { color: #e8c97a; font-weight: 800; font-size: 16px; min-width: 50px; }
+  .match-tasks { margin-top: 12px; }
+  .match-tasks h5 { color: #4caf7f; margin-bottom: 8px; font-size: 14px; }
+  .task-item { background: rgba(76,175,79,.1); border-right: 3px solid #4caf7f; padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; color: #c0e8c0; font-size: 13px; }
+  .match-warning { margin-top: 12px; }
+  .match-warning h5 { color: #e8a030; margin-bottom: 8px; font-size: 14px; }
+  .warn-item { background: rgba(232,160,48,.1); border-right: 3px solid #e8a030; padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; color: #e8d0a0; font-size: 13px; }
+</style>
 </head>
 <body>
-    <div id="root"></div>
-    <script type="text/babel">
-        const { useState } = React;
 
-        const DEPARTMENTS = ["צעצועים", "כלי בית", "טקסטיל", "ניקיון", "חד פעמי", "יצירה", "חשמל", "גינון", "קמפינג", "ריהוט", "משרד", "ביוטי", "ממתקים"];
-        const ROLES = ["קופאי/ת", "סדרן/ית", "מחסנאי/ת", "סגן/ית מנהל", "אחראי/ת משמרת", "נציג/ת שירות", "מלקט/ת", "בודק/ת חשבוניות", "אחראי/ת החזרות", "סדרן/ית עגלה", "מנהל/ת מחלקה", "אחראי/ת סטוק", "דיילת מכירות", "מוביל/ה", "עובד/ת כללי"];
+<div id="site-header">
+  <div class="h-max">MAX</div>
+  <div class="h-tag">כאן קונים בכיף</div>
+  <div class="h-sub">גיוס והתאמת עובדים</div>
+</div>
 
-        const App = () => {
-            const [view, setView] = useState('quiz');
-            const [candidates, setCandidates] = useState([]);
-            const [form, setForm] = useState({ fn: '', ln: '' });
+<div id="home-screen" class="screen active">
+  <div class="home-inner">
+    <p>בחר את הממשק המתאים</p>
+    <div class="home-btns">
+      <button class="home-btn home-btn-gold" onclick="showCandidate()">
+        <div class="btn-icon">📝</div>
+        <div class="btn-label">אני מועמד</div>
+        <div class="btn-sub">מילוי שאלון קליטה</div>
+      </button>
+      <button class="home-btn home-btn-dark" onclick="showManager()">
+        <div class="btn-icon">👔</div>
+        <div class="btn-label">אני מנהל</div>
+        <div class="btn-sub">צפייה וניהול מועמדים</div>
+      </button>
+    </div>
+  </div>
+</div>
 
-            // פונקציית כניסה למנהל - תיקון נקודתי
-            const enterAdmin = () => {
-                const pass = window.prompt("סיסמה:");
-                if (pass === "MAX2026") {
-                    setView('admin');
-                } else {
-                    alert("סיסמה שגויה");
-                }
-            };
+<div id="candidate-screen" class="screen">
+  <div class="cand-inner">
+    <div class="lang-bar" id="lang-bar"></div>
+    <div id="cand-content"></div>
+  </div>
+</div>
 
-            const saveAndDone = () => {
-                if(!form.fn) return alert("מלא שם");
-                // לוגיקה מהירה לשיבוץ מתוך המאגר
-                const mockAna = {
-                    role: ROLES[Math.floor(Math.random() * ROLES.length)],
-                    dept: DEPARTMENTS[Math.floor(Math.random() * DEPARTMENTS.length)]
-                };
-                setCandidates([{...form, ana: mockAna}, ...candidates]);
-                setView('done');
-            };
+<div id="manager-screen" class="screen">
+  <div class="mgr-inner" id="mgr-content"></div>
+</div>
 
-            if (view === 'admin') return (
-                <div className="container">
-                    <h2>ניהול מועמדים (צד מנהל)</h2>
-                    <button className="btn-main" onClick={() => setView('quiz')}>חזרה למזכירה</button>
-                    
-                    {candidates.map((c, i) => (
-                        <div key={i} className="admin-card">
-                            <h3 style={{margin:0}}>{c.fn} {c.ln}</h3>
-                            <span className="label">המלצת שיבוץ מילולית:</span>
-                            <span className="text">מועמד מתאים לתפקיד <strong>{c.ana.role}</strong> במחלקת <strong>{c.ana.dept}</strong>.</span>
-                        </div>
-                    ))}
+<script>
+var DB = {
+  load: function() { try { return JSON.parse(localStorage.getItem("max_v3") || "[]"); } catch(e) { return []; } },
+  save: function(l) { try { localStorage.setItem("max_v3", JSON.stringify(l)); } catch(e) {} },
+  add: function(item) { var l = DB.load(); item.id = Date.now(); item.at = new Date().toISOString(); l.push(item); DB.save(l); },
+  update: function(id, u) { var l = DB.load(); for (var i = 0; i < l.length; i++) { if (l[i].id === id) { for (var k in u) l[i][k] = u[k]; } } DB.save(l); },
+  remove: function(id) { var l = DB.load(); l = l.filter(function(c) { return c.id !== id; }); DB.save(l); }
+};
 
-                    <div className="system-check">
-                        <strong>בדיקת תקינות מערכת:</strong><br/>
-                        מחלקות טעונות: {DEPARTMENTS.length} (צעצועים...ממתקים) | 
-                        תפקידים טעונים: {ROLES.length} (קופאי...עובד כללי)
-                    </div>
-                </div>
-            );
+var DEPTS = ["פלסטיקה","חד פעמי","כלי עבודה","כלי בית","כלי זכוכית","טקסטיל","חיות + הלבשה","עונה","דקורציה","צעצועים","סלולר + ביוטי","כלי כתיבה","יצירה"];
+var ROLES = ["מנהל","סגן מנהל","מזכירה","אחראי משמרת","אחראי מחלקה","סדרן","קופאית ראשית","קופאית","מחסנאי","מנהל מחסן","בודק סחורה","עובד כללי","שומר כניסה","שומר יציאה"];
+var PASS = "max2026";
 
-            if (view === 'done') return (
-                <div className="container" style={{textAlign:'center'}}>
-                    <div className="glass-card">
-                        <h1 style={{color: 'var(--success)'}}>✓ נשלח</h1>
-                        <button className="btn-main" onClick={() => { setForm({fn:'', ln:''}); setView('quiz'); }}>מועמד חדש</button>
-                    </div>
-                </div>
-            );
+var LANGS = {
+  he: { dir:"rtl", label:"עברית", title:"ברוך הבא", sub:"אנא מלא את הפרטים הבאים", fname:"שם מלא", fdob:"תאריך לידה (DD.MM.YYYY)", next:"הבא ›", send:"שלח", thanks:"תודה! הפרטים הועברו למנהל.", e1:"יש למלא את כל השדות", e2:"יש לענות על כל השאלות", e3:"תאריך לידה לא תקין",
+    q:[
+      {q:"לקוח נכנס לחנות ונראה אבוד. מה תעשה?",a:["אגש מיד ואציע עזרה בחיוך","אחכה שיפנה אליי","אחפש עובד אחר שיעזור לו","אמשיך בעבודתי"]},
+      {q:"המדף שאתה אחראי עליו לא מסודר. מה קודם?",a:["אסדר אותו מיד לפני כל דבר","אסיים משימה נוכחית ואז אסדר","אדווח למנהל","אשאיר לתורן הבא"]},
+      {q:"מנהל ביקש ממך לעשות X, אך לדעתך Y עדיף. מה תעשה?",a:["אעשה X כפי שביקש","אציע Y ואסביר למנהל","אעשה Y בלי לשאול","אשאל עמית לדעתו"]},
+      {q:"יש פגישה דחופה ואתה באמצע עזרה ללקוח. מה עדיף?",a:["אסיים עם הלקוח ואז אגיע","אלך מיד לפגישה","אבקש עמית להחליף אותי","אדחה את הפגישה"]},
+      {q:"ראית שגיאת מחיר על מוצר. מה תעשה?",a:["אתקן מיד ואדווח למנהל","אדווח רק למנהל","אתקן בלי לדווח","אשאיר – זה לא תפקידי"]},
+      {q:"לקוח כועס ומדבר בקול. מה תעשה?",a:["אקשיב בשקט ואנסה לפתור","אקרא מנהל מיד","אדבר בחזרה בקול","אתנצל ואסגור"]},
+      {q:"הגעת לעבודה ורואה שעמית לא הגיע. מה תעשה?",a:["אדווח למנהל ואציע לכסות","אמשיך בתפקידי בלבד","אשאל עמיתים מה קרה","אחכה להוראות"]},
+      {q:"המלאי ריק ולקוח מבקש מוצר. מה תגיד?",a:["אבדוק אם יש בחדר מלאי ואציע חלופה","אגיד שנגמר ואסיים","אבטיח שיגיע מחר","אפנה אותו לחנות אחרת"]},
+      {q:"קיבלת ביקורת מהמנהל בפומבי. מה תרגיש ותעשה?",a:["אקבל, אלמד ואשתפר","ארגיש פגוע אך לא אגיב","אסביר את עצמי בציבור","אדבר עם המנהל בצד לאחר מכן"]},
+      {q:"שעת השיא וכולם עסוקים. לקוח מבקש עזרה דחופה.",a:["אגש מיד ואטפל","אגיד לו לחכות","אמצא עמית פנוי","אסמן ואחזור בהקדם"]},
+      {q:"יש לך רעיון לשיפור שיטת עבודה. מה תעשה?",a:["אציג למנהל בפגישה הבאה","איישם בעצמי בלי לשאול","אשאר שקט – לא תפקידי","אשתף עמית בלבד"]},
+      {q:"נגמרה המשמרת אך יש עבודה שלא הסתיימה.",a:["אסיים לפני שאצא","אעביר לתורן הבא בעדכון","אצא – המשמרת הסתיימה","אשאל מנהל"]},
+      {q:"לקוח שאל שאלה שאינך יודע עליה. מה תגיד?",a:["אודה שאיני יודע ואמצא את התשובה","אנחש ואגיד","אפנה לעמית","אגיד שאין לי זמן"]},
+      {q:"שמת לב שעמית לא עושה את עבודתו. מה תעשה?",a:["אדבר איתו בעדינות","אדווח למנהל מיד","אתעלם – לא עסקי","אכסה אותו בשקט"]},
+      {q:"קיבלת שתי משימות בו-זמנית. מה תעשה?",a:["אסדר לפי דחיפות ואעדכן","אתחיל עם האחרונה","אבקש עזרה מיד","אעשה שתיהן במקביל"]}
+    ]
+  },
+  en: { dir:"ltr", label:"English", title:"Welcome", sub:"Please fill in your details", fname:"Full Name", fdob:"Date of Birth (DD.MM.YYYY)", next:"Next ›", send:"Submit", thanks:"Thank you! Details forwarded to manager.", e1:"Please fill all fields", e2:"Please answer all questions", e3:"Invalid date of birth",
+    q:[
+      {q:"A customer enters and looks lost. What do you do?",a:["Approach immediately with a smile","Wait for them to come to me","Find another employee","Continue my task"]},
+      {q:"Your shelf is messy. What first?",a:["Tidy it immediately","Finish current task then tidy","Report to manager","Leave for next shift"]},
+      {q:"Manager asked X, but you think Y is better.",a:["Do X as requested","Suggest Y and explain","Do Y without asking","Ask a colleague"]},
+      {q:"Urgent meeting but helping a customer.",a:["Finish with customer first","Go to meeting immediately","Ask colleague to cover","Postpone the meeting"]},
+      {q:"You notice a price error.",a:["Fix and report to manager","Report only","Fix without reporting","Leave it"]},
+      {q:"Angry customer speaking loudly.",a:["Listen calmly and resolve","Call manager immediately","Speak back loudly","Apologize and end"]},
+      {q:"Colleague didn't show up.",a:["Report to manager and offer to cover","Continue own tasks","Ask colleagues","Wait for instructions"]},
+      {q:"Stock empty, customer asks for product.",a:["Check stockroom and offer alternative","Say it's out","Promise it tomorrow","Redirect elsewhere"]},
+      {q:"Manager criticized you publicly.",a:["Accept, learn and improve","Feel hurt but stay quiet","Explain yourself publicly","Talk to manager privately later"]},
+      {q:"Peak hour, customer needs urgent help.",a:["Approach and handle immediately","Tell them to wait","Find a free colleague","Acknowledge and return quickly"]},
+      {q:"You have an idea to improve work methods.",a:["Present to manager","Implement yourself","Stay quiet","Share only with colleague"]},
+      {q:"Shift ended but work isn't finished.",a:["Finish before leaving","Hand off with update","Leave","Ask manager"]},
+      {q:"Customer asks something you don't know.",a:["Admit and find the answer","Guess and answer","Refer to colleague","Say no time"]},
+      {q:"Colleague not doing their work.",a:["Talk to them gently","Report to manager","Ignore","Cover for them quietly"]},
+      {q:"Two tasks at once.",a:["Prioritize by urgency","Start with the latest","Ask for help","Do both in parallel"]}
+    ]
+  },
+  ru: { dir:"ltr", label:"Русский", title:"Добро пожаловать", sub:"Заполните данные", fname:"Полное имя", fdob:"Дата рождения (ДД.ММ.ГГГГ)", next:"Далее ›", send:"Отправить", thanks:"Спасибо! Данные переданы менеджеру.", e1:"Заполните все поля", e2:"Ответьте на все вопросы", e3:"Неверная дата",
+    q:[
+      {q:"Покупатель выглядит растерянно.",a:["Подойду и предложу помощь","Подожду","Найду другого","Продолжу работу"]},
+      {q:"Полка не в порядке.",a:["Уберу немедленно","Закончу задачу потом","Доложу","Оставлю смене"]},
+      {q:"Менеджер просит X, вы считаете Y лучше.",a:["Сделаю X","Предложу Y","Сделаю Y","Спрошу коллегу"]},
+      {q:"Срочное совещание, помогаете клиенту.",a:["Закончу с клиентом","Уйду","Попрошу коллегу","Перенесу"]},
+      {q:"Ошибка в цене.",a:["Исправлю и сообщу","Только сообщу","Исправлю","Оставлю"]},
+      {q:"Злой клиент говорит громко.",a:["Выслушаю и решу","Позову менеджера","Отвечу","Извинюсь"]},
+      {q:"Коллега не явился.",a:["Сообщу и предложу прикрыть","Продолжу своё","Спрошу коллег","Подожду"]},
+      {q:"Товар закончился.",a:["Проверю и предложу альтернативу","Скажу что нет","Обещу завтра","Направлю"]},
+      {q:"Менеджер покритиковал публично.",a:["Приму и улучшусь","Обижусь","Объяснюсь","Поговорю наедине"]},
+      {q:"Час пик, клиент нуждается.",a:["Подойду немедленно","Попрошу подождать","Найду коллегу","Отмечу и вернусь"]},
+      {q:"Есть идея улучшения.",a:["Представлю менеджеру","Внедрю сам","Промолчу","Поделюсь"]},
+      {q:"Смена закончилась, работа нет.",a:["Закончу","Передам","Уйду","Спрошу"]},
+      {q:"Клиент задал вопрос.",a:["Признаюсь и найду","Угадаю","Направлю","Скажу нет времени"]},
+      {q:"Коллега не работает.",a:["Поговорю мягко","Сообщу","Проигнорирую","Прикрою"]},
+      {q:"Две задачи одновременно.",a:["Расставлю приоритеты","Начну с последней","Попрошу помощи","Буду делать обе"]}
+    ]
+  },
+  ar: { dir:"rtl", label:"العربية", title:"أهلاً وسهلاً", sub:"يرجى تعبئة البيانات", fname:"الاسم الكامل", fdob:"تاريخ الميلاد (DD.MM.YYYY)", next:"التالي ›", send:"إرسال", thanks:"شكراً! تم إرسال بياناتك للمدير.", e1:"يرجى تعبئة جميع الحقول", e2:"يرجى الإجابة على جميع الأسئلة", e3:"تاريخ ميلاد غير صالح",
+    q:[
+      {q:"دخل عميل ويبدو تائهاً.",a:["سأتوجه فوراً وأعرض المساعدة","سأنتظر","سأجد موظفاً آخر","سأكمل عملي"]},
+      {q:"الرف غير مرتب.",a:["سأرتبه فوراً","سأنهي المهمة أولاً","سأبلغ","سأتركه"]},
+      {q:"المدير طلب X لكنك تعتقد Y أفضل.",a:["سأنفذ X","سأقترح Y","سأنفذ Y","سأستشير"]},
+      {q:"اجتماع عاجل وأنت تساعد عميلاً.",a:["سأنهي مع العميل","سأذهب فوراً","سأطلب من زميل","سأؤجل"]},
+      {q:"لاحظت خطأ في السعر.",a:["سأصحح وأبلغ","سأبلغ فقط","سأصحح","سأتركه"]},
+      {q:"عميل غاضب.",a:["سأستمع وأحل","سأستدعي المدير","سأرد","سأعتذر وأنهي"]},
+      {q:"زميل غائب.",a:["سأبلغ وأعرض","سأكمل مهامي","سأسأل","سأنتظر"]},
+      {q:"المخزون فارغ.",a:["سأتحقق وأقترح","سأقول غير متوفر","سأعده غداً","سأوجهه"]},
+      {q:"المدير انتقدك علناً.",a:["سأقبل وأتحسن","لن أرد","سأدافع عن نفسي","سأتحدث خاصة"]},
+      {q:"ساعة الذروة وعميل يحتاج مساعدة.",a:["سأتوجه فوراً","سأطلب الانتظار","سأجد زميلاً","سأشير وأعود"]},
+      {q:"لديك فكرة لتحسين.",a:["سأعرضها","سأطبقها","سأصمت","سأشارك"]},
+      {q:"انتهت الوردية.",a:["سأكمل","سأسلم مع تحديث","سأغادر","سأسأل"]},
+      {q:"عميل سألك شيئاً لا تعرفه.",a:["سأعترف وأجد","سأخمن","سأحوله","لا وقت"]},
+      {q:"زميل لا يعمل.",a:["سأتحدث بلطف","سأبلغ","سأتجاهل","سأغطيه"]},
+      {q:"مهمتان في وقت واحد.",a:["سأرتب","سأبدأ بالأخيرة","سأطلب مساعدة","سأعمل على كلتيهما"]}
+    ]
+  },
+  th: { dir:"ltr", label:"ภาษาไทย", title:"ยินดีต้อนรับ", sub:"กรุณากรอกข้อมูล", fname:"ชื่อ-นามสกุล", fdob:"วันเกิด (DD.MM.YYYY)", next:"ถัดไป ›", send:"ส่ง", thanks:"ขอบคุณ! ข้อมูลถูกส่งถึงผู้จัดการแล้ว", e1:"กรุณากรอกข้อมูลให้ครบ", e2:"กรุณาตอบทุกคำถาม", e3:"วันเกิดไม่ถูกต้อง",
+    q:[
+      {q:"ลูกค้าดูหลงทาง",a:["เข้าหาทันที","รอให้มาหา","หาพนักงานอื่น","ทำงานต่อ"]},
+      {q:"ชั้นวางไม่เป็นระเบียบ",a:["จัดทันที","ทำงานให้เสร็จก่อน","รายงาน","ทิ้งไว้"]},
+      {q:"ผู้จัดการขอ X แต่คิดว่า Y ดีกว่า",a:["ทำ X","แนะนำ Y","ทำ Y","ถามเพื่อน"]},
+      {q:"ประชุมด่วนแต่กำลังช่วยลูกค้า",a:["เสร็จกับลูกค้าก่อน","ไปประชุมทันที","ขอเพื่อนแทน","เลื่อน"]},
+      {q:"เห็นราคาผิด",a:["แก้และรายงาน","รายงานเท่านั้น","แก้","ทิ้งไว้"]},
+      {q:"ลูกค้าโกรธ",a:["ฟังและแก้ปัญหา","เรียกผู้จัดการ","ตอบกลับ","ขอโทษและจบ"]},
+      {q:"เพื่อนไม่มา",a:["รายงานและเสนอช่วย","ทำงานตัวเอง","ถามเพื่อน","รอคำสั่ง"]},
+      {q:"สินค้าหมด",a:["ตรวจสต็อกและเสนอทางเลือก","บอกว่าหมด","สัญญา","แนะนำร้านอื่น"]},
+      {q:"ผู้จัดการวิจารณ์",a:["รับและพัฒนา","รู้สึกเจ็บแต่ไม่พูด","อธิบาย","คุยส่วนตัว"]},
+      {q:"ชั่วโมงเร่งด่วน",a:["เข้าหาทันที","บอกให้รอ","หาเพื่อน","รับทราบและกลับ"]},
+      {q:"มีไอเดียปรับปรุง",a:["นำเสนอ","ทำเอง","เงียบ","แชร์"]},
+      {q:"กะจบแต่งานยังไม่เสร็จ",a:["ทำให้เสร็จ","ส่งต่อ","กลับบ้าน","ถาม"]},
+      {q:"ลูกค้าถามสิ่งที่ไม่รู้",a:["ยอมรับและหา","เดา","แนะนำ","ไม่มีเวลา"]},
+      {q:"เพื่อนไม่ทำงาน",a:["พูดคุย","รายงาน","เพิกเฉย","ช่วยปิดบัง"]},
+      {q:"สองงานพร้อมกัน",a:["จัดลำดับ","เริ่มล่าสุด","ขอช่วย","ทำทั้งสอง"]}
+    ]
+  }
+};
 
-            return (
-                <div className="container">
-                    <div className="glass-card">
-                        <h1 style={{textAlign:'center', color:'var(--gold)'}}>MAX STOCK</h1>
-                        <input placeholder="שם פרטי" value={form.fn} onChange={e => setForm({...form, fn: e.target.value})} style={{width:'100%', padding:'10px', marginBottom:'10px'}} />
-                        <input placeholder="שם משפחה" value={form.ln} onChange={e => setForm({...form, ln: e.target.value})} style={{width:'100%', padding:'10px', marginBottom:'10px'}} />
-                        <p style={{textAlign:'center'}}>שאלון מועמד (15 שאלות)</p>
-                        <button className="btn-main" onClick={saveAndDone}>שלח שאלון</button>
-                        <div className="admin-trigger" onClick={enterAdmin}>כניסת מנהל (ADMIN)</div>
-                    </div>
-                </div>
-            );
-        };
+var state = {
+  lang: "he", step: "info", name: "", dob: "",
+  answers: new Array(15).fill(null), qi: 0,
+  mgrAuth: false, mgrView: "list", selId: null,
+  dept: "", role: "", showConfirmDel: false,
+  mgrInteract: "", teamInteract: ""
+};
 
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-    </script>
+// ── ANALYSIS ENGINE — נומרולוגיה + ניתוח שם ──────────────────────────────
+
+// חישוב מספר נומרולוגי (מצמצם לספרה בודדת 1-9)
+function calcNum(n) {
+  while (n > 9) { var s=0; var str=String(n); for(var i=0;i<str.length;i++) s+=parseInt(str[i]); n=s; }
+  return n;
+}
+
+// מספר גורל מתאריך לידה
+function destinyNum(dob) {
+  var parts = dob.split(".");
+  var sum = parseInt(parts[0]) + parseInt(parts[1]) + parseInt(parts[2]);
+  return calcNum(sum);
+}
+
+// ערך נומרולוגי משם (א=1, ב=2 ... י=10→1 וכו׳)
+function nameNum(name) {
+  var heb = "אבגדהוזחטיכלמנסעפצקרשת";
+  var sum = 0;
+  for (var i = 0; i < name.length; i++) {
+    var idx = heb.indexOf(name[i]);
+    if (idx >= 0) sum += (idx % 9) + 1;
+  }
+  return sum === 0 ? 5 : calcNum(sum);
+}
+
+// פרופיל לפי מספר גורל
+var NUM_PROFILE = {
+  1: { title:"1 — יוזם ומוביל", trait:"אדם עצמאי בעל כושר הנהגה. מתאים לתפקידים הדורשים החלטות מהירות ואחריות.", depts:["עונה","פלסטיקה","יצירה"], roles:["אחראי מחלקה","אחראי משמרת","מנהל"], mgr:"יפעל טוב כשניתנת לו עצמאות מלאה. הנחיות צריכות להיות ברורות אך ללא מעקב צמוד. כדאי להציב לו יעדים שבועיים ולאפשר לו לנהל את הדרך בעצמו." },
+  2: { title:"2 — מגשר ושיתופי", trait:"אדם רגיש ומקשיב. מצטיין בעבודת צוות ובהרמוניה בין-אישית.", depts:["סלולר + ביוטי","כלי בית","טקסטיל"], roles:["קופאית","עובד כללי","סדרן"], mgr:"זקוק לאווירה תומכת ולפידבק חיובי. יגיב טוב לתקשורת ישירה ועדינה. יש להימנע מביקורת חריפה בפומבי." },
+  3: { title:"3 — יצירתי ותקשורתי", trait:"בעל כישרון ביטוי ויצירה. אוהב אנשים ומרים את מצב הרוח של הצוות.", depts:["יצירה","צעצועים","כלי כתיבה"], roles:["קופאית","עובד כללי","קופאית ראשית"], mgr:"מתפקד טוב בסביבה דינמית עם גיוון. אין להציב אותו בתפקידים מונוטוניים לאורך זמן. יגיב מצוין להוקרה ולהכרה מילולית." },
+  4: { title:"4 — בונה ושיטתי", trait:"אדם יסודי, מסודר ואמין. מצטיין בביצוע מדויק של משימות.", depts:["כלי עבודה","כלי בית","כלי זכוכית"], roles:["מחסנאי","בודק סחורה","סדרן"], mgr:"מתפקד הכי טוב כשיש לו שגרה ברורה ומסגרת קבועה. יש לתת לו הנחיות מדויקות בתחילת כל משמרת. אינו אוהב שינויים פתאומיים." },
+  5: { title:"5 — הרפתקן וגמיש", trait:"אדם אנרגטי אוהב שינוי ואינו נשחק בקלות. מתאים לסביבות עם קצב גבוה.", depts:["עונה","חד פעמי","דקורציה"], roles:["עובד כללי","שומר כניסה","קופאית"], mgr:"זקוק לגיוון במשימות. עלול להשתעמם בתפקידים חוזרניים. מומלץ לסבב אותו בין מחלקות לפי הצורך. יגיב טוב לאתגרים חדשים." },
+  6: { title:"6 — מטפח ואחראי", trait:"אדם נאמן ואכפתי. שם לב לפרטים ומרגיש אחראי לסביבתו.", depts:["חיות + הלבשה","טקסטיל","כלי בית"], roles:["קופאית ראשית","אחראי מחלקה","סדרן"], mgr:"יגיב מצוין כשמרגישים שסומכים עליו. יש לשלב אותו בקבלת החלטות שקשורות למחלקתו. לא מתאים לניהול תחת לחץ מתמיד." },
+  7: { title:"7 — מנתח ומעמיק", trait:"אדם חושב וסקרן. מצטיין בהבנת תהליכים ובאיתור בעיות.", depts:["כלי כתיבה","יצירה","מחשוב - אם קיים"], roles:["בודק סחורה","מחסנאי","מנהל מחסן"], mgr:"עובד הכי טוב בשקט ובלי הפרעות. אינו זקוק לניהול צמוד אך כן לבירור ציפיות בהתחלה. יש לאפשר לו זמן מחשבה לפני ביצוע." },
+  8: { title:"8 — יעיל ומוכוון תוצאה", trait:"אדם שאפתן ומעשי. מכוון להשגת יעדים ויודע לנהל עומסים.", depts:["פלסטיקה","עונה","סלולר + ביוטי"], roles:["אחראי משמרת","מנהל","סגן מנהל"], mgr:"מתפקד מצוין תחת לחץ. מומלץ לתת לו יעדים מדידים. ישגשג כשיש לו מרחב לנהל את צוותו ולקבל החלטות." },
+  9: { title:"9 — אנושי ומסתגל", trait:"אדם שיודע להתחבר לכל אחד. בעל אמפתיה גבוהה ותחושת שייכות.", depts:["חיות + הלבשה","דקורציה","צעצועים"], roles:["קופאית","עובד כללי","שומר יציאה"], mgr:"מגיב טוב לתחושת ערך ושייכות לצוות. חשוב לשלב אותו בפעילויות קבוצתיות. יש להימנע מניהול קר ומרוחק." }
+};
+
+// ניתוח התאמה לתפקיד/מחלקה לפי שם + תאריך
+function buildReport(name, dob, answers) {
+  var dn = destinyNum(dob);
+  var nn = nameNum(name);
+  var combined = calcNum(dn + nn);
+  var prof = NUM_PROFILE[combined] || NUM_PROFILE[dn];
+  var age = new Date().getFullYear() - parseInt(dob.split(".")[2]);
+
+  // ניתוח תשובות — רמת יוזמה
+  var initiative = 0, service = 0, teamwork = 0, followInstr = 0;
+  for (var i = 0; i < answers.length; i++) {
+    if (answers[i] === 0) initiative++;
+    if (answers[i] >= 2) followInstr++;
+  }
+  if (answers[0]===0) service++; if (answers[5]===0) service++; if (answers[9]===0) service++;
+  if (answers[6]===0) teamwork++; if (answers[13]===0) teamwork++;
+
+  // סגנון עבודה (ללא "ראש קטן")
+  var style = initiative >= 9 ? "יוזם עצמאי" : initiative >= 5 ? "מאוזן" : "מבצע מסור";
+
+  // פורטרט
+  var portrait = "לפניך " + name + ", בן/בת " + age + ". " +
+    "מספר הגורל הנומרולוגי: " + dn + " | ערך שם: " + nn + " | מספר שילוב: " + combined + ". " +
+    prof.trait;
+
+  // אינטראקציה מנהל–עובד — מלל בלבד
+  var mgrText = prof.mgr;
+
+  // המלצת שיבוץ
+  var deptRec = prof.depts.join(", ");
+  var roleRec = prof.roles.join(", ");
+  var placement = "על פי הניתוח הנומרולוגי ופרופיל השם, המחלקות המתאימות הן: " + deptRec +
+    ". התפקידים המומלצים: " + roleRec + ".";
+
+  // ניתוח מעמיק של התאמה לפי ענפים
+  var serviceAdapt = service >= 2 ? "מצטיין בשירות לקוחות ישיר." : "מתאים יותר לתפקידי עורף ולוגיסטיקה.";
+  var teamAdapt = teamwork >= 2 ? "עובד צוות טוב — כדאי לשבצו עם אנשים משלימים." : "עדיף לעבוד באופן עצמאי עם אחריות ברורה.";
+  placement += " " + serviceAdapt + " " + teamAdapt;
+
+  return {
+    portrait: portrait,
+    profTitle: prof.title,
+    interaction: mgrText,
+    placement: placement,
+    style: style,
+    dn: dn, nn: nn, combined: combined,
+    age: age
+  };
+}
+
+// ── MATCH ENGINE ──────────────────────────────────────────────────────────
+function calcMatch(c1, c2) {
+  var dn1 = c1.report.dn; var dn2 = c2.report.dn;
+  var nn1 = c1.report.nn; var nn2 = c2.report.nn;
+  var st1 = c1.report.style; var st2 = c2.report.style;
+
+  // תאימות מספרי גורל
+  var dnCompat = [
+    [1,1,"שניהם יוזמים — יתחרו על מי מוביל. כדאי לחלק אחריות ברורה בין מחלקות.","עצמאיים וממוקדים — כל אחד ב'ממלכה' שלו"],
+    [1,2,"שילוב מצוין — אחד מוביל, השני מגשר ומרגיע. משלימים זה את זה.","ניהול לקוחות + תמיכה עורפית"],
+    [1,5,"שניהם אנרגטיים — כימיה טובה בשעות עומס. עלולים להתפזר יחד.","מחלקות דינמיות בקצב גבוה"],
+    [2,3,"שיתוף פעולה נעים ופורה. שניהם אנשיים ותקשורתיים.","שירות לקוחות, קופות"],
+    [3,6,"שילוב אנושי וחם. יצירו אווירה חיובית בצוות.","כל מחלקה פרונטלית"],
+    [4,8,"שניהם מעשיים ומוכווני תוצאה — שילוב יעיל מאוד.","לוגיסטיקה, מלאי, קבלת סחורה"],
+    [4,4,"שניהם שיטתיים — עבודה מסודרת ויעילה אך בלי הפתעות.","בדיקת סחורה, מחסן"],
+    [7,9,"שילוב עמוק ואמיתי — אחד מנתח, השני מחבר אנשים.","מחלקות מיוחדות"],
+  ];
+
+  // חיפוש תאימות ספציפית
+  var matchText = "", taskText = "";
+  var found = false;
+  for (var i=0; i<dnCompat.length; i++) {
+    var row = dnCompat[i];
+    if ((dn1===row[0]&&dn2===row[1])||(dn1===row[1]&&dn2===row[0])) {
+      matchText = row[2]; taskText = row[3]; found = true; break;
+    }
+  }
+
+  // תאימות כללית לפי הפרש מספרים
+  var diff = Math.abs(dn1 - dn2);
+  if (!found) {
+    if (diff === 0) { matchText = "אותו מספר גורל — אישיות דומה מאוד. טובים כשאחד מנחה את השני, פחות טובים כשמתחרים."; taskText = "משימות זהות בסיבוב"; }
+    else if (diff <= 2) { matchText = "מספרי גורל קרובים — בסיס ערכי משותף. שיתוף פעולה טוב עם תיאום מינימלי."; taskText = "רוב המשימות הצוותיות"; }
+    else if (diff <= 4) { matchText = "הבדל מתון — כל אחד מביא זווית שונה. יעבדו טוב אם יש הגדרת תפקידים ברורה."; taskText = "משימות עם חלוקת עבודה"; }
+    else { matchText = "הבדל גדול בין מספרי הגורל — שני טיפוסים שונים מאוד. יכולים להשלים אם הצוות מנוהל נכון."; taskText = "עדיף לתת להם מחלקות שונות"; }
+  }
+
+  // ניתוח ערכי שם
+  var nameDiff = Math.abs(nn1 - nn2);
+  var nameText = nameDiff <= 1 ? "ערכי השם שלהם קרובים מאוד — תחושת 'גל דומה' ביניהם." :
+    nameDiff <= 3 ? "ערכי השם משלימים — תקשורת טבעית ביניהם." :
+    "ערכי השם שונים — ייקח זמן לבנות שפה משותפת, אבל אפשרי.";
+
+  // אזהרות
+  var warnings = [];
+  if (st1 === "יוזם עצמאי" && st2 === "יוזם עצמאי") warnings.push("שניהם יוזמים — חשוב להגדיר מי אחראי על מה כדי למנוע חיכוך.");
+  if (diff >= 5) warnings.push("הבדל אופי משמעותי — מומלץ להכיר אחד את השני לפני משמרת משותפת ממושכת.");
+
+  return {
+    matchText: matchText,
+    taskText: taskText,
+    nameText: nameText,
+    warnings: warnings,
+    dn1: dn1, dn2: dn2, nn1: nn1, nn2: nn2
+  };
+}
+
+// ── SCREENS ───────────────────────────────────────────────────────────────
+function show(id) {
+  ["home-screen","candidate-screen","manager-screen"].forEach(function(s) {
+    document.getElementById(s).classList.remove("active");
+  });
+  document.getElementById(id).classList.add("active");
+}
+function showCandidate() { show("candidate-screen"); renderCandidate(); }
+function showManager() { show("manager-screen"); renderManager(); }
+
+// ── CANDIDATE ────────────────────────────────────────────────────────────
+function renderCandidate() {
+  var L = LANGS[state.lang];
+  document.getElementById("candidate-screen").setAttribute("dir", L.dir);
+  var lb = document.getElementById("lang-bar");
+  lb.innerHTML = "";
+  ["he","en","ru","ar","th"].forEach(function(k) {
+    var btn = document.createElement("button");
+    btn.className = "lang-btn" + (state.lang === k ? " active" : "");
+    btn.textContent = LANGS[k].label;
+    btn.onclick = function() { state.lang = k; renderCandidate(); };
+    lb.appendChild(btn);
+  });
+  var L = LANGS[state.lang];
+  var el = document.getElementById("cand-content");
+
+  if (state.step === "done") {
+    el.innerHTML = '<div class="done-wrap"><div><div class="done-icon">✅</div><h2>' + L.thanks + '</h2></div></div>';
+    return;
+  }
+  if (state.step === "info") {
+    el.innerHTML = '<div class="card"><h2 style="color:#4a3520;margin-bottom:20px;font-size:18px">' + L.title + '</h2>' +
+      '<label>' + L.fname + '</label><input type="text" id="inp-name" value="' + state.name + '">' +
+      '<label>' + L.fdob + '</label><input type="text" id="inp-dob" value="' + state.dob + '" placeholder="DD.MM.YYYY">' +
+      '<div id="cand-err" class="err" style="display:none"></div>' +
+      '<button class="btn-gold" onclick="candNext()">' + L.next + '</button></div>';
+    return;
+  }
+  if (state.step === "q") {
+    var qi = state.qi; var pct = Math.round(((qi+1)/15)*100); var qd = L.q[qi];
+    var ah = "";
+    for (var i = 0; i < qd.a.length; i++) {
+      ah += '<button class="ans-btn' + (state.answers[qi]===i?" selected":"") + '" onclick="pickAns(' + i + ')">' + qd.a[i] + '</button>';
+    }
+    el.innerHTML = '<div class="card">' +
+      '<div class="prog-bar-wrap"><div class="prog-nums"><span>' + (qi+1) + ' / 15</span><span>' + pct + '%</span></div>' +
+      '<div class="prog-track"><div class="prog-fill" style="width:' + pct + '%"></div></div></div>' +
+      '<p class="q-text">' + qd.q + '</p><div class="ans-list">' + ah + '</div>' +
+      (qi===14 ? '<div id="cand-err" class="err" style="display:none"></div><button class="btn-gold" onclick="candSubmit()">' + L.send + '</button>' : '') +
+      '</div>';
+  }
+}
+function candNext() {
+  var name = document.getElementById("inp-name").value.trim();
+  var dob = document.getElementById("inp-dob").value.trim();
+  var L = LANGS[state.lang]; var e = document.getElementById("cand-err");
+  if (!name||!dob) { e.textContent=L.e1; e.style.display="block"; return; }
+  if (!/^\d{2}\.\d{2}\.\d{4}$/.test(dob)) { e.textContent=L.e3; e.style.display="block"; return; }
+  var p=dob.split("."); if(parseInt(p[0])<1||parseInt(p[0])>31||parseInt(p[1])<1||parseInt(p[1])>12||parseInt(p[2])<1950||parseInt(p[2])>2010){e.textContent=L.e3;e.style.display="block";return;}
+  state.name=name; state.dob=dob; state.step="q"; state.qi=0; renderCandidate();
+}
+function pickAns(i) {
+  state.answers[state.qi]=i;
+  if (state.qi<14) { state.qi++; renderCandidate(); } else { renderCandidate(); }
+}
+function candSubmit() {
+  for(var i=0;i<state.answers.length;i++){if(state.answers[i]===null){var e=document.getElementById("cand-err");e.textContent=LANGS[state.lang].e2;e.style.display="block";return;}}
+  DB.add({name:state.name,dob:state.dob,lang:state.lang,answers:state.answers,report:buildReport(state.name,state.dob,state.answers)});
+  state.step="done"; renderCandidate();
+}
+
+// ── MANAGER ───────────────────────────────────────────────────────────────
+function renderManager() {
+  var el = document.getElementById("mgr-content");
+  if (!state.mgrAuth) {
+    el.innerHTML = '<div class="login-wrap"><div class="login-box"><div style="font-size:40px;margin-bottom:12px">🔐</div><h2>כניסת מנהל</h2>' +
+      '<input type="password" id="mgr-pass" placeholder="הזן סיסמה" dir="ltr" onkeydown="if(event.key===\'Enter\')mgrLogin()">' +
+      '<div id="mgr-pass-err" class="err" style="display:none"></div>' +
+      '<button class="btn-gold" onclick="mgrLogin()">כניסה</button>' +
+      '<p style="color:#4a4a6a;margin-top:12px;font-size:12px">סיסמה: max2026</p>' +
+      '</div></div>';
+    return;
+  }
+  if (state.mgrView==="detail") { renderDetail(); return; }
+  if (state.mgrView==="match") { renderMatch(); return; }
+  renderList();
+}
+function mgrLogin() {
+  var p=document.getElementById("mgr-pass").value;
+  if(p===PASS){state.mgrAuth=true;renderManager();}
+  else{var e=document.getElementById("mgr-pass-err");e.textContent="סיסמה שגויה";e.style.display="block";}
+}
+
+function renderList() {
+  var candidates=DB.load();
+  var pending=candidates.filter(function(c){return !c.assigned;});
+  var assigned=candidates.filter(function(c){return c.assigned;});
+  var el=document.getElementById("mgr-content");
+  var html='<div dir="rtl">';
+
+  // Stats
+  html+='<div class="stats">';
+  html+='<div class="stat-card" style="border-top:3px solid #c9a84c"><div class="stat-val" style="color:#c9a84c">'+pending.length+'</div><div class="stat-lbl">ממתינים</div></div>';
+  html+='<div class="stat-card" style="border-top:3px solid #4caf7f"><div class="stat-val" style="color:#4caf7f">'+assigned.length+'</div><div class="stat-lbl">משובצים</div></div>';
+  html+='<div class="stat-card" style="border-top:3px solid #2e86ab"><div class="stat-val" style="color:#2e86ab">'+candidates.length+'</div><div class="stat-lbl">סה״כ</div></div>';
+  html+='</div>';
+
+  // Action buttons
+  html+='<div class="mgr-actions">';
+  html+='<button class="mgr-action-btn btn-match" onclick="showMatch()">🔗 התאמת עובדים</button>';
+  html+='</div>';
+
+  // Pending
+  if(pending.length>0){
+    html+='<div class="section-title title-pending">⏳ ממתינים לעיון</div>';
+    for(var i=0;i<pending.length;i++){
+      var c=pending[i]; var ll=LANGS[c.lang]?LANGS[c.lang].label:c.lang;
+      html+='<div class="cand-row" onclick="openDetail('+c.id+')"><div class="cand-avatar">👤</div>' +
+        '<div class="cand-info"><p>'+c.name+'</p><small>'+c.dob+' · '+ll+'</small></div>' +
+        '<span class="tag-gold">'+(c.report?c.report.style:'')+'</span></div>';
+    }
+  }
+
+  // Assigned
+  if(assigned.length>0){
+    html+='<div class="section-title title-assigned">✅ טבלת שיבוץ צוות</div>';
+    html+='<div class="table-wrap"><div style="overflow-x:auto"><table class="tbl"><thead><tr>';
+    ["שם","מחלקה","תפקיד","סגנון"].forEach(function(h){html+='<th>'+h+'</th>';});
+    html+='</tr></thead><tbody>';
+    for(var j=0;j<assigned.length;j++){
+      var c=assigned[j];
+      html+='<tr onclick="openDetail('+c.id+')"><td>'+c.name+'</td><td class="muted">'+(c.dept||'')+'</td><td class="muted">'+(c.role||'')+'</td>' +
+        '<td><span class="tag-gold">'+(c.report?c.report.style:'')+'</span></td></tr>';
+    }
+    html+='</tbody></table></div></div>';
+  }
+
+  if(candidates.length===0) html+='<div class="empty-state"><div class="empty-icon">📋</div><p>עדיין אין מועמדים שמילאו את השאלון</p></div>';
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function openDetail(id) {
+  state.selId=id; state.mgrView="detail";
+  var c=DB.load().find(function(x){return x.id===id;});
+  state.dept=c&&c.dept?c.dept:"";
+  state.role=c&&c.role?c.role:"";
+  state.mgrInteract=c&&c.mgrInteract?c.mgrInteract:"";
+  state.teamInteract=c&&c.teamInteract?c.teamInteract:"";
+  state.showConfirmDel=false;
+  renderDetail();
+}
+
+function renderDetail() {
+  var c=DB.load().find(function(x){return x.id===state.selId;});
+  if(!c){state.mgrView="list";renderList();return;}
+  var r=c.report; var ll=LANGS[c.lang]?LANGS[c.lang].label:c.lang;
+  var dOpts='<option value="">בחר מחלקה...</option>';
+  DEPTS.forEach(function(d){dOpts+='<option value="'+d+'"'+(state.dept===d?" selected":"")+'>'+d+'</option>';});
+  var rOpts='<option value="">בחר תפקיד...</option>';
+  ROLES.forEach(function(r){rOpts+='<option value="'+r+'"'+(state.role===r?" selected":"")+'>'+r+'</option>';});
+
+  // בניית תפריט עובדים לבדיקת התאמה
+  var allC=DB.load();
+  var emptyOpts='<select id="detail-match-c2" style="width:100%;padding:10px;border-radius:10px;border:none;background:#0f3460;color:#fff;font-size:14px;outline:none;font-family:inherit"><option value="">בחר עובד...</option>';
+  for(var ei=0;ei<allC.length;ei++){
+    if(allC[ei].id!==c.id) emptyOpts+='<option value="'+allC[ei].id+'">'+allC[ei].name+' ('+allC[ei].dob+')</option>';
+  }
+  emptyOpts+='</select>';
+
+  var confirmHtml = state.showConfirmDel ?
+    '<div class="confirm-box"><p>⚠️ האם למחוק את '+c.name+' לצמיתות?</p><div class="confirm-btns">' +
+    '<button class="btn-confirm-del" onclick="confirmDelete()">כן, מחק</button>' +
+    '<button class="btn-cancel" onclick="cancelDelete()">ביטול</button></div></div>' : '';
+
+  document.getElementById("mgr-content").innerHTML =
+    '<div dir="rtl">' +
+    '<button class="back-btn" onclick="goBack()">← חזרה לרשימה</button>' +
+    '<div class="detail-card">' +
+    '<div class="detail-head">' +
+    '<div class="detail-avatar">👤</div>' +
+    '<div><div class="detail-name">'+c.name+'</div><div class="detail-dob">'+c.dob+' · '+ll+'</div></div>' +
+    (c.assigned?'<span class="tag-green" style="margin-right:auto">✓ משובץ</span>':'') +
+    '</div>' +
+
+    '<div class="detail-section" style="border-color:#c9a84c"><h3 style="color:#c9a84c">👤 דיוקן אופי</h3>' +
+    '<p style="color:#e8c97a;font-weight:700;margin-bottom:8px">'+r.profTitle+'</p>' +
+    '<p>'+r.portrait+'</p>' +
+    '<div class="tags">' +
+    '<span class="tag-sm tag-dark">גיל: '+r.age+'</span>' +
+    '<span class="tag-sm tag-dark">מספר גורל: '+r.dn+'</span>' +
+    '<span class="tag-sm tag-dark">ערך שם: '+r.nn+'</span>' +
+    '<span class="tag-sm" style="background:rgba(201,168,76,.2);color:#e8c97a">'+r.style+'</span></div></div>' +
+
+    '<div class="detail-section" style="border-color:#7c5cbf"><h3 style="color:#7c5cbf">🤝 פרוטוקול אינטראקציה</h3><p>'+r.interaction+'</p></div>' +
+    '<div class="detail-section" style="border-color:#2e86ab"><h3 style="color:#2e86ab">📍 המלצת שיבוץ</h3><p>'+r.placement+'</p></div>' +
+
+    '<div class="detail-section" style="border-color:#e8a030"><h3 style="color:#e8a030">📊 אינטראקציה מנהל–עובד</h3>' +
+    '<p style="color:#d0d0e8;line-height:1.8">'+r.interaction+'</p>' +
+    '</div>' +
+
+    '<div class="detail-section" style="border-color:#7c5cbf"><h3 style="color:#7c5cbf">🔗 התאמה בין עובדים</h3>' +
+    '<p style="color:#d0d0e8;margin-bottom:14px;font-size:13px">בחר עובד נוסף לבדיקת רמת ההתאמה והמשימות המשותפות</p>' +
+    '<div style="margin-bottom:12px">' +
+    '<label style="display:block;color:#a0b0c0;margin-bottom:6px;font-size:13px">עובד ראשון</label>' +
+    '<div style="width:100%;padding:10px;border-radius:10px;background:#0f3460;color:#e8c97a;font-size:14px;font-weight:700">'+c.name+' (נוכחי)</div>' +
+    '</div>' +
+    '<div style="margin-bottom:14px">' +
+    '<label style="display:block;color:#a0b0c0;margin-bottom:6px;font-size:13px">עובד שני</label>' +
+    emptyOpts +
+    '</div>' +
+    '<button onclick="runDetailMatch()" style="width:100%;padding:12px;background:linear-gradient(135deg,#7c5cbf,#a07de0);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">🔍 בצע ניתוח התאמה</button>' +
+    '<div id="detail-match-result" style="margin-top:14px"></div>' +
+    '</div>' +
+    '<div class="detail-section" style="border-color:#4caf7f"><h3 style="color:#4caf7f">✍️ שיבוץ ותפקיד</h3>' +
+    '<div class="assign-row">' +
+    '<div><label>מחלקה</label><select id="sel-dept" onchange="state.dept=this.value">'+dOpts+'</select></div>' +
+    '<div><label>תפקיד</label><select id="sel-role" onchange="state.role=this.value">'+rOpts+'</select></div>' +
+    '</div>' +
+    '<div id="save-msg" class="save-msg" style="display:none"></div>' +
+    '<button class="btn-gold" onclick="saveAssign()">💾 שמירה ושיבוץ</button></div>' +
+
+    '<div style="margin-top:16px">' + confirmHtml +
+    '<button onclick="askDelete()" style="width:100%;padding:12px;background:#2a0a0a;border:2px solid #c0392b;border-radius:12px;color:#ff8888;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">🗑️ מחיקת מועמד</button>' +
+    '</div>' +
+
+    '</div></div>';
+}
+
+function runDetailMatch() {
+  var id2=document.getElementById("detail-match-c2").value;
+  var res=document.getElementById("detail-match-result");
+  if(!id2){res.innerHTML='<p style="color:#e74c3c">יש לבחור עובד שני</p>';return;}
+  var candidates=DB.load();
+  var c1=candidates.find(function(c){return c.id===state.selId;});
+  var c2=candidates.find(function(c){return c.id==id2;});
+  if(!c1||!c2){res.innerHTML='<p style="color:#e74c3c">שגיאה</p>';return;}
+  var m=calcMatch(c1,c2);
+  var warnHtml='';
+  for(var j=0;j<m.warnings.length;j++) warnHtml+='<div class="warn-item">⚠️ '+m.warnings[j]+'</div>';
+  res.innerHTML=
+    '<div class="match-result">' +
+    '<h4>ניתוח: '+c1.name+' + '+c2.name+'</h4>' +
+    '<div style="margin-bottom:12px">' +
+    '<p style="color:#a0b0c0;font-size:12px;margin-bottom:4px">מספרי גורל: '+c1.name+' = '+m.dn1+' | '+c2.name+' = '+m.dn2+'</p>' +
+    '<p style="color:#a0b0c0;font-size:12px">ערכי שם: '+c1.name+' = '+m.nn1+' | '+c2.name+' = '+m.nn2+'</p>' +
+    '</div>' +
+    '<div class="task-item" style="margin-bottom:10px">🤝 '+m.matchText+'</div>' +
+    '<div class="task-item" style="margin-bottom:10px">📋 משימות מומלצות יחד: '+m.taskText+'</div>' +
+    '<div class="task-item" style="margin-bottom:10px">✍️ '+m.nameText+'</div>' +
+    (warnHtml?'<div class="match-warning"><h5>⚠️ נקודות לתשומת לב</h5>'+warnHtml+'</div>':'') +
+    '</div>';
+}
+
+function askDelete() { state.showConfirmDel=true; renderDetail(); }
+function cancelDelete() { state.showConfirmDel=false; renderDetail(); }
+function confirmDelete() { DB.remove(state.selId); state.mgrView="list"; renderList(); }
+
+function goBack() { state.mgrView="list"; renderList(); }
+function saveAssign() {
+  var dept=document.getElementById("sel-dept").value;
+  var role=document.getElementById("sel-role").value;
+  DB.update(state.selId,{dept:dept,role:role,assigned:true});
+  var msg=document.getElementById("save-msg"); msg.textContent="✅ המועמד שובץ בהצלחה!"; msg.style.display="block";
+  setTimeout(function(){msg.style.display="none";},3000);
+}
+
+// ── MATCH ─────────────────────────────────────────────────────────────────
+function showMatch() { state.mgrView="match"; renderMatch(); }
+
+function renderMatch() {
+  var candidates=DB.load();
+  var el=document.getElementById("mgr-content");
+  if(candidates.length<2){
+    el.innerHTML='<div dir="rtl"><button class="back-btn" onclick="goBack()">← חזרה</button>' +
+      '<div style="text-align:center;padding:60px 20px;color:#4a4a6a"><div style="font-size:44px;margin-bottom:12px">🔗</div>' +
+      '<p>נדרשים לפחות 2 מועמדים לבצע התאמה</p></div></div>';
+    return;
+  }
+  var opts='<option value="">בחר מועמד...</option>';
+  for(var i=0;i<candidates.length;i++) opts+='<option value="'+candidates[i].id+'">'+candidates[i].name+' ('+candidates[i].dob+')</option>';
+
+  el.innerHTML='<div dir="rtl">' +
+    '<button class="back-btn" onclick="goBack()">← חזרה לרשימה</button>' +
+    '<div class="match-card">' +
+    '<h3>🔗 התאמת עובדים — כימיה ומשימות משותפות</h3>' +
+    '<div class="match-select-row">' +
+    '<div><label>עובד ראשון</label><select id="match-c1" onchange="clearMatchResult()">'+opts+'</select></div>' +
+    '<div><label>עובד שני</label><select id="match-c2" onchange="clearMatchResult()">'+opts+'</select></div>' +
+    '</div>' +
+    '<button class="btn-purple" onclick="runMatch()">🔍 בצע ניתוח התאמה</button>' +
+    '<div id="match-result"></div>' +
+    '</div></div>';
+}
+
+function clearMatchResult() { document.getElementById("match-result").innerHTML=""; }
+
+function runMatch() {
+  var id1=document.getElementById("match-c1").value;
+  var id2=document.getElementById("match-c2").value;
+  var res=document.getElementById("match-result");
+  if(!id1||!id2){res.innerHTML='<p style="color:#e74c3c;margin-top:12px">יש לבחור שני מועמדים</p>';return;}
+  if(id1===id2){res.innerHTML='<p style="color:#e74c3c;margin-top:12px">יש לבחור שני מועמדים שונים</p>';return;}
+  var candidates=DB.load();
+  var c1=candidates.find(function(c){return c.id==id1;});
+  var c2=candidates.find(function(c){return c.id==id2;});
+  if(!c1||!c2){res.innerHTML='<p style="color:#e74c3c;margin-top:12px">שגיאה — מועמד לא נמצא</p>';return;}
+  var m=calcMatch(c1,c2);
+  var warnHtml='';
+  for(var j=0;j<m.warnings.length;j++) warnHtml+='<div class="warn-item">⚠️ '+m.warnings[j]+'</div>';
+  res.innerHTML=
+    '<div class="match-result">' +
+    '<h4>ניתוח: '+c1.name+' + '+c2.name+'</h4>' +
+    '<div style="margin-bottom:12px">' +
+    '<p style="color:#a0b0c0;font-size:12px;margin-bottom:4px">מספרי גורל: '+c1.name+' = '+m.dn1+' | '+c2.name+' = '+m.dn2+'</p>' +
+    '<p style="color:#a0b0c0;font-size:12px">ערכי שם: '+c1.name+' = '+m.nn1+' | '+c2.name+' = '+m.nn2+'</p>' +
+    '</div>' +
+    '<div class="task-item" style="margin-bottom:10px">🤝 '+m.matchText+'</div>' +
+    '<div class="task-item" style="margin-bottom:10px">📋 משימות מומלצות יחד: '+m.taskText+'</div>' +
+    '<div class="task-item" style="margin-bottom:10px">✍️ '+m.nameText+'</div>' +
+    (warnHtml?'<div class="match-warning"><h5>⚠️ נקודות לתשומת לב</h5>'+warnHtml+'</div>':'') +
+    '</div>';
+}
+</script>
 </body>
 </html>
