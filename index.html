@@ -4,6 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MAX - גיוס והתאמת עובדים</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyBJooo0oh962AAGgHcG2mv4-gjROYjQ698",
+    authDomain: "max-system-e0fff.firebaseapp.com",
+    databaseURL: "https://max-system-e0fff-default-rtdb.firebaseio.com",
+    projectId: "max-system-e0fff",
+    storageBucket: "max-system-e0fff.firebasestorage.app",
+    messagingSenderId: "190052374906",
+    appId: "1:190052374906:web:c59a5e36b7d0df99379ec3"
+  });
+  var fbDB = firebase.database();
+</script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f0e8; min-height: 100vh; }
@@ -177,12 +193,35 @@
 </div>
 
 <script>
+// ── Firebase DB ──────────────────────────────────────────────────────────
 var DB = {
-  load: function() { try { return JSON.parse(localStorage.getItem("max_v3") || "[]"); } catch(e) { return []; } },
-  save: function(l) { try { localStorage.setItem("max_v3", JSON.stringify(l)); } catch(e) {} },
-  add: function(item) { var l = DB.load(); item.id = Date.now(); item.at = new Date().toISOString(); l.push(item); DB.save(l); },
-  update: function(id, u) { var l = DB.load(); for (var i = 0; i < l.length; i++) { if (l[i].id === id) { for (var k in u) l[i][k] = u[k]; } } DB.save(l); },
-  remove: function(id) { var l = DB.load(); l = l.filter(function(c) { return c.id !== id; }); DB.save(l); }
+  load: function(cb) {
+    fbDB.ref("candidates").once("value", function(snap) {
+      var data = snap.val();
+      if (!data) { cb([]); return; }
+      var list = Object.keys(data).map(function(k) {
+        var item = data[k]; item._fbKey = k; return item;
+      });
+      cb(list);
+    });
+  },
+  add: function(item, cb) {
+    item.id = Date.now();
+    item.at = new Date().toISOString();
+    fbDB.ref("candidates").push(item, function() { if(cb) cb(); });
+  },
+  update: function(id, updates, cb) {
+    fbDB.ref("candidates").orderByChild("id").equalTo(id).once("value", function(snap) {
+      snap.forEach(function(child) { child.ref.update(updates); });
+      if(cb) cb();
+    });
+  },
+  remove: function(id, cb) {
+    fbDB.ref("candidates").orderByChild("id").equalTo(id).once("value", function(snap) {
+      snap.forEach(function(child) { child.ref.remove(); });
+      if(cb) cb();
+    });
+  }
 };
 
 var DEPTS = ["פלסטיקה","חד פעמי","כלי עבודה","כלי בית","כלי זכוכית","טקסטיל","חיות + הלבשה","עונה","דקורציה","צעצועים","סלולר + ביוטי","כלי כתיבה","יצירה"];
@@ -508,8 +547,9 @@ function pickAns(i) {
 }
 function candSubmit() {
   for(var i=0;i<state.answers.length;i++){if(state.answers[i]===null){var e=document.getElementById("cand-err");e.textContent=LANGS[state.lang].e2;e.style.display="block";return;}}
-  DB.add({name:state.name,dob:state.dob,lang:state.lang,answers:state.answers,report:buildReport(state.name,state.dob,state.answers)});
-  state.step="done"; renderCandidate();
+  DB.add({name:state.name,dob:state.dob,lang:state.lang,answers:state.answers,report:buildReport(state.name,state.dob,state.answers)}, function() {
+    state.step="done"; renderCandidate();
+  });
 }
 
 // ── MANAGER ───────────────────────────────────────────────────────────────
@@ -535,82 +575,75 @@ function mgrLogin() {
 }
 
 function renderList() {
-  var candidates=DB.load();
-  var pending=candidates.filter(function(c){return !c.assigned;});
-  var assigned=candidates.filter(function(c){return c.assigned;});
   var el=document.getElementById("mgr-content");
-  var html='<div dir="rtl">';
-
-  // Stats
-  html+='<div class="stats">';
-  html+='<div class="stat-card" style="border-top:3px solid #c9a84c"><div class="stat-val" style="color:#c9a84c">'+pending.length+'</div><div class="stat-lbl">ממתינים</div></div>';
-  html+='<div class="stat-card" style="border-top:3px solid #4caf7f"><div class="stat-val" style="color:#4caf7f">'+assigned.length+'</div><div class="stat-lbl">משובצים</div></div>';
-  html+='<div class="stat-card" style="border-top:3px solid #2e86ab"><div class="stat-val" style="color:#2e86ab">'+candidates.length+'</div><div class="stat-lbl">סה״כ</div></div>';
-  html+='</div>';
-
-  // Action buttons
-  html+='<div class="mgr-actions">';
-  html+='<button class="mgr-action-btn btn-match" onclick="showMatch()">🔗 התאמת עובדים</button>';
-  html+='</div>';
-
-  // Pending
-  if(pending.length>0){
-    html+='<div class="section-title title-pending">⏳ ממתינים לעיון</div>';
-    for(var i=0;i<pending.length;i++){
-      var c=pending[i]; var ll=LANGS[c.lang]?LANGS[c.lang].label:c.lang;
-      html+='<div class="cand-row" onclick="openDetail('+c.id+')"><div class="cand-avatar">👤</div>' +
-        '<div class="cand-info"><p>'+c.name+'</p><small>'+c.dob+' · '+ll+'</small></div>' +
-        '<span class="tag-gold">'+(c.report?c.report.style:'')+'</span></div>';
+  el.innerHTML='<div style="text-align:center;padding:40px;color:#6b7aaa">טוען נתונים...</div>';
+  DB.load(function(candidates) {
+    var pending=candidates.filter(function(c){return !c.assigned;});
+    var assigned=candidates.filter(function(c){return c.assigned;});
+    var html='<div dir="rtl">';
+    html+='<div class="stats">';
+    html+='<div class="stat-card" style="border-top:3px solid #c9a84c"><div class="stat-val" style="color:#c9a84c">'+pending.length+'</div><div class="stat-lbl">ממתינים</div></div>';
+    html+='<div class="stat-card" style="border-top:3px solid #4caf7f"><div class="stat-val" style="color:#4caf7f">'+assigned.length+'</div><div class="stat-lbl">משובצים</div></div>';
+    html+='<div class="stat-card" style="border-top:3px solid #2e86ab"><div class="stat-val" style="color:#2e86ab">'+candidates.length+'</div><div class="stat-lbl">סה״כ</div></div>';
+    html+='</div>';
+    html+='<div class="mgr-actions"><button class="mgr-action-btn btn-match" onclick="showMatch()">🔗 התאמת עובדים</button></div>';
+    if(pending.length>0){
+      html+='<div class="section-title title-pending">⏳ ממתינים לעיון</div>';
+      for(var i=0;i<pending.length;i++){
+        var c=pending[i]; var ll=LANGS[c.lang]?LANGS[c.lang].label:c.lang;
+        html+='<div class="cand-row" onclick="openDetail('+c.id+')"><div class="cand-avatar">👤</div>' +
+          '<div class="cand-info"><p>'+c.name+'</p><small>'+c.dob+' · '+ll+'</small></div>' +
+          '<span class="tag-gold">'+(c.report?c.report.style:'')+'</span></div>';
+      }
     }
-  }
-
-  // Assigned
-  if(assigned.length>0){
-    html+='<div class="section-title title-assigned">✅ טבלת שיבוץ צוות</div>';
-    html+='<div class="table-wrap"><div style="overflow-x:auto"><table class="tbl"><thead><tr>';
-    ["שם","מחלקה","תפקיד","סגנון"].forEach(function(h){html+='<th>'+h+'</th>';});
-    html+='</tr></thead><tbody>';
-    for(var j=0;j<assigned.length;j++){
-      var c=assigned[j];
-      html+='<tr onclick="openDetail('+c.id+')"><td>'+c.name+'</td><td class="muted">'+(c.dept||'')+'</td><td class="muted">'+(c.role||'')+'</td>' +
-        '<td><span class="tag-gold">'+(c.report?c.report.style:'')+'</span></td></tr>';
+    if(assigned.length>0){
+      html+='<div class="section-title title-assigned">✅ טבלת שיבוץ צוות</div>';
+      html+='<div class="table-wrap"><div style="overflow-x:auto"><table class="tbl"><thead><tr>';
+      ["שם","מחלקה","תפקיד","סגנון"].forEach(function(h){html+='<th>'+h+'</th>';});
+      html+='</tr></thead><tbody>';
+      for(var j=0;j<assigned.length;j++){
+        var c=assigned[j];
+        html+='<tr onclick="openDetail('+c.id+')"><td>'+c.name+'</td><td class="muted">'+(c.dept||'')+'</td><td class="muted">'+(c.role||'')+'</td>' +
+          '<td><span class="tag-gold">'+(c.report?c.report.style:'')+'</span></td></tr>';
+      }
+      html+='</tbody></table></div></div>';
     }
-    html+='</tbody></table></div></div>';
-  }
-
-  if(candidates.length===0) html+='<div class="empty-state"><div class="empty-icon">📋</div><p>עדיין אין מועמדים שמילאו את השאלון</p></div>';
-  html+='</div>';
-  el.innerHTML=html;
+    if(candidates.length===0) html+='<div class="empty-state"><div class="empty-icon">📋</div><p>עדיין אין מועמדים שמילאו את השאלון</p></div>';
+    html+='</div>';
+    el.innerHTML=html;
+  });
 }
 
 function openDetail(id) {
-  state.selId=id; state.mgrView="detail";
-  var c=DB.load().find(function(x){return x.id===id;});
-  state.dept=c&&c.dept?c.dept:"";
-  state.role=c&&c.role?c.role:"";
-  state.mgrInteract=c&&c.mgrInteract?c.mgrInteract:"";
-  state.teamInteract=c&&c.teamInteract?c.teamInteract:"";
-  state.showConfirmDel=false;
-  renderDetail();
+  state.selId=id; state.mgrView="detail"; state.showConfirmDel=false;
+  DB.load(function(candidates) {
+    var c=candidates.find(function(x){return x.id===id;});
+    state.dept=c&&c.dept?c.dept:"";
+    state.role=c&&c.role?c.role:"";
+    renderDetailWith(c, candidates);
+  });
 }
 
 function renderDetail() {
-  var c=DB.load().find(function(x){return x.id===state.selId;});
+  DB.load(function(candidates) {
+    var c=candidates.find(function(x){return x.id===state.selId;});
+    if(!c){state.mgrView="list";renderList();return;}
+    renderDetailWith(c, candidates);
+  });
+}
+
+function renderDetailWith(c, allC) {
   if(!c){state.mgrView="list";renderList();return;}
   var r=c.report; var ll=LANGS[c.lang]?LANGS[c.lang].label:c.lang;
   var dOpts='<option value="">בחר מחלקה...</option>';
   DEPTS.forEach(function(d){dOpts+='<option value="'+d+'"'+(state.dept===d?" selected":"")+'>'+d+'</option>';});
   var rOpts='<option value="">בחר תפקיד...</option>';
-  ROLES.forEach(function(r){rOpts+='<option value="'+r+'"'+(state.role===r?" selected":"")+'>'+r+'</option>';});
-
-  // בניית תפריט עובדים לבדיקת התאמה
-  var allC=DB.load();
+  ROLES.forEach(function(ro){rOpts+='<option value="'+ro+'"'+(state.role===ro?" selected":"")+'>'+ro+'</option>';});
   var emptyOpts='<select id="detail-match-c2" style="width:100%;padding:10px;border-radius:10px;border:none;background:#0f3460;color:#fff;font-size:14px;outline:none;font-family:inherit"><option value="">בחר עובד...</option>';
   for(var ei=0;ei<allC.length;ei++){
     if(allC[ei].id!==c.id) emptyOpts+='<option value="'+allC[ei].id+'">'+allC[ei].name+' ('+allC[ei].dob+')</option>';
   }
   emptyOpts+='</select>';
-
   var confirmHtml = state.showConfirmDel ?
     '<div class="confirm-box"><p>⚠️ האם למחוק את '+c.name+' לצמיתות?</p><div class="confirm-btns">' +
     '<button class="btn-confirm-del" onclick="confirmDelete()">כן, מחק</button>' +
@@ -674,66 +707,69 @@ function runDetailMatch() {
   var id2=document.getElementById("detail-match-c2").value;
   var res=document.getElementById("detail-match-result");
   if(!id2){res.innerHTML='<p style="color:#e74c3c">יש לבחור עובד שני</p>';return;}
-  var candidates=DB.load();
-  var c1=candidates.find(function(c){return c.id===state.selId;});
-  var c2=candidates.find(function(c){return c.id==id2;});
-  if(!c1||!c2){res.innerHTML='<p style="color:#e74c3c">שגיאה</p>';return;}
-  var m=calcMatch(c1,c2);
-  var warnHtml='';
-  for(var j=0;j<m.warnings.length;j++) warnHtml+='<div class="warn-item">⚠️ '+m.warnings[j]+'</div>';
-  res.innerHTML=
-    '<div class="match-result">' +
-    '<h4>ניתוח: '+c1.name+' + '+c2.name+'</h4>' +
-    '<div style="margin-bottom:12px">' +
-    '<p style="color:#a0b0c0;font-size:12px;margin-bottom:4px">מספרי גורל: '+c1.name+' = '+m.dn1+' | '+c2.name+' = '+m.dn2+'</p>' +
-    '<p style="color:#a0b0c0;font-size:12px">ערכי שם: '+c1.name+' = '+m.nn1+' | '+c2.name+' = '+m.nn2+'</p>' +
-    '</div>' +
-    '<div class="task-item" style="margin-bottom:10px">🤝 '+m.matchText+'</div>' +
-    '<div class="task-item" style="margin-bottom:10px">📋 משימות מומלצות יחד: '+m.taskText+'</div>' +
-    '<div class="task-item" style="margin-bottom:10px">✍️ '+m.nameText+'</div>' +
-    (warnHtml?'<div class="match-warning"><h5>⚠️ נקודות לתשומת לב</h5>'+warnHtml+'</div>':'') +
-    '</div>';
+  DB.load(function(candidates) {
+    var c1=candidates.find(function(c){return c.id===state.selId;});
+    var c2=candidates.find(function(c){return c.id==id2;});
+    if(!c1||!c2){res.innerHTML='<p style="color:#e74c3c">שגיאה</p>';return;}
+    var m=calcMatch(c1,c2);
+    var warnHtml='';
+    for(var j=0;j<m.warnings.length;j++) warnHtml+='<div class="warn-item">⚠️ '+m.warnings[j]+'</div>';
+    res.innerHTML=
+      '<div class="match-result">' +
+      '<h4>ניתוח: '+c1.name+' + '+c2.name+'</h4>' +
+      '<div style="margin-bottom:12px">' +
+      '<p style="color:#a0b0c0;font-size:12px;margin-bottom:4px">מספרי גורל: '+c1.name+' = '+m.dn1+' | '+c2.name+' = '+m.dn2+'</p>' +
+      '<p style="color:#a0b0c0;font-size:12px">ערכי שם: '+c1.name+' = '+m.nn1+' | '+c2.name+' = '+m.nn2+'</p>' +
+      '</div>' +
+      '<div class="task-item" style="margin-bottom:10px">🤝 '+m.matchText+'</div>' +
+      '<div class="task-item" style="margin-bottom:10px">📋 משימות מומלצות יחד: '+m.taskText+'</div>' +
+      '<div class="task-item" style="margin-bottom:10px">✍️ '+m.nameText+'</div>' +
+      (warnHtml?'<div class="match-warning"><h5>⚠️ נקודות לתשומת לב</h5>'+warnHtml+'</div>':'') +
+      '</div>';
+  });
 }
 
 function askDelete() { state.showConfirmDel=true; renderDetail(); }
 function cancelDelete() { state.showConfirmDel=false; renderDetail(); }
-function confirmDelete() { DB.remove(state.selId); state.mgrView="list"; renderList(); }
+function confirmDelete() { DB.remove(state.selId, function() { state.mgrView="list"; renderList(); }); }
 
 function goBack() { state.mgrView="list"; renderList(); }
 function saveAssign() {
   var dept=document.getElementById("sel-dept").value;
   var role=document.getElementById("sel-role").value;
-  DB.update(state.selId,{dept:dept,role:role,assigned:true});
-  var msg=document.getElementById("save-msg"); msg.textContent="✅ המועמד שובץ בהצלחה!"; msg.style.display="block";
-  setTimeout(function(){msg.style.display="none";},3000);
+  DB.update(state.selId,{dept:dept,role:role,assigned:true}, function() {
+    var msg=document.getElementById("save-msg");
+    if(msg){ msg.textContent="✅ המועמד שובץ בהצלחה!"; msg.style.display="block"; setTimeout(function(){msg.style.display="none";},3000); }
+  });
 }
 
 // ── MATCH ─────────────────────────────────────────────────────────────────
 function showMatch() { state.mgrView="match"; renderMatch(); }
 
 function renderMatch() {
-  var candidates=DB.load();
   var el=document.getElementById("mgr-content");
-  if(candidates.length<2){
-    el.innerHTML='<div dir="rtl"><button class="back-btn" onclick="goBack()">← חזרה</button>' +
-      '<div style="text-align:center;padding:60px 20px;color:#4a4a6a"><div style="font-size:44px;margin-bottom:12px">🔗</div>' +
-      '<p>נדרשים לפחות 2 מועמדים לבצע התאמה</p></div></div>';
-    return;
-  }
-  var opts='<option value="">בחר מועמד...</option>';
-  for(var i=0;i<candidates.length;i++) opts+='<option value="'+candidates[i].id+'">'+candidates[i].name+' ('+candidates[i].dob+')</option>';
-
-  el.innerHTML='<div dir="rtl">' +
-    '<button class="back-btn" onclick="goBack()">← חזרה לרשימה</button>' +
-    '<div class="match-card">' +
-    '<h3>🔗 התאמת עובדים — כימיה ומשימות משותפות</h3>' +
-    '<div class="match-select-row">' +
-    '<div><label>עובד ראשון</label><select id="match-c1" onchange="clearMatchResult()">'+opts+'</select></div>' +
-    '<div><label>עובד שני</label><select id="match-c2" onchange="clearMatchResult()">'+opts+'</select></div>' +
-    '</div>' +
-    '<button class="btn-purple" onclick="runMatch()">🔍 בצע ניתוח התאמה</button>' +
-    '<div id="match-result"></div>' +
-    '</div></div>';
+  el.innerHTML='<div style="text-align:center;padding:40px;color:#6b7aaa">טוען נתונים...</div>';
+  DB.load(function(candidates) {
+    if(candidates.length<2){
+      el.innerHTML='<div dir="rtl"><button class="back-btn" onclick="goBack()">← חזרה</button>' +
+        '<div style="text-align:center;padding:60px 20px;color:#4a4a6a"><div style="font-size:44px;margin-bottom:12px">🔗</div>' +
+        '<p>נדרשים לפחות 2 מועמדים לבצע התאמה</p></div></div>';
+      return;
+    }
+    var opts='<option value="">בחר מועמד...</option>';
+    for(var i=0;i<candidates.length;i++) opts+='<option value="'+candidates[i].id+'">'+candidates[i].name+' ('+candidates[i].dob+')</option>';
+    el.innerHTML='<div dir="rtl">' +
+      '<button class="back-btn" onclick="goBack()">← חזרה לרשימה</button>' +
+      '<div class="match-card">' +
+      '<h3>🔗 התאמת עובדים — כימיה ומשימות משותפות</h3>' +
+      '<div class="match-select-row">' +
+      '<div><label>עובד ראשון</label><select id="match-c1" onchange="clearMatchResult()">'+opts+'</select></div>' +
+      '<div><label>עובד שני</label><select id="match-c2" onchange="clearMatchResult()">'+opts+'</select></div>' +
+      '</div>' +
+      '<button class="btn-purple" onclick="runMatch()">🔍 בצע ניתוח התאמה</button>' +
+      '<div id="match-result"></div>' +
+      '</div></div>';
+  });
 }
 
 function clearMatchResult() { document.getElementById("match-result").innerHTML=""; }
@@ -744,25 +780,26 @@ function runMatch() {
   var res=document.getElementById("match-result");
   if(!id1||!id2){res.innerHTML='<p style="color:#e74c3c;margin-top:12px">יש לבחור שני מועמדים</p>';return;}
   if(id1===id2){res.innerHTML='<p style="color:#e74c3c;margin-top:12px">יש לבחור שני מועמדים שונים</p>';return;}
-  var candidates=DB.load();
-  var c1=candidates.find(function(c){return c.id==id1;});
-  var c2=candidates.find(function(c){return c.id==id2;});
-  if(!c1||!c2){res.innerHTML='<p style="color:#e74c3c;margin-top:12px">שגיאה — מועמד לא נמצא</p>';return;}
-  var m=calcMatch(c1,c2);
-  var warnHtml='';
-  for(var j=0;j<m.warnings.length;j++) warnHtml+='<div class="warn-item">⚠️ '+m.warnings[j]+'</div>';
-  res.innerHTML=
-    '<div class="match-result">' +
-    '<h4>ניתוח: '+c1.name+' + '+c2.name+'</h4>' +
-    '<div style="margin-bottom:12px">' +
-    '<p style="color:#a0b0c0;font-size:12px;margin-bottom:4px">מספרי גורל: '+c1.name+' = '+m.dn1+' | '+c2.name+' = '+m.dn2+'</p>' +
-    '<p style="color:#a0b0c0;font-size:12px">ערכי שם: '+c1.name+' = '+m.nn1+' | '+c2.name+' = '+m.nn2+'</p>' +
-    '</div>' +
-    '<div class="task-item" style="margin-bottom:10px">🤝 '+m.matchText+'</div>' +
-    '<div class="task-item" style="margin-bottom:10px">📋 משימות מומלצות יחד: '+m.taskText+'</div>' +
-    '<div class="task-item" style="margin-bottom:10px">✍️ '+m.nameText+'</div>' +
-    (warnHtml?'<div class="match-warning"><h5>⚠️ נקודות לתשומת לב</h5>'+warnHtml+'</div>':'') +
-    '</div>';
+  DB.load(function(candidates) {
+    var c1=candidates.find(function(c){return c.id==id1;});
+    var c2=candidates.find(function(c){return c.id==id2;});
+    if(!c1||!c2){res.innerHTML='<p style="color:#e74c3c;margin-top:12px">שגיאה — מועמד לא נמצא</p>';return;}
+    var m=calcMatch(c1,c2);
+    var warnHtml='';
+    for(var j=0;j<m.warnings.length;j++) warnHtml+='<div class="warn-item">⚠️ '+m.warnings[j]+'</div>';
+    res.innerHTML=
+      '<div class="match-result">' +
+      '<h4>ניתוח: '+c1.name+' + '+c2.name+'</h4>' +
+      '<div style="margin-bottom:12px">' +
+      '<p style="color:#a0b0c0;font-size:12px;margin-bottom:4px">מספרי גורל: '+c1.name+' = '+m.dn1+' | '+c2.name+' = '+m.dn2+'</p>' +
+      '<p style="color:#a0b0c0;font-size:12px">ערכי שם: '+c1.name+' = '+m.nn1+' | '+c2.name+' = '+m.nn2+'</p>' +
+      '</div>' +
+      '<div class="task-item" style="margin-bottom:10px">🤝 '+m.matchText+'</div>' +
+      '<div class="task-item" style="margin-bottom:10px">📋 משימות מומלצות יחד: '+m.taskText+'</div>' +
+      '<div class="task-item" style="margin-bottom:10px">✍️ '+m.nameText+'</div>' +
+      (warnHtml?'<div class="match-warning"><h5>⚠️ נקודות לתשומת לב</h5>'+warnHtml+'</div>':'') +
+      '</div>';
+  });
 }
 </script>
 </body>
